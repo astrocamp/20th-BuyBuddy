@@ -1,0 +1,23 @@
+{
+  "name": "buybuddy",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "js:dev": "esbuild src/scripts/app.js --bundle --outfile=public/scripts/app.js --watch",
+    "js:build": "esbuild src/scripts/app.js --bundle --minify --outfile=public/scripts/app.js",
+    "css:dev": "npx @tailwindcss/cli -i src/styles/style.css -o public/styles/style.css --watch",
+    "css:build": "npx @tailwindcss/cli -i src/styles/style.css -o public/styles/style.css --minify",
+    "dev": "concurrently --names \"JS,CSS\" --prefix-colors \"bgBlue.bold,bgGreen.bold\" \"npm run js:dev\" \"npm run css:dev\"",
+    "build": "concurrently --names \"JS,CSS\" --prefix-colors \"bgBlue.bold,bgGreen.bold\" \"npm run js:build\" \"npm run css:build\""
+
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.12",
+    "concurrently": "^9.2.0",
+    "tailwindcss": "^4.1.12"
+  }
+}
