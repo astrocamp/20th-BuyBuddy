@@ -13,3 +13,5 @@ node_modules
 *.sqlite3
 .DS_Store
 .env
+.pg_service.conf
+.my_pgpass
