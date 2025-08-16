@@ -1,14 +1,23 @@
 from django.db import models
 from users.models import User
 
+
 class Notification(models.Model):
     title = models.CharField(max_length=100)
     content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
 
 
 class UserNotification(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="notifications"
+    )
     notification = models.ForeignKey(Notification, on_delete=models.CASCADE)
     is_read = models.BooleanField(default=False)
-    read_at = models.DateTimeField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user} - {self.notification.title}"
