@@ -4,7 +4,8 @@
             <li><a href="{% url 'pages:homepage' %}">首頁</a></li>
             <li><a href="{% url 'buy:index' %}">購買</a></li>
             <li><a href="{% url 'groups:index' %}">團購</a></li>
-            <li class="relative">通知
+            <li class="relative cursor-pointer" x-data="{show:false}">
+                <span @click="show = !show">通知</span>
                 {% include "shared/notifications_dropdown.html" %}
             </li>
             <li><a href="{% url 'products:index' %}">商品</a></li>
