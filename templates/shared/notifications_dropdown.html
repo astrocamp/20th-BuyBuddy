@@ -1,11 +1,16 @@
 {% if notifications %}
-<div class="absolute bg-red-500 p-2 top-[-5px] right-[-10px] rounded-full w-[18px] h-[18px] flex justify-center items-center">
+{% if unread_count %}
+<div class="absolute bg-red-500 p-2 top-[-5px] right-[-10px] rounded-full w-[18px] h-[18px]         
+     flex justify-center items-center">
     <span class="text-[13px] text-white ">
         {{unread_count}}
     </span>
 </div>
-<div class="absolute w-[200px] h-[200px] overflow-auto">
+{% endif %}
 
+<div x-show="show"
+     @click.outside="show=false"  
+     class="absolute w-[200px] h-[200px] overflow-auto">
     <form action="{% url 'notifications:read_all' %}" method="post">
         {% csrf_token %}
         <button class="border-b-2 cursor-pointer">全部已讀</button>
