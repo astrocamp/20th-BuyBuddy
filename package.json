@@ -21,6 +21,7 @@
     "tailwindcss": "^4.1.12"
   },
   "dependencies": {
-    "alpinejs": "^3.14.9"
+    "alpinejs": "^3.14.9",
+    "htmx.org": "^2.0.6"
   }
 }
