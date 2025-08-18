@@ -13,11 +13,14 @@
     "css:build": "npx @tailwindcss/cli -i src/styles/style.css -o public/styles/style.css --minify",
     "dev": "concurrently --names \"JS,CSS\" --prefix-colors \"bgBlue.bold,bgGreen.bold\" \"npm run js:dev\" \"npm run css:dev\"",
     "build": "concurrently --names \"JS,CSS\" --prefix-colors \"bgBlue.bold,bgGreen.bold\" \"npm run js:build\" \"npm run css:build\""
-
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.12",
     "concurrently": "^9.2.0",
+    "esbuild": "^0.25.9",
     "tailwindcss": "^4.1.12"
+  },
+  "dependencies": {
+    "alpinejs": "^3.14.9"
   }
 }
