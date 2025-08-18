@@ -7,6 +7,20 @@
             <li><a href="{% url 'products:index' %}">商品</a></li>
             <li><a href="{% url 'sales:index' %}">銷售頁面</a></li>
             <li><a href="{% url 'status:index' %}">團購狀態</a></li>
-            <li><a href="{% url 'users:index' %}">用戶頁面</a></li>
+            <li><a href="{% url 'users:detail' %}">用戶頁面</a></li>
         </ul>
+        {% if user.is_authenticated %}
+            <ul class="flex gap-4">
+                <li><a href="{% url 'users:new' %}">{{user.username}}</a></li>
+                <li><a hx-delete="{% url 'users:sessions_delete' %}"
+                    hx-target="#navbar-main"
+                    hx-swap="outerHTML"
+                    href="#">登出</a></li>
+            </ul>
+        {% else %}
+            <ul class="flex gap-4">
+                <li><a href="{% url 'users:new' %}">註冊</a></li>
+                <li><a href="{% url 'users:sessions_new' %}">登入</a></li>
+            </ul>
+        {% endif %}
 </nav>
