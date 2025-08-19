@@ -1,0 +1,11 @@
+{% if messages %}
+<div x-data="messagesControl" x-init="showAllFrom($refs.msgsJson)">
+    <script type="application/json" x-ref="msgsJson">
+    [
+        {% for message in messages %}
+            {"text":"{{ message|escapejs }}","level":"{{ message.tags|escapejs }}"}
+        {% endfor %}
+    ]
+    </script>
+</div>
+{% endif %}
