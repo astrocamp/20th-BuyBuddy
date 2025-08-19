@@ -1,6 +1,6 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
-from users.models import User
+from users.models import User, UserAddress
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -12,6 +12,8 @@ from django.urls import reverse
 from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
+from .forms import UserForm, UserAddressForm
+
 
 
 def send_verification_mail(request, user, email):
@@ -180,3 +182,11 @@ def verify_email(request, uid, token):
     except (User.DoesNotExist, ValueError, TypeError):
         messages.error(request, "無效的驗證連結。如果您尚未註冊，請先註冊帳號")
         return redirect("users:new")
+
+def profiles(request, id):
+    user = get_object_or_404(User, pk=id)
+    user_address = get_object_or_404(UserAddress, user=user)
+    user_form = UserForm(instance=user)
+    user_address_form = UserAddressForm(instance=user_address)
+
+    return render(request, "users/profiles.html", {"user_form":user_form, "user_address_form":user_address_form})
