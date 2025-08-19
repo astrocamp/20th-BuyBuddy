@@ -38,8 +38,6 @@ INSTALLED_APPS = [
     'notifications',
     'sales',
     'products',
-    # 註冊 AWS S3 storage 套件
-    'storages',
 ]
 
 MIDDLEWARE = [
@@ -131,25 +129,3 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
-# AWS S3 STORAGES SETTINGS
-STORAGES = {
-    "default": {
-        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-        "OPTIONS": {
-            "access_key": os.getenv('AWS_ACCESS_KEY_ID'),
-            "secret_key": os.getenv('AWS_SECRET_ACCESS_KEY'),
-            "bucket_name": os.getenv('AWS_STORAGE_BUCKET_NAME'),
-            "region_name": os.getenv('AWS_S3_REGION_NAME'),
-
-        },
-    },
-    "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-    },
-}
-AWS_S3_FILE_OVERWRITE = False
-AWS_DEFAULT_ACL = None
-MEDIA_URL = f"https://{os.getenv('AWS_STORAGE_BUCKET_NAME')}.s3.ap-northeast-1.amazonaws.com/"
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
