@@ -1,4 +1,5 @@
- <nav id="navbar-main" class="bg-green-100 py-4 px-8 flex justify-between">
+<nav id="navbar-main"
+    class="bg-green-100 py-4 px-8 flex justify-between">
         <ul class="flex gap-4">
             <li><a href="{% url 'pages:homepage' %}">首頁</a></li>
             <li><a href="{% url 'buy:index' %}">購買</a></li>
@@ -12,10 +13,7 @@
         {% if user.is_authenticated %}
             <ul class="flex gap-4">
                 <li><a href="{% url 'users:new' %}">{{user.username}}</a></li>
-                <li><a hx-delete="{% url 'users:sessions_delete' %}"
-                    hx-target="#navbar-main"
-                    hx-swap="outerHTML"
-                    href="#">登出</a></li>
+                <li><a href="{% url 'users:sessions_delete' %}?next={{request.path}}">登出</a></li>
             </ul>
         {% else %}
             <ul class="flex gap-4">
