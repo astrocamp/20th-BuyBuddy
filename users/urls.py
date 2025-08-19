@@ -4,7 +4,7 @@ from . import views
 app_name = "users"
 
 urlpatterns = [
-    path("detail/", views.detail, name="detail"),
+    path('profiles/<int:id>', views.profiles, name="profiles"),
     path("new/", views.new, name="new"),
     path("", views.create, name="create"),
     path("sessions/new/", views.sessions_new, name="sessions_new"),
@@ -15,3 +15,4 @@ urlpatterns = [
         "verify-email/<str:uid>/<str:token>/", views.verify_email, name="verify_email"
     ),
 ]
+    
