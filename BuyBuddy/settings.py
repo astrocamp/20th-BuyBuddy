@@ -132,6 +132,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = "/users/sessions/new/"
 
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 3
+
 # 開發階段：在 terminal 顯示郵件內容
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # DEFAULT_FROM_EMAIL = 'noreply@yoursite.com'

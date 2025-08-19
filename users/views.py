@@ -101,6 +101,7 @@ def sessions_new(request):
 def sessions_create(request):
     email = request.POST.get("email")
     password = request.POST.get("password")
+    remember_me = "remember_me" in request.POST
 
     if not email or not password:
         messages.warning(request, "缺少登入資料")
@@ -109,6 +110,10 @@ def sessions_create(request):
     user = authenticate(request, username=email, password=password)
     if user:
         login(request, user)
+
+        if remember_me:
+            request.session.set_expiry(60 * 60 * 24 * 10)
+
         next_url = request.POST.get("next")
         if next_url and next_url.strip():
             messages.success(request, "登入成功")
