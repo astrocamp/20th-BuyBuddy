@@ -1,0 +1,54 @@
+{% extends 'layouts/default.html'%}
+
+{% block content%}
+<h1>用戶資料</h1>
+
+<div class="flex flex-col">
+    <div class="w-full">
+{{ user_form.avatar_url.label_tag }}
+{{ user_form.avatar_url }}
+    </div>
+    <div>
+{{ user_form.username.label_tag }}
+{{ user_form.username }}
+    </div>
+    <div>
+{{ user_form.password.label_tag }}
+{{ user_form.password }}
+    </div>
+    <div>
+{{ user_address_form.recipient_name.label_tag }}
+{{ user_address_form.recipient_name }}
+    </div>
+    <div>
+{{ user_address_form.is_default.label_tag }}
+{{ user_address_form.is_default }}
+    </div>
+    <div>
+{{ user_address_form.phone.label_tag }}
+{{ user_address_form.phone }}
+    </div>
+    <div>
+{{ user_address_form.postal_code.label_tag }}
+{{ user_address_form.postal_code }}
+    </div>
+    <div>
+{{ user_address_form.county.label_tag }}
+{{ user_address_form.county }}
+    </div>    
+    <div>
+{{ user_address_form.district.label_tag }}
+{{ user_address_form.district }}
+    </div>    
+    <div>
+{{ user_address_form.road.label_tag }}
+{{ user_address_form.road }}
+    </div>    
+    <div>
+{{ user_address_form.detail.label_tag }}
+{{ user_address_form.detail }}
+    </div>            
+</div>
+
+
+{% endblock %}
