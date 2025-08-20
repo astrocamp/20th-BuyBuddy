@@ -9,9 +9,11 @@ class Group(models.Model):
     goal_choice = models.CharField(max_length=10)
     deadline = models.DateTimeField(null=True)
     status = models.CharField(max_length=20)
-    banner = models.CharField(max_length=255)
+    banner = models.ImageField(upload_to='groups/banners/')
     created_at = models.DateTimeField(auto_now_add=True)
     deleted_at = models.DateTimeField(null=True)
+    description = models.TextField(null=True)
+
 
 class JoinedGroup(models.Model):
     buyer = models.ForeignKey(User, on_delete=models.CASCADE)
