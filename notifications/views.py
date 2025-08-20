@@ -13,6 +13,7 @@ def open(request, id):
         un.read_at = timezone.now()
         un.save(update_fields=["is_read", "read_at"])
 
+    # TODO 需導向銷售頁面
     return redirect("groups:index")
 
 
@@ -24,4 +25,5 @@ def read_all(request):
         is_read=True, read_at=now
     )
 
-    return redirect("groups:index")
+    next_url = request.POST.get("next", "/")
+    return redirect(next_url)
