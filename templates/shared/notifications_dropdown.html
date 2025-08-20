@@ -10,9 +10,10 @@
 
 <div x-show="show"
      @click.outside="show=false"  
-     class="absolute w-[200px] h-[200px] overflow-auto">
+     class="absolute w-[300px] h-[200px] top-[40px] right-[-70px] overflow-auto p-[15px]">
     <form action="{% url 'notifications:read_all' %}" method="post">
         {% csrf_token %}
+        <input type="hidden" name="next" value="{{request.path}}">
         <button class="border-b-2 cursor-pointer">全部已讀</button>
     </form>
     <ul>

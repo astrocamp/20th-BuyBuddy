@@ -4,10 +4,6 @@
             <li><a href="{% url 'pages:homepage' %}">首頁</a></li>
             <li><a href="{% url 'buy:index' %}">購買</a></li>
             <li><a href="{% url 'groups:index' %}">團購</a></li>
-            <li class="relative cursor-pointer" x-data="{show:false}">
-                <span @click="show = !show">通知</span>
-                {% include "shared/notifications_dropdown.html" %}
-            </li>
             <li><a href="{% url 'products:index' %}">商品</a></li>
             <li><a href="{% url 'sales:index' %}">銷售頁面</a></li>
             <li><a href="{% url 'status:index' %}">團購狀態</a></li>
@@ -15,6 +11,10 @@
         {% if user.is_authenticated %}
             <ul class="flex gap-4">
                 <li><a href="{% url 'users:profiles'%}">{{user.username}}</a></li>
+                <li class="relative cursor-pointer" x-data="{show:false}">
+                <span @click="show = !show">通知</span>
+                {% include "shared/notifications_dropdown.html" %}
+                </li>
                 <li><a href="{% url 'users:sessions_delete' %}?next={{request.path}}">登出</a></li>
             </ul>
         {% else %}
