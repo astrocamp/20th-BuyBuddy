@@ -183,8 +183,9 @@ def verify_email(request, uid, token):
         messages.error(request, "無效的驗證連結。如果您尚未註冊，請先註冊帳號")
         return redirect("users:new")
 
-def profiles(request, id):
-    user = get_object_or_404(User, pk=id)
+@login_required
+def profiles(request):
+    user = request.user
     user_address = get_object_or_404(UserAddress, user=user)
     user_form = UserForm(instance=user)
     user_address_form = UserAddressForm(instance=user_address)
