@@ -9,7 +9,7 @@
   
     <script type="module" src="{% static 'scripts/app.js'%}"></script>
 </head>
-<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+<body>
     {% include 'shared/navbar.html' %}
 
     {% include 'shared/messages.html' %}
