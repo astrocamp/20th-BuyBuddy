@@ -5,13 +5,13 @@ def navbar_notifications(request):
     if not request.user.is_authenticated:
         return {}
 
-    qs = (
+    notifications_query = (
         UserNotification.objects.filter(user=request.user)
         .select_related("notification")
         .order_by("-notification__created_at")
     )
 
-    notifications = qs[:5]
-    unread_count = qs.filter(is_read=False).count()
+    unread_count = notifications_query.filter(is_read=False).count()
+    all_user_notifications = notifications_query[:5]
 
-    return {"notifications": notifications, "unread_count": unread_count}
+    return {"notifications": all_user_notifications, "unread_count": unread_count}
