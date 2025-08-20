@@ -1,11 +1,18 @@
 from django.db import models
 from users.models import User
+from groups.models import Group
 
 
 class Notification(models.Model):
     title = models.CharField(max_length=100)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    group = models.ForeignKey(
+        Group,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="notifications",
+    )
 
     def __str__(self):
         return self.title
