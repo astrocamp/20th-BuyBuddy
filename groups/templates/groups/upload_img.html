@@ -1,9 +1,11 @@
+{% extends 'layouts/default.html'%}
+{% load static%}
 {% block content %}
 <h2 class="text-center text-2xl font-bold mb-5">Create Data</h2>
 <div class="flex flex-col items-center gap-2">
   <form
     class="flex justify-center gap-2 mb-5"
-    action="{% url 'groups:create'%}"
+    action="{% url 'groups:create_img'%}"
     method="post"
     enctype="multipart/form-data"
   >
