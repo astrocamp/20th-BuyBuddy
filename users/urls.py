@@ -4,7 +4,7 @@ from . import views
 app_name = "users"
 
 urlpatterns = [
-    path('profiles/<int:id>', views.profiles, name="profiles"),
+    path('profiles', views.profiles, name="profiles"),
     path("new/", views.new, name="new"),
     path("", views.create, name="create"),
     path("sessions/new/", views.sessions_new, name="sessions_new"),
