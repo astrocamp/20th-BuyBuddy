@@ -1,0 +1,82 @@
+{% extends 'layouts/default.html'%} {% block content%}
+<h1 class="text-2xl font-bold text-center">座標位置：groups / new_group</h1>
+
+<form
+  class="flex flex-col gap-2 items-center mt-5"
+  method="POST"
+  enctype="multipart/form-data"
+>
+  {% csrf_token %}
+  <label class="w-1/2 text-left" for="name">團購名稱</label>
+  <input
+    class="w-1/2 border-2 border-gray-300 rounded-md p-2"
+    type="text"
+    name="name"
+    id="name"
+    placeholder="團購名稱"
+  />
+
+  <label class="w-1/2 text-left">成團方式</label>
+  <div class="input-wrap flex gap-2 w-1/2 justify-center">
+    <input id="choice_amount" type="radio" name="goal_choice" value="amount" />
+    <input
+      class="w-full border-2 border-gray-300 rounded-md p-2"
+      type="number"
+      name="min_amount"
+      id="min_amount"
+      placeholder="成團金額"
+    />
+  </div>
+  <div class="input-wrap flex gap-2 w-1/2 justify-center">
+    <input
+      id="choice_quantity"
+      type="radio"
+      name="goal_choice"
+      value="quantity"
+    />
+    <input
+      class="w-full border-2 border-gray-300 rounded-md p-2"
+      type="number"
+      name="min_quantity"
+      id="min_quantity"
+      placeholder="成團數量"
+    />
+  </div>
+
+  <label class="w-1/2 text-left" for="banner">團購圖片</label>
+  <input
+    class="w-1/2 border-2 border-gray-300 rounded-md p-2"
+    type="file"
+    name="banner"
+    id="banner"
+  />
+  <label class="w-1/2 text-left" for="description">團購描述</label>
+  <textarea
+    class="w-1/2 border-2 border-gray-300 rounded-md p-2 resize-y"
+    name="description"
+    id="description"
+    rows="10"
+    placeholder="團購描述"
+  ></textarea>
+  <label class="w-1/2 text-left" for="deadline">團購截止日期</label>
+  <input
+    class="w-1/2 border-2 border-gray-300 rounded-md p-2"
+    type="date"
+    name="deadline"
+    id="deadline"
+  />
+  <button class="bg-blue-500 text-white px-4 py-2 rounded-md" type="submit">
+    新增團購
+  </button>
+</form>
+{% endblock %} {% comment %} const choice_amount =
+document.getElementById('choice_amount'); const choice_quantity =
+document.getElementById('choice_quantity'); const min_amount_num =
+document.getElementById('min_amount_num'); const min_quantity_num =
+document.getElementById('min_quantity_num');
+choice_amount.addEventListener('change', () => { min_amount_num.focus();
+min_quantity_num.value = ''; }) choice_quantity.addEventListener('change', () =>
+{ min_quantity_num.focus(); min_amount_num.value = ''; })
+min_amount_num.addEventListener('focus', () => { choice_amount.checked = true;
+min_quantity_num.value = ''; }) min_quantity_num.addEventListener('focus', () =>
+{ choice_quantity.checked = true; min_amount_num.value = ''; }) {% endcomment %}

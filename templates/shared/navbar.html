@@ -8,7 +8,6 @@
             <li><a href="{% url 'products:index' %}">商品</a></li>
             <li><a href="{% url 'sales:index' %}">銷售頁面</a></li>
             <li><a href="{% url 'status:index' %}">團購狀態</a></li>
-            <li><a href="{% url 'users:profiles' %}">用戶頁面</a></li>
         </ul>
         {% if user.is_authenticated %}
             <ul class="flex gap-4">
