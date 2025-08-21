@@ -3,7 +3,7 @@
     <script type="application/json" x-ref="msgsJson">
     [
         {% for message in messages %}
-            {"text":"{{ message|escapejs }}","level":"{{ message.tags|escapejs }}"}
+            {"text":"{{ message|escapejs }}","tag":"{{ message.tags|escapejs }}"} {% if not forloop.last %},{% endif %}
         {% endfor %}
     ]
     </script>
