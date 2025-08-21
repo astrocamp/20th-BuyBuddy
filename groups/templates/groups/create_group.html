@@ -14,6 +14,7 @@
       name="name"
       id="name"
       placeholder="團購名稱"
+      required
     />
   
     <label class="w-1/2 text-left">成團方式</label>
@@ -22,10 +23,10 @@
         id="choice_amount" 
         type="radio" 
         name="goal_choice" 
-        value="amount"
         x-model="goal_choice"
         @change="choiceFocus('amount_input')"
         x-ref="amount_radio"
+        value="amount"
       />
       <input
         class="w-full border-2 border-gray-300 rounded-md p-2"
@@ -34,11 +35,11 @@
         id="min_amount"
         placeholder="成團金額"
         x-model="amount"
-        value="amount"
         min="0"
         @input="removeZero()"
         @focus="choiceFocus('amount_radio'); clearInput()"
         x-ref="amount_input"
+        :required="goal_choice === 'amount'"
       />
     </div>
     <div class="input-wrap flex gap-2 w-1/2 justify-center">
@@ -58,11 +59,11 @@
         id="min_quantity"
         placeholder="成團數量"
         x-model="quantity"
-        value="quantity"
         min="0"
         @input="removeZero()"
         @focus="choiceFocus('quantity_radio'); clearInput()"
         x-ref="quantity_input"
+        :required="goal_choice === 'quantity'"
       />
     </div>
   
@@ -72,6 +73,7 @@
       type="file"
       name="banner"
       id="banner"
+      required
     />
     <label class="w-1/2 text-left" for="description">團購描述</label>
     <textarea
@@ -80,6 +82,7 @@
       id="description"
       rows="10"
       placeholder="團購描述"
+      required
     ></textarea>
     <label class="w-1/2 text-left" for="deadline">團購截止日期</label>
     <input
@@ -87,6 +90,7 @@
       type="date"
       name="deadline"
       id="deadline"
+      required
     />
     <button class="bg-blue-500 text-white px-4 py-2 rounded-md" type="submit">
       新增團購
