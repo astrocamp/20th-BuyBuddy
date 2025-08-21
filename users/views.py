@@ -15,7 +15,6 @@ from django.template.loader import render_to_string
 from .forms import UserForm, UserAddressForm
 
 
-
 def send_verification_mail(request, user, email):
     try:
         # 製作 token
@@ -183,6 +182,11 @@ def verify_email(request, uid, token):
         messages.error(request, "無效的驗證連結。如果您尚未註冊，請先註冊帳號")
         return redirect("users:new")
 
+    except Exception:
+        messages.error(request, "驗證發生錯誤，如果您已註冊，請登入後重新發送驗證信")
+        return redirect("users:new")
+
+
 @login_required
 def profiles(request):
     user = request.user
@@ -190,4 +194,8 @@ def profiles(request):
     user_form = UserForm(instance=user)
     user_address_form = UserAddressForm(instance=user_address)
 
-    return render(request, "users/profiles.html", {"user_form":user_form, "user_address_form":user_address_form})
+    return render(
+        request,
+        "users/profiles.html",
+        {"user_form": user_form, "user_address_form": user_address_form},
+    )
