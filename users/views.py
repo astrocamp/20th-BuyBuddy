@@ -69,7 +69,7 @@ def create(request):
     try:
         # 先建立用戶資料
         new_user = User.objects.create_user(
-            username=email, email=email, password=password
+            username=email, email=email, password=password, avatar_url='image/upload/v1755754867/avatars/tyzned8ajzgzeokgarve.png'
         )
 
         # 寄信
@@ -193,9 +193,23 @@ def profiles(request):
     user_address = get_object_or_404(UserAddress, user=user)
     user_form = UserForm(instance=user)
     user_address_form = UserAddressForm(instance=user_address)
+    if request.method == "POST":
+        user_form = UserForm(request.POST,request.FILES, instance=user)
+        user_address_form = UserAddressForm(request.POST, instance=user_address)
+        if user_form.is_valid() and user_address_form.is_valid():
+            user_form.save()
+            user_address_form.save()
+        else:
+            print("-"*10)
+            print(user_form.errors)
+        return redirect("users:profiles")
 
-    return render(
-        request,
-        "users/profiles.html",
-        {"user_form": user_form, "user_address_form": user_address_form},
-    )
+    return render(request, "users/profiles.html", {"user_form":user_form, "user_address_form":user_address_form})
+
+@login_required
+def edit(request):
+    user = request.user
+    user_address = get_object_or_404(UserAddress, user=user)
+    user_form = UserForm(instance=user)
+    user_address_form = UserAddressForm(instance=user_address)
+    return render(request, "users/edit.html", {"user_form":user_form, "user_address_form":user_address_form})
