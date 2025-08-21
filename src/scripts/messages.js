@@ -5,8 +5,8 @@ const messagesControl = () => {
     items: [],
     showAllFrom(jsonRef) {
       if (!jsonRef) {
-        // DEVLOG: 沒有訊息
-        // console.log("沒有訊息");
+        // DEVLOG: DOM 元素沒抓到
+        // console.log("DOM 元素沒抓到");
         return;
       }
 
@@ -16,8 +16,8 @@ const messagesControl = () => {
         // console.log("訊息內容:", content);
 
         if (!content) {
-          // DEVLOG: 沒有訊息內容
-          // console.log("沒有訊息內容");
+          // DEVLOG: 訊息內容為空
+          // console.log("訊息內容為空");
           return;
         }
 
@@ -31,20 +31,20 @@ const messagesControl = () => {
           return;
         }
 
-        messages.forEach(({ text, level }) => {
+        messages.forEach(({ text, tag }) => {
           if (!text) return;
 
-          const kind = (level || "info").split(" ")[0];
-          const bg =
-            {
-              success: "#259a50ff",
-              info: "#2b65e2ff",
-              warning: "#d78512ff",
-              error: "#c23232ff",
-            }[kind] || "#2b65e2ff";
+          const type = (tag || "info").split(" ")[0];
+          const bgList = {
+            success: "#259a50ff",
+            info: "#2b65e2ff",
+            warning: "#d78512ff",
+            error: "#c23232ff",
+          };
+          const bg = bgList[type] || "#2b65e2ff";
 
           // DEVLOG: Toastify 內容
-          // console.log("Showing toast:", text, level);
+          // console.log("Showing toast:", text, tag);
 
           Toastify({
             text,
