@@ -4,8 +4,7 @@ from users.models import User
 class Group(models.Model):
     name = models.CharField(max_length=100)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="owned_groups")
-    min_amount = models.IntegerField(null=True, blank=True)
-    min_quantity = models.IntegerField(null=True, blank=True)
+    min_goal = models.IntegerField(null=True, blank=True)
     goal_choice = models.CharField(max_length=10)
     deadline = models.DateTimeField(null=True)
     status = models.CharField(max_length=20)

@@ -4,9 +4,8 @@ from PIL import Image
 import io, os
 from .models import Group
 from .forms import GroupForm
-from datetime import datetime
 from django.contrib.auth.decorators import login_required
-
+from django.contrib import messages
 
 def index(request):
   return render(request, "groups/index.html")
@@ -15,23 +14,21 @@ def index(request):
 @login_required
 def create_group(request):
   if request.method == 'POST':
-
     group_form = GroupForm(request.POST, request.FILES)
     if group_form.is_valid():
       data = group_form.save(commit=False)
-      data.update({
-        'owner': request.user,
-        'status': '進行中',
-        'deleted_at': None,
-      })
-      group_form.save()
-      
-      return redirect('groups:create_group')
+      data.owner = request.user
+      data.status = '進行中'
+      # group_form.save()
+      print(data.min_goal)
+      messages.info(request, "團購已建立")
+      return redirect('groups:index')
     else:
       print(group_form.errors)
+      messages.warning(request, "出現錯誤稍候再試")
       return redirect('groups:create_group')
-    
-  return render(request, "groups/create_group.html")
+  group_form = GroupForm()
+  return render(request, 'groups/create_group.html', {'group_form': group_form})
 
 def upload_img(request):
     return render(request, "groups/upload_img.html")
@@ -57,6 +54,7 @@ def create_img(request):
     print('儲存:', Group.objects.all())
     
     return redirect('groups:read_img')
+  
   return render(request, 'groups/upload_img.html')
   
 def read_img(request):
