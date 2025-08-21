@@ -20,22 +20,21 @@
     <label class="w-1/2 text-left">成團方式</label>
     <div class="input-wrap flex gap-2 w-1/2 justify-center">
       <input 
-        id="choice_amount" 
         type="radio" 
         name="goal_choice" 
         x-model="goal_choice"
         @change="choiceFocus('amount_input')"
         x-ref="amount_radio"
         value="amount"
+        required
       />
       <input
         class="w-full border-2 border-gray-300 rounded-md p-2"
         type="number"
         name="min_amount"
-        id="min_amount"
         placeholder="成團金額"
-        x-model="amount"
         min="0"
+        x-model="amount"
         @input="removeZero()"
         @focus="choiceFocus('amount_radio'); clearInput()"
         x-ref="amount_input"
@@ -44,19 +43,18 @@
     </div>
     <div class="input-wrap flex gap-2 w-1/2 justify-center">
       <input
-        id="choice_quantity"
         type="radio"
         name="goal_choice"
         value="quantity"
         x-model="goal_choice"
         @change="choiceFocus('quantity_input')"
         x-ref="quantity_radio"
+        required
       />
       <input
         class="w-full border-2 border-gray-300 rounded-md p-2"
         type="number"
         name="min_quantity"
-        id="min_quantity"
         placeholder="成團數量"
         x-model="quantity"
         min="0"
