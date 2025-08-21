@@ -10,6 +10,7 @@ from datetime import datetime
 def index(request):
   return render(request, "groups/index.html")
 
+
 def create_group(request):
   forms = GroupForm()
   if request.method == 'POST':
@@ -23,18 +24,6 @@ def create_group(request):
     status = '進行中'
     created_at = datetime.now()
     deleted_at = None
-
-
-    print('name:', name);
-    print('min_amount:', min_amount);
-    print('min_quantity:', min_quantity);
-    print('goal_choice:', goal_choice);
-    print('banner:', banner);
-    print('description:', description);
-    print('deadline:', deadline);
-    print('status:', status);
-    print('created_at:', created_at);
-    print('deleted_at:', deleted_at);
 
     
   return render(request, "groups/create_group.html", {"forms": forms})

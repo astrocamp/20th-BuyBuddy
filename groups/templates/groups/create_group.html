@@ -1,0 +1,96 @@
+{% extends 'layouts/default.html'%} {% block content%}
+<div x-data="createGroup" >
+  <h1 class="text-2xl font-bold text-center">座標位置：groups / new_group</h1>
+  <form
+    class="flex flex-col gap-2 items-center mt-5"
+    method="POST"
+    enctype="multipart/form-data"
+  >
+    {% csrf_token %}
+    <label class="w-1/2 text-left" for="name">團購名稱</label>
+    <input
+      class="w-1/2 border-2 border-gray-300 rounded-md p-2"
+      type="text"
+      name="name"
+      id="name"
+      placeholder="團購名稱"
+    />
+  
+    <label class="w-1/2 text-left">成團方式</label>
+    <div class="input-wrap flex gap-2 w-1/2 justify-center">
+      <input 
+        id="choice_amount" 
+        type="radio" 
+        name="goal_choice" 
+        value="amount"
+        x-model="goal_choice"
+        @change="choiceFocus('amount_input')"
+        x-ref="amount_radio"
+      />
+      <input
+        class="w-full border-2 border-gray-300 rounded-md p-2"
+        type="number"
+        name="min_amount"
+        id="min_amount"
+        placeholder="成團金額"
+        x-model="amount"
+        value="amount"
+        min="0"
+        @input="removeZero()"
+        @focus="choiceFocus('amount_radio'); clearInput()"
+        x-ref="amount_input"
+      />
+    </div>
+    <div class="input-wrap flex gap-2 w-1/2 justify-center">
+      <input
+        id="choice_quantity"
+        type="radio"
+        name="goal_choice"
+        value="quantity"
+        x-model="goal_choice"
+        @change="choiceFocus('quantity_input')"
+        x-ref="quantity_radio"
+      />
+      <input
+        class="w-full border-2 border-gray-300 rounded-md p-2"
+        type="number"
+        name="min_quantity"
+        id="min_quantity"
+        placeholder="成團數量"
+        x-model="quantity"
+        value="quantity"
+        min="0"
+        @input="removeZero()"
+        @focus="choiceFocus('quantity_radio'); clearInput()"
+        x-ref="quantity_input"
+      />
+    </div>
+  
+    <label class="w-1/2 text-left" for="banner">團購圖片</label>
+    <input
+      class="w-1/2 border-2 border-gray-300 rounded-md p-2"
+      type="file"
+      name="banner"
+      id="banner"
+    />
+    <label class="w-1/2 text-left" for="description">團購描述</label>
+    <textarea
+      class="w-1/2 border-2 border-gray-300 rounded-md p-2 resize-y"
+      name="description"
+      id="description"
+      rows="10"
+      placeholder="團購描述"
+    ></textarea>
+    <label class="w-1/2 text-left" for="deadline">團購截止日期</label>
+    <input
+      class="w-1/2 border-2 border-gray-300 rounded-md p-2"
+      type="date"
+      name="deadline"
+      id="deadline"
+    />
+    <button class="bg-blue-500 text-white px-4 py-2 rounded-md" type="submit">
+      新增團購
+    </button>
+  </form>
+</div>
+{% endblock %}
