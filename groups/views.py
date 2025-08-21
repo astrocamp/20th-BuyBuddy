@@ -16,7 +16,7 @@ def index(request):
 @login_required
 def create_group(request):
   forms = GroupForm()
-  if request.method == 'POST' and request.FILES.get('image'):
+  if request.method == 'POST':
 
     form = GroupForm(request.POST, request.FILES)
     if form.is_valid():
@@ -31,7 +31,7 @@ def create_group(request):
       Group.objects.create(**form_data)
       return redirect('groups:create_group')
     else:
-      return redirect('groups:create_group')
+      return redirect('groups:create_group', {'form': form})
     
   return render(request, "groups/create_group.html", {"forms": forms})
 
