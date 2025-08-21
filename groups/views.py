@@ -6,29 +6,34 @@ import io, os
 from .models import Group
 from .forms import GroupForm
 from datetime import datetime
+from django.contrib.auth.decorators import login_required
+
 
 def index(request):
   return render(request, "groups/index.html")
 
 
+@login_required
 def create_group(request):
   forms = GroupForm()
-  if request.method == 'POST':
-    name = request.POST.get('name')
-    min_amount = request.POST.get('min_amount')
-    min_quantity = request.POST.get('min_quantity')
-    goal_choice = request.POST.get('goal_choice')
-    banner = request.FILES.get('banner')
-    description = request.POST.get('description')
-    deadline = request.POST.get('deadline')
-    status = '進行中'
-    created_at = datetime.now()
-    deleted_at = None
+  if request.method == 'POST' and request.FILES.get('image'):
 
+    form = GroupForm(request.POST, request.FILES)
+    if form.is_valid():
+      form_data = form.cleaned_data
+      form_data.update({
+        'owner': request.user,
+        'status': '進行中',
+        'created_at': datetime.now(),
+        'deleted_at': None,
+      })
+
+      Group.objects.create(**form_data)
+      return redirect('groups:create_group')
+    else:
+      return redirect('groups:create_group')
     
   return render(request, "groups/create_group.html", {"forms": forms})
-  
-  
 
 def upload_img(request):
     return render(request, "groups/upload_img.html")
