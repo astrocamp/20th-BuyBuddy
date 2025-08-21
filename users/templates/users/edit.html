@@ -1,0 +1,64 @@
+{% extends 'layouts/default.html'%}
+
+{% block content%}
+<h1>用戶資料</h1>
+
+<form action="{% url 'users:profiles' %}" method="post" enctype="multipart/form-data">
+{% csrf_token %}
+    <div class="max-w-md mx-auto bg-white shadow-md rounded-lg p-6">
+        <div class="flex justify-center mb-6">
+            <img 
+                src="{{ user_form.instance.avatar_url.url }}" 
+                alt="User Avatar" 
+                class="w-40 h-40 rounded-full border-4 border-gray-300 object-contain"
+            >
+        </div>
+        <div class="space-y-4">
+            <div class="flex justify-between">
+                <span>{{ user_form.avatar_url }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="font-semibold">{{ user_form.username.label_tag }}</span>
+                <span>{{ user_form.username }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="font-semibold">{{ user_address_form.recipient_name.label_tag }}</span>
+                <span>{{ user_address_form.recipient_name }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="font-semibold">{{ user_address_form.is_default.label_tag }}</span>
+                <span>{{ user_address_form.is_default }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="font-semibold">{{ user_address_form.phone.label_tag }}</span>
+                <span>{{ user_address_form.phone }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="font-semibold">{{ user_address_form.postal_code.label_tag }}</span>
+                <span>{{ user_address_form.postal_code }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="font-semibold">{{ user_address_form.county.label_tag }}</span>
+                <span>{{ user_address_form.county }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="font-semibold">{{ user_address_form.district.label_tag }}</span>
+                <span>{{ user_address_form.district }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="font-semibold">{{ user_address_form.road.label_tag }}</span>
+                <span>{{ user_address_form.road }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="font-semibold">{{ user_address_form.detail.label_tag }}</span>
+                <span>{{ user_address_form.detail }}</span>
+            </div>
+        </div>
+        <div class="mt-6 text-center">
+            <button class="inline-block px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition">送出</button>
+        </div>
+    </div>
+    
+</form>
+
+{% endblock %}

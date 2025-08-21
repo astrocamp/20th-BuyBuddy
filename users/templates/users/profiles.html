@@ -1,53 +1,57 @@
 {% extends 'layouts/default.html'%}
 
 {% block content%}
-<h1>用戶資料</h1>
+<h1 class="text-2xl font-bold text-center mb-6">用戶資料</h1>
 
-<div class="flex flex-col">
-    <div class="w-full">
-{{ user_form.avatar_url.label_tag }}
-{{ user_form.avatar_url }}
+<div class="max-w-md mx-auto bg-white shadow-md rounded-lg p-6">
+     <div class="flex justify-center mb-6">
+        <img 
+            src="{{ user_form.instance.avatar_url.url }}" 
+            alt="User Avatar" 
+            class="w-40 h-40 rounded-full border-4 border-gray-300 object-contain"
+        >
+     </div>
+     <div class="space-y-4">
+        <div class="flex justify-between">
+            <span class="font-semibold">{{ user_form.username.label_tag }}</span>
+            <span>{{ user_form.username.value }}</span>
+        </div>
+        <div class="flex justify-between">
+            <span class="font-semibold">{{ user_address_form.recipient_name.label_tag }}</span>
+            <span>{{ user_address_form.recipient_name.value }}</span>
+        </div>
+        <div class="flex justify-between">
+            <span class="font-semibold">{{ user_address_form.is_default.label_tag }}</span>
+            <span>{{ user_address_form.is_default.value }}</span>
+        </div>
+        <div class="flex justify-between">
+            <span class="font-semibold">{{ user_address_form.phone.label_tag }}</span>
+            <span>{{ user_address_form.phone.value }}</span>
+        </div>
+        <div class="flex justify-between">
+            <span class="font-semibold">{{ user_address_form.postal_code.label_tag }}</span>
+            <span>{{ user_address_form.postal_code.value }}</span>
+        </div>
+        <div class="flex justify-between">
+            <span class="font-semibold">{{ user_address_form.county.label_tag }}</span>
+            <span>{{ user_address_form.county.value }}</span>
+        </div>
+        <div class="flex justify-between">
+            <span class="font-semibold">{{ user_address_form.district.label_tag }}</span>
+            <span>{{ user_address_form.district.value }}</span>
+        </div>
+        <div class="flex justify-between">
+            <span class="font-semibold">{{ user_address_form.road.label_tag }}</span>
+            <span>{{ user_address_form.road.value }}</span>
+        </div>
+        <div class="flex justify-between">
+            <span class="font-semibold">{{ user_address_form.detail.label_tag }}</span>
+            <span>{{ user_address_form.detail.value }}</span>
+        </div>
     </div>
-    <div>
-{{ user_form.username.label_tag }}
-{{ user_form.username }}
+    <div class="mt-6 text-center">
+        <a href="{% url 'users:edit' %}" class="inline-block px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition">編輯</a>
     </div>
-    <div>
-{{ user_form.password.label_tag }}
-{{ user_form.password }}
-    </div>
-    <div>
-{{ user_address_form.recipient_name.label_tag }}
-{{ user_address_form.recipient_name }}
-    </div>
-    <div>
-{{ user_address_form.is_default.label_tag }}
-{{ user_address_form.is_default }}
-    </div>
-    <div>
-{{ user_address_form.phone.label_tag }}
-{{ user_address_form.phone }}
-    </div>
-    <div>
-{{ user_address_form.postal_code.label_tag }}
-{{ user_address_form.postal_code }}
-    </div>
-    <div>
-{{ user_address_form.county.label_tag }}
-{{ user_address_form.county }}
-    </div>    
-    <div>
-{{ user_address_form.district.label_tag }}
-{{ user_address_form.district }}
-    </div>    
-    <div>
-{{ user_address_form.road.label_tag }}
-{{ user_address_form.road }}
-    </div>    
-    <div>
-{{ user_address_form.detail.label_tag }}
-{{ user_address_form.detail }}
-    </div>            
 </div>
 
 

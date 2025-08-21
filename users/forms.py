@@ -4,16 +4,14 @@ from .models import User, UserAddress
 class UserForm(ModelForm):
     class Meta:
         model = User
-        fields = [ "avatar_url", "username", "password"]
+        fields = [ "avatar_url", "username"]
         labels = {
             "avatar_url": "大頭照",
             "username": "用戶名稱",
-            "password": "密碼"
         }
         widgets = {
             "avatar_url": FileInput(),
             "username": TextInput(),
-            "password": PasswordInput(),
         }
 
 class UserAddressForm(ModelForm):
