@@ -1,4 +1,3 @@
-
 from django.shortcuts import render, redirect
 from django.core.files.base import ContentFile
 from PIL import Image
@@ -15,25 +14,24 @@ def index(request):
 
 @login_required
 def create_group(request):
-  forms = GroupForm()
   if request.method == 'POST':
 
-    form = GroupForm(request.POST, request.FILES)
-    if form.is_valid():
-      form_data = form.cleaned_data
-      form_data.update({
+    group_form = GroupForm(request.POST, request.FILES)
+    if group_form.is_valid():
+      data = group_form.save(commit=False)
+      data.update({
         'owner': request.user,
         'status': '進行中',
-        'created_at': datetime.now(),
         'deleted_at': None,
       })
-
-      Group.objects.create(**form_data)
+      group_form.save()
+      
       return redirect('groups:create_group')
     else:
-      return redirect('groups:create_group', {'form': form})
+      print(group_form.errors)
+      return redirect('groups:create_group')
     
-  return render(request, "groups/create_group.html", {"forms": forms})
+  return render(request, "groups/create_group.html")
 
 def upload_img(request):
     return render(request, "groups/upload_img.html")
@@ -64,3 +62,4 @@ def create_img(request):
 def read_img(request):
   photos = Group.objects.all()
   return render(request, 'groups/upload_img.html', {"photos": photos})
+

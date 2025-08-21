@@ -10,7 +10,7 @@ class Group(models.Model):
     deadline = models.DateTimeField(null=True)
     status = models.CharField(max_length=20)
     banner = models.ImageField(upload_to='groups/banners/')
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     deleted_at = models.DateTimeField(null=True)
     description = models.TextField(null=True)
 
