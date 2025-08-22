@@ -4,12 +4,12 @@ from users.models import User
 class Group(models.Model):
     name = models.CharField(max_length=100)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="owned_groups")
-    min_goal = models.IntegerField(null=True, blank=True)
+    min_goal = models.IntegerField()
     goal_choice = models.CharField(max_length=10)
     deadline = models.DateTimeField(null=True)
     status = models.CharField(max_length=20)
     banner = models.ImageField(upload_to='groups/banners/')
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     deleted_at = models.DateTimeField(null=True)
     description = models.TextField(null=True)
 
