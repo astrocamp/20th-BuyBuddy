@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'notifications',
     'sales',
     'products',
-   
+    'anymail',
 ]
 
 MIDDLEWARE = [
@@ -138,20 +138,20 @@ LOGIN_URL = "/users/sessions/new/"
 
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 3
 
+# MEDIA_URL = '/media/'
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
 # 開發階段：在 terminal 顯示郵件內容
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # DEFAULT_FROM_EMAIL = 'noreply@yoursite.com'
 
-# 真實發信（Gmail 範例）：
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "buybuddysite@gmail.com"
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_PASSWORD")
 
+# 真實發信
+# Anymail 設定
+ANYMAIL = {
+    "MAILGUN_API_KEY": os.environ.get("MAILGUN_API_KEY"),
+    "MAILGUN_SENDER_DOMAIN": os.environ.get("MAILGUN_SENDER_DOMAIN"),
+}
 
-
-
-# MEDIA_URL = '/media/'
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAI")

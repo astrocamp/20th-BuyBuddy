@@ -9,10 +9,8 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.urls import reverse
-from django.core.mail import send_mail
-from django.conf import settings
-from django.template.loader import render_to_string
 from .forms import UserForm, UserAddressForm
+from anymail.message import AnymailMessage
 
 
 def send_verification_mail(request, user, email):
@@ -26,22 +24,20 @@ def send_verification_mail(request, user, email):
             reverse("users:verify_email", kwargs={"uid": uid, "token": token})
         )
 
-        # 發信
-        html_message = render_to_string(
-            "emails/verify_email.html", {"verify_url": verify_url}
+        # 使用 anymail 發送模板郵件
+        mail = AnymailMessage(
+            template_id="註冊驗證信",
+            to=[email],
         )
-        plain_message = f"請點擊以下連結驗證您的信箱：{verify_url}"
 
-        send_mail(
-            subject="驗證您的信箱",
-            message=plain_message,  # 純文字版本
-            html_message=html_message,  # HTML 版本
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[email],
-            fail_silently=False,
-        )
+        # 設定模板變數
+        mail.merge_global_data = {"verify_url": verify_url}
+
+        mail.send()
         return True
-    except Exception:
+
+    except Exception as e:
+        print(f"寄送驗證信時發生錯誤: {e}")
         return False
 
 
@@ -69,7 +65,10 @@ def create(request):
     try:
         # 先建立用戶資料
         new_user = User.objects.create_user(
-            username=email, email=email, password=password, avatar_url='image/upload/v1755754867/avatars/tyzned8ajzgzeokgarve.png'
+            username=email,
+            email=email,
+            password=password,
+            avatar_url='image/upload/v1755754867/avatars/tyzned8ajzgzeokgarve.png',
         )
 
         # 寄信
@@ -194,17 +193,22 @@ def profiles(request):
     user_form = UserForm(instance=user)
     user_address_form = UserAddressForm(instance=user_address)
     if request.method == "POST":
-        user_form = UserForm(request.POST,request.FILES, instance=user)
+        user_form = UserForm(request.POST, request.FILES, instance=user)
         user_address_form = UserAddressForm(request.POST, instance=user_address)
         if user_form.is_valid() and user_address_form.is_valid():
             user_form.save()
             user_address_form.save()
         else:
-            print("-"*10)
+            print("-" * 10)
             print(user_form.errors)
         return redirect("users:profiles")
 
-    return render(request, "users/profiles.html", {"user_form":user_form, "user_address_form":user_address_form})
+    return render(
+        request,
+        "users/profiles.html",
+        {"user_form": user_form, "user_address_form": user_address_form},
+    )
+
 
 @login_required
 def edit(request):
@@ -212,4 +216,8 @@ def edit(request):
     user_address = get_object_or_404(UserAddress, user=user)
     user_form = UserForm(instance=user)
     user_address_form = UserAddressForm(instance=user_address)
-    return render(request, "users/edit.html", {"user_form":user_form, "user_address_form":user_address_form})
+    return render(
+        request,
+        "users/edit.html",
+        {"user_form": user_form, "user_address_form": user_address_form},
+    )
