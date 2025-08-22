@@ -1,2 +1,41 @@
 @import "tailwindcss";
 @import "toastify-js/src/toastify.css";
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
+
+:root {
+  font-family: "Monsterrat";
+  --main-color: #ebbc46;
+  --secondary-color: #edc956;
+  --brand-red: #d85c34;
+  --brand-green: #3d7757ff;
+  --brand-black: #221b18;
+}
+
+html {
+  background: #ece7d9;
+  color: var(--brand-black);
+}
+
+.main-color {
+  color: var(--main-color);
+}
+
+.bg-main-color {
+  background-color: var(--main-color);
+}
+
+.border-main-color {
+  border-color: var(--main-color);
+}
+
+.brand-black {
+  color: var(--brand-black);
+}
+
+.bg-brand-black {
+  background-color: var(--brand-black);
+}
+
+.border-brand-black {
+  border-color: var(--brand-black);
+}

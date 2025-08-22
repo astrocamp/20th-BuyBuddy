@@ -1,10 +1,10 @@
 import Toastify from "toastify-js";
 
 const bgList = {
-  success: "#259a50ff",
+  success: "#3d7757ff",
   info: "#2b65e2ff",
   warning: "#d78512ff",
-  error: "#c23232ff",
+  error: "#d85c34",
 };
 const infoColor = bgList["info"];
 
@@ -55,9 +55,12 @@ const messagesControl = () => {
             position: "center",
             close: true,
             duration: 3500,
+            offset: {
+              y: 10,
+            },
             style: {
               background: bg,
-              borderRadius: "8px",
+              borderRadius: "50px",
               padding: "12px 20px",
               display: "flex",
               justifyContent: "space-between",
