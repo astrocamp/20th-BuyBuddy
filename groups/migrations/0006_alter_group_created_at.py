@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('groups', '0005_group_description_alter_group_banner_and_more'),
+        ('groups', '0005_group_description_alter_group_banner'),
     ]
 
     operations = [
