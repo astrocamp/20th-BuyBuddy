@@ -19,8 +19,7 @@ def create_group(request):
       data = group_form.save(commit=False)
       data.owner = request.user
       data.status = '進行中'
-      # group_form.save()
-      print(data.min_goal)
+      group_form.save()
       messages.info(request, "團購已建立")
       return redirect('groups:index')
     else:

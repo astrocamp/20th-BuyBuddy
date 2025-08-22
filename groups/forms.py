@@ -41,7 +41,6 @@ class GroupForm(ModelForm):
         'class': 'w-full border-2 border-gray-300 rounded-md p-2', 
         'placeholder': '成團數量',
         'min': 0,
-        'step': '1',
         'required': True,
         'x-model': 'min_goal',
         'x-on:input': 'removeZero()'
