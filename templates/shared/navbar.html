@@ -1,8 +1,13 @@
 {% load static %}
 <nav id="navbar-main"
     class="px-10 py-6 flex justify-between items-center h-[98px] fixed w-full top-0">
-        <ul class="flex gap-10">
-            
+        <ul class="flex gap-10 items-center">
+            <li>
+                <a href="{% url 'pages:homepage' %}" class="relative leading-8 flex items-center px-4 font-extrabold">
+                <img class="h-20 w-52" src="{% static 'asset/logo.svg' %}" alt="logo">
+                </a>
+            </li>
+
             <li><a href="{% url 'buy:index' %}" class="relative leading-8 flex items-center px-4 outline-main-color hover:outline hover:outline-[1.5px] hover:outline-offset-8 rounded-full transition-all">購買</a></li>
             <li><a href="{% url 'groups:index' %}" class="relative leading-8 flex items-center px-4 outline-main-color hover:outline hover:outline-[1.5px] hover:outline-offset-8 rounded-full transition-all">團購</a></li>
             <li><a href="{% url 'products:index' %}" class="relative leading-8 flex items-center px-4 outline-main-color hover:outline hover:outline-[1.5px] hover:outline-offset-8 rounded-full transition-all">商品</a></li>
@@ -10,9 +15,7 @@
             <li><a href="{% url 'status:index' %}" class="relative leading-8 flex items-center px-4 outline-main-color hover:outline hover:outline-[1.5px] hover:outline-offset-8 rounded-full transition-all">團購狀態</a></li>
             
         </ul>
-        <ul class="fixed left-1/2 -translate-x-1/2 flex h-[98px] items-center">
-            <li><a href="{% url 'pages:homepage' %}" class="relative leading-8 flex items-center px-4">首頁</a></li>
-        </ul>
+    
         {% if user.is_authenticated %}
             <ul class="flex gap-4 leading-8 items-center">
                 <li><a href="{% url 'users:profiles'%}" class="relative leading-8 flex items-center px-4 outline-main-color hover:outline hover:outline-[1.5px] hover:outline-offset-8 rounded-full transition-all">{{user.username}}</a></li>
@@ -44,9 +47,9 @@
                 </li>
             </ul>
         {% else %}
-            <ul class="flex gap-4 leading-8">
-                <li><a href="{% url 'users:new' %}" class="relative leading-8 flex items-center px-4 outline-main-color hover:outline hover:outline-[1.5px] hover:outline-offset-8 rounded-full transition-all">註冊</a></li>
+            <ul class="flex items-center gap-10 leading-8">
                 <li><a href="{% url 'users:sessions_new' %}" class="relative leading-8 flex items-center px-4 outline-main-color hover:outline hover:outline-[1.5px] hover:outline-offset-8 rounded-full transition-all">登入</a></li>
+                <li><a href="{% url 'users:new' %}" class="relative leading-8 flex items-center px-6 py-[10px] bg-[var(--main-color)] rounded-full hover:bg-[#f3c44f]">註冊</a></li>
             </ul>
         {% endif %}
 </nav>

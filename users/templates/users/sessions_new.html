@@ -1,9 +1,12 @@
 {% extends 'layouts/default.html'%}
+{% load static %}
 
 {% block content%}
 <div class="flex flex-col items-center mt-20">
     <div class="w-full max-w-md">
-        <h1 class="text-2xl font-bold mt-12 mb-8 text-center">登入</h1>
+        <img class="w-30 mt-12 mx-auto" src="{% static "asset/buddy_2.svg" %}" alt="">
+        <h1 class="text-2xl font-bold mt-5 mb-2 text-center">登入</h1>
+        <h1 class="text-lg font-bold mb-8 text-center">Buy Together, Save Forever!</h1>
         <form action="{% url 'users:sessions_create' %}" method="post" class="space-y-8">
             {% csrf_token %}
             <input type="hidden" name="next" value="{{ request.GET.next }}">

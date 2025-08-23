@@ -1,5 +1,12 @@
 {% extends 'layouts/default.html'%}
+{% load static %}
 
 {% block content%}
-<h1>TEST</h1>
+
+<div class="rounded-4xl mx-16 px-10 h-[700px] text-center bg-no-repeat bg-cover bg-top text-white flex flex-col justify-center" style="background-image: url({% static 'asset/banner-test.jpg' %})">
+
+<h1 class="text-[40px] font-black my-5">"Group Up, Save Up!"</h1>
+<h2 class="text-2xl font-black mb-5">尋找你的購物夥伴!</h2>
+    <p class="text-sm opacity-30 w-[50%] mx-auto justify-self-end">Group buying is a revolutionary shopping experience that brings people together to unlock incredible deals and savings. By combining the purchasing power of multiple buyers, we can negotiate better prices, access exclusive products, and create a community-driven marketplace where everyone wins.!</p>
+</div>
 {% endblock %}

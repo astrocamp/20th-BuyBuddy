@@ -3,16 +3,15 @@
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 
 :root {
-  font-family: "Monsterrat";
+  font-family: "Montserrat";
   --main-color: #ebbc46;
-  --secondary-color: #edc956;
   --brand-red: #d85c34;
   --brand-green: #3d7757ff;
   --brand-black: #221b18;
 }
 
 html {
-  background: #ece7d9;
+  background: #f8f5ed;
   color: var(--brand-black);
 }
 
