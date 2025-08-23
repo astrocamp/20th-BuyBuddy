@@ -1,10 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from cloudinary.models import CloudinaryField
 
 class User(AbstractUser):
     email = models.EmailField(unique=True)
-    avatar_url = CloudinaryField('avatar', folder='avatars/', overwrite=False)
+    avatar_url = models.ImageField(upload_to='avatars/')
     is_verified = models.BooleanField(default=False)
 
     USERNAME_FIELD = "email"
