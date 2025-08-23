@@ -2,9 +2,9 @@ import Toastify from "toastify-js";
 
 const bgList = {
   success: "#3d7757ff",
-  info: "#2b65e2ff",
+  info: "#293343",
   warning: "#d78512ff",
-  error: "#d85c34",
+  error: "#d85c34ff",
 };
 const infoColor = bgList["info"];
 
