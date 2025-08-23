@@ -9,7 +9,7 @@ class Notification(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     group = models.ForeignKey(
         Group,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         null=True,
         related_name="notifications",
     )
