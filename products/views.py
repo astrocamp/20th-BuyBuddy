@@ -8,8 +8,7 @@ def index(request):
 
 
 def product_detail(request, product_id):
-    product = get_object_or_404(Product, pk=product_id)
-    images = ProductImage.objects.filter(product=product)
-    return render(
-        request, "products/product_detail.html", {"product": product, "images": images}
+    product = get_object_or_404(
+        Product.objects.select_related("group").prefetch_related("images"), pk=product_id
     )
+    return render(request, "products/product_detail.html", {"product": product})
