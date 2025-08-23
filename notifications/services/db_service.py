@@ -1,13 +1,7 @@
 from ..models import UserNotification, Notification
 
-GROUP_STATUS = {"reached": "已成團", "failed": "揪團失敗"}
 
-
-def notify_owner(user_id, group):
-    if not group:
-        return 0
-
-    group_status = GROUP_STATUS.get(group.status, "狀態更新")
+def create_notification(user_id, group, group_status):
     title = f"{group_status} {group.name}"
 
     new_notification = Notification.objects.create(
@@ -21,11 +15,7 @@ def notify_owner(user_id, group):
     return 1
 
 
-def notify_buyer(user_ids, group):
-    if not group:
-        return 0
-
-    group_status = GROUP_STATUS.get(group.status, "狀態更新")
+def create_bulk_notifications(user_ids, group, group_status):
     title = f"{group_status} {group.name}"
 
     new_notification = Notification.objects.create(

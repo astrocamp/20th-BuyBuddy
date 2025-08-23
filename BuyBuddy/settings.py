@@ -141,6 +141,14 @@ SESSION_COOKIE_AGE = 60 * 60 * 24 * 3
 # MEDIA_URL = '/media/'
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
+if DEBUG:
+    SITE_URL = "http://127.0.0.1:8000"
+    SITE_NAME = "buybuddy (dev)"
+else:
+    # TODO
+    SITE_URL = "https://yourdomain.com"
+    SITE_NAME = "buybuddy"
+
 # 開發階段：在 terminal 顯示郵件內容
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # DEFAULT_FROM_EMAIL = 'noreply@yoursite.com'
@@ -154,4 +162,4 @@ ANYMAIL = {
 }
 
 EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAI")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
