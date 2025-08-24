@@ -43,6 +43,7 @@ class GroupForm(ModelForm):
         'min': 0,
         'required': True,
         'x-model': 'min_goal',
+        'x-ref': 'min_goal',
         'x-on:input': 'removeZero()'
       }),
       'deadline': DateInput(attrs={
