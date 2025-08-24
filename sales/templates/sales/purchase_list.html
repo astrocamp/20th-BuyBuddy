@@ -1,0 +1,23 @@
+{% extends 'layouts/default.html' %}
+
+{% block content %}
+<h1>購買記錄</h1>
+
+<p>總購買金額：${{ total_amount }}</p>
+
+<hr>
+
+{% for purchase in purchases %}
+<div style="border:1px solid #ccc; padding:15px; margin:10px 0;">
+    <h3>
+        {{ purchase.sales_index.name }}
+    </h3>
+    <p>數量：{{ purchase.quantity }} 件 | 金額：${{ purchase.total_amount }}</p>
+    <p>狀態：{{ purchase.status }} | 購買時間：{{ purchase.purchase_date|date:"Y-m-d H:i" }}</p>
+</div>
+{% empty %}
+<p>沒有購買記錄</p>
+{% endfor %}
+
+<p><a href="{% url 'sales:index' %}">返回首頁</a></p>
+{% endblock %}
