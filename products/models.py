@@ -18,3 +18,4 @@ class JoinedGroupProduct(models.Model):
     joined_group = models.ForeignKey(JoinedGroup, on_delete=models.CASCADE, related_name="joined_group_products")
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField()
+    deleted_at = models.DateTimeField(null=True)
