@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'notifications',
     'sales',
     'products',
+    'storages'
    
 ]
 
@@ -150,8 +151,22 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "buybuddysite@gmail.com"
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_PASSWORD")
 
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "OPTIONS": {
+            "access_key": os.getenv('AWS_ACCESS_KEY_ID'),
+            "secret_key": os.getenv('AWS_SECRET_ACCESS_KEY'),
+            "bucket_name": os.getenv('AWS_STORAGE_BUCKET_NAME'),
+            "region_name": os.getenv('AWS_S3_REGION_NAME'),
 
-
-
-# MEDIA_URL = '/media/'
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = None
+MEDIA_URL = f"https://{os.getenv('AWS_STORAGE_BUCKET_NAME')}.s3.{os.getenv('AWS_S3_REGION_NAME')}.amazonaws.com/"
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

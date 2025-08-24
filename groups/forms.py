@@ -24,7 +24,7 @@ class GroupForm(ModelForm):
       'banner': FileInput(attrs={
         'class': 'w-full border-2 border-gray-300 rounded-md p-2', 
         'placeholder': '團購圖片',
-        'required': True
+        'required': True,
       }),
       'description': Textarea(attrs={
         'class': 'w-full border-2 border-gray-300 rounded-md p-2 resize-y', 
@@ -43,6 +43,7 @@ class GroupForm(ModelForm):
         'min': 0,
         'required': True,
         'x-model': 'min_goal',
+        'x-ref': 'min_goal',
         'x-on:input': 'removeZero()'
       }),
       'deadline': DateInput(attrs={

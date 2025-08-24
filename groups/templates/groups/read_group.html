@@ -1,0 +1,27 @@
+{% extends 'layouts/default.html' %}
+
+{% block content %}
+<h1 class="text-2xl font-bold text-center">座標位置：groups / read_group</h1>
+{% for group in groups %}
+<form class="w-full border-2 flex" method="post" action="{% url 'groups:delete_group' group.id %}">
+  {% csrf_token %}
+    <div class="flex-1">
+      <img class="h-full object-cover" src="{{ group.banner.url }}" alt="{{ group.name }}">
+    </div>
+    <div class="flex-[3] flex flex-col justify-between">
+      <div>
+        <h2 class="text-2xl font-bold">標題：{{ group.name }}</h2>
+        <p>內容：{{ group.description }}</p>
+        <p>最低目標：{{ group.min_goal }}</p>
+        <p>發起時間：{{ group.created_at }}</p>
+        <p>截止日期：{{ group.deadline }}</p>
+        <p>狀態：{{ group.status }}</p>
+      </div>
+      <div class="flex gap-2 justify-end">
+        <a class="inline-block border" href="{% url 'groups:edit_group' group.id %}">編輯</a>
+        <button class="inline-block border" type="submit">刪除</button>
+      </div>
+    </div>
+</form>
+{% endfor %}
+{% endblock %}
