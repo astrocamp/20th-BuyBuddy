@@ -9,6 +9,7 @@
 {% endif %}
 
 <div x-show="show"
+     x-cloak
      x-transition:enter="transition ease-out duration-300"
      x-transition:enter-start="opacity-0 transform translate-x-4"
      x-transition:enter-end="opacity-100 transform translate-x-0"
@@ -16,14 +17,14 @@
      x-transition:leave-start="opacity-100 transform translate-x-0"
      x-transition:leave-end="opacity-0 transform translate-x-4"
      @click.outside="show=false"  
-     class="bg-main-color absolute w-[400px] top-[-25px] right-[-80px] rounded-[50px] h-screen flex flex-col overflow-hidden">
+     class="pl-[100px] pb-12 bg-main-color absolute w-[500px] top-[-25px] right-[-80px] rounded-l-[80px] h-screen flex flex-col overflow-hidden">
      <div class="sticky top-0 bg-main-color pt-[85px] pb-4 z-10 rounded-t-[50px]">
          <button class="absolute top-10 right-[85px] cursor-pointer 
          hover:outline hover:outline-[1.5px] hover:outline-offset-8 rounded-full transition-all" @click="show=false">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#000000" viewBox="0 0 256 256"><path d="M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z"></path></svg>
          </button>
 {% if notifications %}
-         <form action="{% url 'notifications:read_all' %}" method="post" class="pl-10">
+         <form action="{% url 'notifications:read_all' %}" method="post" class="">
             {% csrf_token %}
             <input type="hidden" name="next" value="{{request.path}}">
             <button class="flex items-center gap-2 py-3 px-6 rounded-full text-sm cursor-pointer hover:outline hover:outline-[1.5px] hover:outline-offset-2 rounded-full transition-all">
@@ -34,7 +35,7 @@
         
      </div>
      <div class="overflow-auto flex-1">
-        <ul class="pl-10 space-y-6 text-brand-black">
+        <ul class="space-y-6 text-brand-black">
         {% for un in notifications %}
             {% if not un.is_read %}
                 <li class="pb-6 hover:text-[#d85c34] transition-all duration-300">
@@ -62,7 +63,7 @@
         </ul>
      </div>
 {% else %}
-    <div class="flex-1 flex items-center justify-center">
+    <div class="flex-1 flex items-center">
         <p>目前沒有您的通知</p>
     </div>
 {% endif %}
