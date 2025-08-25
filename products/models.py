@@ -10,7 +10,7 @@ class Product(models.Model):
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="images")
-    url = models.CharField(max_length=255)
+    url = models.ImageField(upload_to='groups/products')
     order = models.IntegerField()
 
 
