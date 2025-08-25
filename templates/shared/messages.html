@@ -1,11 +1,28 @@
 {% if messages %}
-<div x-data="messagesControl" x-init="showAllFrom($refs.msgsJson)">
-    <script type="application/json" x-ref="msgsJson">
-    [
-        {% for message in messages %}
-            {"text":"{{ message|escapejs }}","tag":"{{ message.tags|escapejs }}"} {% if not forloop.last %},{% endif %}
-        {% endfor %}
-    ]
-    </script>
-</div>
+        <div x-data="messagesControl" x-init="showAllFrom($refs.msgsJson)">
+            <script type="application/json" x-ref="msgsJson">
+            [
+                {% for message in messages %}
+                    {"text":"{{ message|escapejs }}","tag":"{{ message.tags|escapejs }}"} {% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ]
+            </script>
+
+            <div x-cloak
+                x-show="modal.show"
+                x-transition
+                class="fixed inset-0 bg-black/60 flex items-center justify-center z-10 text-center">
+                <div class="rounded-4xl shadow-xl max-w-md relative pt-20 pb-14 px-14 "
+                     :class="modal.type == 'success'? 'bg-[var(--main-color)]':'bg-[var(--brand-red)]'
+                ">
+                    <p x-text="modal.title" class="text-2xl font-bold"></p>
+                    <button class="absolute top-6 right-6 cursor-pointer 
+                    hover:outline hover:outline-[1.5px] hover:outline-offset-8 rounded-full transition-all"
+                    @click="modal.show=false">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#000000" viewBox="0 0 256 256"><path d="M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z"></path></svg>
+                    </button>
+                    <p class="text-brand-black my-4" x-text="modal.text"></p>
+                </div>
+            </div>
+        </div>
 {% endif %}

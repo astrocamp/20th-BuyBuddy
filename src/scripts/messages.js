@@ -11,6 +11,8 @@ const infoColor = bgList["info"];
 const messagesControl = () => {
   return {
     items: [],
+    modal: { show: false, title: "", text: "", type: "" },
+    hasShownVerify: false,
 
     showAllFrom(jsonRef) {
       if (!jsonRef) {
@@ -43,7 +45,29 @@ const messagesControl = () => {
         messages.forEach(({ text, tag }) => {
           if (!text) return;
 
-          const type = (tag || "info").split(" ")[0];
+          const tagsStr = String(tag || "");
+          const isVerify = tagsStr.includes("verify");
+          const fromRegister = tagsStr.includes("register");
+          const fromProfile = tagsStr.includes("profile");
+          const isSuccess = tagsStr.includes("success");
+
+          if (!this.hasShownVerify && isVerify) {
+            let title = "通知";
+            if (fromRegister) {
+              title = "註冊＆登入成功";
+            } else if (fromProfile) {
+              title = isSuccess ? "已寄出驗證信" : "驗證信寄送失敗";
+            }
+
+            this.modal.title = title;
+            this.modal.text = text;
+            this.modal.type = isSuccess ? "success" : "warning";
+            this.modal.show = true;
+            this.hasShownVerify = true;
+            return;
+          }
+
+          const type = tagsStr.split(" ")[0] || "info";
           const bg = bgList[type] || infoColor;
 
           // DEVLOG: Toastify 內容
