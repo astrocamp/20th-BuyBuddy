@@ -1,5 +1,6 @@
 from django.forms import ModelForm
 from .models import Group
+from products.models import Product, ProductImage
 from django.forms.widgets import *
 
 
@@ -17,6 +18,7 @@ class GroupForm(ModelForm):
     }
     widgets = {
       'name': TextInput(attrs={
+        'id': 'group_name',
         'class': 'w-full border-2 border-gray-300 rounded-md p-2', 
         'placeholder': '團購名稱',
         'required': True,
@@ -27,6 +29,7 @@ class GroupForm(ModelForm):
         'required': True
       }),
       'description': Textarea(attrs={
+        'id': 'group_description',
         'class': 'w-full border-2 border-gray-300 rounded-md p-2 resize-y', 
         'placeholder': '團購描述',
         'rows': 5,
@@ -40,7 +43,7 @@ class GroupForm(ModelForm):
       'min_goal': NumberInput(attrs={
         'class': 'w-full border-2 border-gray-300 rounded-md p-2', 
         'placeholder': '成團數量',
-        'min': 0,
+        'min': 1,
         'required': True,
         'x-model': 'min_goal',
         'x-ref': 'min_goal',
@@ -51,5 +54,50 @@ class GroupForm(ModelForm):
         'placeholder': '團購截止日期',
         'type': 'date',
         'required': True
+      }),
+    }
+
+class ProductForm(ModelForm):
+  class Meta:
+    model = Product
+    fields = ['name', 'price', 'description']
+    labels = {
+      'name': '產品名稱',
+      'price': '產品價格',
+      'description': '產品描述'
+    }
+    widgets = {
+      'name': TextInput(attrs={
+        'id': 'product_name',
+        'class': 'w-full border-2 border-gray-300 rounded-md p-2', 
+        'placeholder': '產品名稱',
+        'required': True,
+      }),
+      'price': NumberInput(attrs={
+        'class': 'w-full border-2 border-gray-300 rounded-md p-2', 
+        'placeholder': '產品價格',
+        'required': True,
+      }),
+      'description': Textarea(attrs={
+        'id': 'product_description',
+        'class': 'w-full border-2 border-gray-300 rounded-md p-2 resize-y', 
+        'placeholder': '產品描述',
+        'rows': 5,
+        'required': True,
+      }),
+    }
+
+class ProductImageForm(ModelForm):
+  class Meta:
+    model = ProductImage
+    fields = ['url']
+    labels = {
+      'url': '圖片'
+    }
+    widgets = {
+      'url': FileInput(attrs={
+        'class': 'w-full border-2 border-gray-300 rounded-md p-2', 
+        'placeholder': '圖片',
+        'required': True,
       }),
     }
