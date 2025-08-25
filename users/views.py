@@ -9,7 +9,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.urls import reverse
-from .forms import UserForm, UserAddressForm
+from .forms import UserForm, UserAddressForm, RegistrationForm, LoginForm
 from anymail.message import AnymailMessage
 
 
@@ -41,51 +41,47 @@ def send_verification_mail(request, user, email):
         return False
 
 
-@login_required
-def detail(request):
-    return render(request, "users/detail.html")
-
-
 def new(request):
     if request.user.is_authenticated:
         messages.info(request, "您已經登入了")
         return redirect("pages:homepage")
-    return render(request, "users/new.html")
+    form = RegistrationForm()
+    return render(request, "users/new.html", {"form": form})
 
 
 @require_POST
 def create(request):
-    email = request.POST.get("email")
-    password = request.POST.get("password")
-
-    if not email or not password:
-        messages.warning(request, "缺少註冊資料")
-        return redirect("users:new")
+    form = RegistrationForm(request.POST)
+    if not form.is_valid():
+        return render(request, "users/new.html", {"form": form})
 
     try:
         # 先建立用戶資料
-        new_user = User.objects.create_user(
-            username=email,
-            email=email,
-            password=password,
-            avatar_url='image/upload/v1755754867/avatars/tyzned8ajzgzeokgarve.png',
+        new_user = form.save(commit=False)
+        new_user.avatar_url = (
+            'image/upload/v1755754867/avatars/tyzned8ajzgzeokgarve.png'
         )
+        new_user.set_password(form.cleaned_data["password"])  # 手動雜湊密碼
+        new_user.save()
 
         # 寄信
-        success = send_verification_mail(request, new_user, email)
-        if not success:
-            messages.warning(request, "寄送驗證信失敗，請登入後稍後再試")
-            return redirect("users:sessions_new")
-        return redirect("users:check_email")
+        success = send_verification_mail(request, new_user, new_user.email)
+        if success:
+            messages.success(
+                request, "註冊成功，驗證信已發送，請至您的信箱點擊驗證連結"
+            )
+        else:
+            messages.warning(
+                request, "註冊成功，但驗證信寄送失敗，請稍後到個人設定重新寄送"
+            )
 
-    except IntegrityError:
-        messages.error(request, "此 Email 已註冊")
-        return redirect("users:new")
+        login(request, new_user)
+        return redirect("pages:homepage")
 
     except Exception as e:
         print(f"註冊時發生錯誤: {e}")
         messages.error(request, "註冊失敗，請稍後再試")
-        return redirect("users:new")
+        return render(request, "users/new.html", {"form": form})
 
 
 def sessions_new(request):
@@ -94,18 +90,24 @@ def sessions_new(request):
         return redirect("pages:homepage")
     if request.GET.get("next"):
         messages.warning(request, "請先登入，以繼續訪問頁面")
-    return render(request, "users/sessions_new.html")
+
+    form = LoginForm()
+    return render(request, "users/sessions_new.html", {"form": form})
 
 
 @require_POST
 def sessions_create(request):
-    email = request.POST.get("email")
-    password = request.POST.get("password")
+    form = LoginForm(request.POST)
+    if not form.is_valid():
+        return render(request, "users/sessions_new.html", {"form": form})
+
+    email = form.cleaned_data.get("email")
+    password = form.cleaned_data.get("password")
     remember_me = "remember_me" in request.POST
 
-    if not email or not password:
-        messages.warning(request, "缺少登入資料")
-        return redirect("users:sessions_new")
+    # if not email or not password:
+    #     messages.warning(request, "缺少登入資料")
+    #     return redirect("users:sessions_new")
 
     user = authenticate(request, username=email, password=password)
     if user:
@@ -120,9 +122,10 @@ def sessions_create(request):
             return redirect(next_url)
         messages.success(request, "登入成功")
         return redirect("pages:homepage")
+
     else:
         messages.error(request, "帳號或密碼錯誤")
-        return redirect("users:sessions_new")
+        return render(request, "users/sessions_new.html", {"form": form})
 
 
 def sessions_delete(request):
@@ -141,19 +144,17 @@ def check_email(request):
     if request.user.is_authenticated:
         user = request.user
 
-        if user.is_verified:
-            messages.info(request, "您的信箱已經驗證過了")
-            return redirect("users:detail")
+    if user.is_verified:
+        messages.info(request, "您的信箱已經驗證過了")
+        return redirect("users:profiles")
 
-        success = send_verification_mail(request, user, user.email)
-        if not success:
-            messages.warning(request, "寄送驗證信失敗，請稍後再試")
-            return redirect("users:detail")
-
+    success = send_verification_mail(request, user, user.email)
+    if not success:
         messages.success(request, "驗證信已發送，請至您的信箱點擊驗證連結")
-        return redirect("users:detail")
+    else:
+        messages.warning(request, "寄送驗證信失敗，請稍後再試")
 
-    return render(request, "users/check_email.html")
+    return redirect("users:profiles")
 
 
 def verify_email(request, uid, token):

@@ -7,27 +7,54 @@
         <img class="w-30 mt-12 mx-auto" src="{% static "asset/buddy_1.svg" %}" alt="">
         <h1 class="text-2xl font-bold mt-5 mb-2 text-center">註冊</h1>
         <h1 class="text-lg font-bold mb-8 text-center">Be Our Buddy!</h1>
-        <form action="{% url 'users:create' %}" method="post" class="space-y-8">
+        <form action="{% url 'users:create' %}" method="post" class="space-y-8" novalidate>
             {% csrf_token %}
             <div class="space-y-2">
-                <div class="relative">
+                <div class="relative h-15">
+                    <svg class="absolute left-0 top-1/2 -translate-y-1/2" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#000000" viewBox="0 0 256 256"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"></path></svg>
+                    <input type="text" 
+                           placeholder="請輸入用戶名" 
+                           name="username" 
+                           class="w-full h-15 pl-8 pr-1 py-2 border-b-[1.2px] border-brand-black focus:outline-none transition-colors"
+                           value="{{form.username.value|default:''}}">
+                    {% if form.username.errors %}
+                        <div class="text-[var(--brand-red)] text-sm ml-8 mt-2">
+                            {{ form.username.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="space-y-2">
+                <div class="relative h-15">
                     <svg class="absolute left-0 top-1/2 -translate-y-1/2" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#221b18" viewBox="0 0 256 256"><path d="M224,48H32a8,8,0,0,0-8,8V192a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A8,8,0,0,0,224,48ZM203.43,64,128,133.15,52.57,64ZM216,192H40V74.19l82.59,75.71a8,8,0,0,0,10.82,0L216,74.19V192Z"></path></svg>
                     <input type="email" 
                            placeholder="請輸入信箱" 
                            name="email" 
-                           class="w-full h-15 pl-8 pr-1 py-2 border-b-[1.2px] border-brand-black focus:outline-none transition-colors">
+                           class="w-full h-15 pl-8 pr-1 py-2 border-b-[1.2px] border-brand-black focus:outline-none transition-colors"
+                           value="{{form.email.value|default:''}}">
+                    {% if form.email.errors %}
+                        <div class="text-[var(--brand-red)] text-sm ml-8 mt-2">
+                            {{ form.email.errors.0 }}
+                        </div>
+                    {% endif %}
                 </div>
             </div>
             <div class="space-y-2">
-                <div class="relative">
+                <div class="relative h-15">
                     <svg class="absolute left-0 top-1/2 -translate-y-1/2" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#221b18" viewBox="0 0 256 256"><path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Z"></path></svg>
                     <input type="password" 
                            placeholder="請輸入密碼" 
                            name="password" 
-                           class="w-full h-15  pl-8 pr-1 py-2 border-b-[1.2px] border-brand-black focus:outline-none transition-colors">
+                           class="w-full h-15  pl-8 pr-1 py-2 border-b-[1.2px] border-brand-black focus:outline-none transition-colors"
+                           value="{{form.password.value|default:''}}">
+                    {% if form.password.errors %}
+                        <div class="text-[var(--brand-red)] text-sm ml-8 mt-2">
+                            {{ form.password.errors.0 }}
+                        </div>
+                    {% endif %}
                 </div>
             </div>
-            <div class="flex justify-center">
+            <div class="flex justify-center mt-12">
                 <button class="text-brand-black px-12 py-3 rounded-full border-[1.2px]  hover:bg-[var(--main-color)] [&:hover]:border-[var(--main-color)] transition-all ease-in-out cursor-pointer">
                 註冊
                 </button>
