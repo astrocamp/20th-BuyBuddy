@@ -8,6 +8,7 @@
 
 :root {
   font-family: "Montserrat";
+  --bg-color: #f8f5ed;
   --main-color: #ebbc46;
   --brand-red: #d85c34;
   --brand-green: #3d7757ff;
@@ -15,7 +16,7 @@
 }
 
 html {
-  background: #f8f5ed;
+  background: var(--bg-color);
   color: var(--brand-black);
 }
 

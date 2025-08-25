@@ -68,11 +68,15 @@ def create(request):
         success = send_verification_mail(request, new_user, new_user.email)
         if success:
             messages.success(
-                request, "註冊成功，驗證信已發送，請至您的信箱點擊驗證連結"
+                request,
+                "驗證信已發送，請至您的信箱點擊驗證連結",
+                extra_tags="verify register",
             )
         else:
             messages.warning(
-                request, "註冊成功，但驗證信寄送失敗，請稍後到個人設定重新寄送"
+                request,
+                "但驗證信發送失敗，請稍後至個人頁面驗證",
+                extra_tags="verify register",
             )
 
         login(request, new_user)
@@ -105,10 +109,6 @@ def sessions_create(request):
     password = form.cleaned_data.get("password")
     remember_me = "remember_me" in request.POST
 
-    # if not email or not password:
-    #     messages.warning(request, "缺少登入資料")
-    #     return redirect("users:sessions_new")
-
     user = authenticate(request, username=email, password=password)
     if user:
         login(request, user)
@@ -139,20 +139,28 @@ def sessions_delete(request):
     return redirect("pages:homepage")
 
 
+@login_required
 def check_email(request):
     # TODO: 個人頁面需要二次驗證
-    if request.user.is_authenticated:
-        user = request.user
+    user = request.user
 
     if user.is_verified:
         messages.info(request, "您的信箱已經驗證過了")
         return redirect("users:profiles")
 
     success = send_verification_mail(request, user, user.email)
-    if not success:
-        messages.success(request, "驗證信已發送，請至您的信箱點擊驗證連結")
+    if success:
+        messages.success(
+            request,
+            "請至您的信箱點擊驗證連結",
+            extra_tags="verify profile",
+        )
     else:
-        messages.warning(request, "寄送驗證信失敗，請稍後再試")
+        messages.warning(
+            request,
+            "請稍後再試",
+            extra_tags="verify profile",
+        )
 
     return redirect("users:profiles")
 
