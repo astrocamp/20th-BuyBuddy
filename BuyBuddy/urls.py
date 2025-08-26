@@ -10,5 +10,6 @@ urlpatterns = [
     path('groups/', include("groups.urls")),
     path('users/', include("users.urls")),
     path('', include("pages.urls")),
+    path('orders/', include("orders.urls")),
     path('admin/', admin.site.urls),
 ]
