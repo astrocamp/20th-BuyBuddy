@@ -6,7 +6,8 @@ app_name = "groups"
 
 urlpatterns = [
     path('', views.index, name="index"),
-
+    # 團購表單
+    path('render_form', views.render_form, name="render_form"),
     # 團購新增
     path('create_group', views.create_group, name="create_group"),
     # 團購列表

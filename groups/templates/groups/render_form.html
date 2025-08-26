@@ -1,0 +1,25 @@
+{% extends 'layouts/default.html'%} 
+{% block content%}
+<div x-data="validators" >
+  <form
+    class="flex flex-col gap-2 items-center mt-5"
+    method="POST"
+    enctype="multipart/form-data"
+    action="{% url 'groups:create_group' %}"
+  >
+    {% csrf_token %}
+    <div class="flex gap-2">
+      <div>
+        {{ group_form.as_div }}
+      </div>
+      <div>
+        {{ product_form.as_div }}
+        {{ productImage_form.as_div }}
+      </div>
+    </div>
+    <button class="bg-blue-500 text-white px-4 py-2 rounded-md" type="submit">
+      新增團購
+    </button>
+  </form>
+</div>
+{% endblock %}
