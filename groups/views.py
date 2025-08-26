@@ -52,17 +52,6 @@ def edit_group(request, id):
     else:
       messages.warning(request, "您無權編輯此團購")
       return redirect('groups:read_group')
-
-
-  group_form = GroupForm(instance=group)
-  exclude_fields = ['deadline', 'min_goal']
-  for field_name, field in group_form.fields.items():
-    if field_name not in exclude_fields:
-      field.widget.attrs.update({
-        'class': 'w-full border-2 border-gray-300 rounded-md p-2 cursor-not-allowed',
-        'readonly': 'readonly',
-      })
-  
   return render(request, 'groups/edit_group.html', {'group_form': group_form, 'group': group})
 
 @login_required
