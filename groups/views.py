@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Group
+from products.models import Product, ProductImage
 from .forms import GroupForm, ProductForm , ProductImageForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -42,30 +43,37 @@ def create_group(request):
 
 @login_required
 def read_group(request):
-  groups = Group.objects.all()
+  owner = request.user
+  groups = Group.objects.filter(owner=owner)
   return render(request, 'groups/read_group.html', {'groups': groups})
 
 @login_required
 def edit_group(request, id):
   group = get_object_or_404(Group, id=id)
-  
+  product = get_object_or_404(Product, group=group)
+  productImage = get_object_or_404(ProductImage, product=product)
+  group_form = GroupForm(instance=group, prefix='group')
+  product_form = ProductForm(instance=product, prefix='product')
+  productImage_form = ProductImageForm(instance=productImage, prefix='product_image')
   if request.method == 'POST':
     if request.user == group.owner:
-      group_form = GroupForm(request.POST, request.FILES, instance=group)
-      if group_form.is_valid():
-        group_form.save()
+      group_form = GroupForm(request.POST, request.FILES, instance=group, prefix='group')
+      product_form = ProductForm(request.POST, instance=product, prefix='product')
+      productImage_form = ProductImageForm(request.POST, request.FILES, instance=productImage, prefix='product_image')
+      if group_form.is_valid() and product_form.is_valid() and productImage_form.is_valid():
+        with transaction.atomic():
+          group = group_form.save()
+          product = product_form.save()
+          productImage = productImage_form.save()
         messages.success(request, "團購已更新")
         return redirect('groups:read_group')
       else:
-        print(group_form.errors)
         messages.warning(request, "欄位填寫有誤，請檢查後再試")
         return redirect('groups:edit_group', id=id)
     else:
       messages.warning(request, "您無權編輯此團購")
       return redirect('groups:read_group')
 
-
-  group_form = GroupForm(instance=group)
   exclude_fields = ['deadline', 'min_goal']
   for field_name, field in group_form.fields.items():
     if field_name not in exclude_fields:
@@ -74,7 +82,7 @@ def edit_group(request, id):
         'readonly': 'readonly',
       })
   
-  return render(request, 'groups/edit_group.html', {'group_form': group_form, 'group': group})
+  return render(request, 'groups/edit_group.html', {'group_form': group_form, 'group': group, 'product_form': product_form, 'productImage_form': productImage_form})
 
 @login_required
 def delete_group(request, id):
