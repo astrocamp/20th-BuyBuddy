@@ -1,33 +1,44 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.core.files.base import ContentFile
-from PIL import Image
-import io, os
 from .models import Group
-from .forms import GroupForm
+from .forms import GroupForm, ProductForm , ProductImageForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db import transaction
 
 def index(request):
   return render(request, "groups/index.html")
 
+def render_form(request):
+  product_form = ProductForm()
+  group_form = GroupForm()
+  productImage_form = ProductImageForm()
+  return render(request, 'groups/render_form.html', {'product_form': product_form, 'group_form': group_form, 'productImage_form': productImage_form})
 
 @login_required
 def create_group(request):
   if request.method == 'POST':
     group_form = GroupForm(request.POST, request.FILES)
-    if group_form.is_valid():
-      data = group_form.save(commit=False)
-      data.owner = request.user
-      data.status = '進行中'
-      group_form.save()
-      messages.success(request, "團購已建立")
-      return redirect('groups:index')
+    product_form = ProductForm(request.POST)
+    productImage_form = ProductImageForm(request.POST, request.FILES)
+    if group_form.is_valid() and product_form.is_valid() and productImage_form.is_valid():
+      with transaction.atomic():
+        group = group_form.save(commit=False)
+        group.owner = request.user
+        group.status = '進行中'
+        group.save()
+        product = product_form.save(commit=False)
+        product.group = group
+        product.save()
+        productImage = productImage_form.save(commit=False)
+        productImage.order = 1
+        productImage.product = product
+        productImage.save()
+        messages.success(request, "團購已建立")
+        return redirect('groups:read_group')
     else:
-      print(group_form.errors)
       messages.warning(request, "欄位填寫有誤，請檢查後再試")
-      return redirect('groups:create_group')
-  group_form = GroupForm()
-  return render(request, 'groups/create_group.html', {'group_form': group_form})
+      return redirect('groups:render_form')
+  return redirect('groups:render_form')
 
 @login_required
 def read_group(request):

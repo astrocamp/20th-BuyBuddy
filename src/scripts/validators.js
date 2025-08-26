@@ -7,7 +7,7 @@ const validators = () => {
       }
     },
     removeZero(){
-      this.min_goal = this.min_goal.replace(/^0+/, '') || '0';
+      this.min_goal = this.min_goal.replace(/^0+/, '') || '1';
     }
   }
 }
