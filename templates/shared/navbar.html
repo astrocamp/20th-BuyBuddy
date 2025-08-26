@@ -13,6 +13,8 @@
             <li><a href="{% url 'products:index' %}" class="relative leading-8 flex items-center px-4 outline-main-color hover:outline hover:outline-[1.5px] hover:outline-offset-8 rounded-full transition-all">商品</a></li>
             <li><a href="{% url 'sales:index' %}" class="relative leading-8 flex items-center px-4 outline-main-color hover:outline hover:outline-[1.5px] hover:outline-offset-8 rounded-full transition-all">銷售頁面</a></li>
             <li><a href="{% url 'status:index' %}" class="relative leading-8 flex items-center px-4 outline-main-color hover:outline hover:outline-[1.5px] hover:outline-offset-8 rounded-full transition-all">團購狀態</a></li>
+            {% comment %} LINE Pay 測試 {% endcomment %}
+            <li><a href="{% url 'orders:checkout' %}" class="relative leading-8 flex items-center px-4 outline-main-color hover:outline hover:outline-[1.5px] hover:outline-offset-8 rounded-full transition-all">LINE Pay 測試</a></li>
             
         </ul>
     
