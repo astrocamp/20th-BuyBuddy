@@ -40,12 +40,12 @@ def ended_list(request):
         is_successful = False
         if (
             product.group.goal_choice == "quantity"
-            and total_quantity >= product.group.min_quantity
+            and total_quantity >= product.group.min_goal
         ):
             is_successful = True
         elif (
             product.group.goal_choice == "amount"
-            and total_amount >= product.group.min_amount
+            and total_amount >= product.group.min_goal
         ):
             is_successful = True
 
