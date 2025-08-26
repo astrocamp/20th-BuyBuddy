@@ -1,40 +1,42 @@
 {% extends 'layouts/default.html' %}
 
 {% block content %}
-<h1>我的團購</h1>
+<h1>團購商品</h1>
 
-<h2>我創建的團購</h2>
-{% for group in my_groups %}
-<div style="border:1px solid #ddd; padding:15px; margin:10px 0; background:#f9f9f9;">
-    <h3>{{ group.name }}</h3>
-    <p>狀態：{{ group.status }} | 創建時間：{{ group.created_at|date:"Y-m-d" }}</p>
-    <p>目標數量：{{ group.min_goal }} | 截止：{{ group.deadline|date:"Y-m-d" }}</p>
-    {% if group.description %}
-    <p>描述：{{ group.description }}</p>
-    {% endif %}
+<div style="margin-bottom: 30px;">
+    <h2>我的 Sales 商品</h2>
+    {% for sales in my_sales_list %}
+    <div style="border:1px solid #ccc; padding:15px; margin:10px 0; background:#f8f9fa;">
+        <h3>{{ sales.name }}</h3>
+        <p>進度：{{ sales.current_progress }}/{{ sales.target_condition }}
+            ({{ sales.progress_percentage|floatformat:0 }}%)</p>
+        <p>狀態：{{ sales.target_status }} | 截止：{{ sales.deadline|date:"Y-m-d" }}</p>
+        <p>單價：${{ sales.price_per_unit }}</p>
+        {% if sales.image %}
+        <img src="{{ sales.image }}" alt="{{ sales.name }}" style="max-width:100px;">
+        {% endif %}
+    </div>
+    {% empty %}
+    <p>您還沒有 Sales 項目</p>
+    {% endfor %}
 </div>
-{% empty %}
-<p>您還沒有創建任何團購</p>
-{% endfor %}
 
-<hr>
-
-<h2>我的商品</h2>
-{% for sales in my_sales_list %}
-<div style="border:1px solid #ccc; padding:15px; margin:10px 0;">
-    <h3>{{ sales.name }}</h3>
-    <p>進度：{{ sales.current_progress }}/{{ sales.target_condition }}
-        ({{ sales.progress_percentage|floatformat:0 }}%)</p>
-    <p>狀態：{{ sales.target_status }} | 截止：{{ sales.deadline|date:"Y-m-d" }}</p>
-    <p>單價：${{ sales.price_per_unit }}</p>
-    {% if sales.image %}
-    <img src="{{ sales.image }}" alt="{{ sales.name }}" style="max-width:100px;">
-    {% endif %}
+<div style="margin-bottom: 30px;">
+    <h2>我的團購</h2>
+    {% for group in my_groups %}
+    <div style="border:1px solid #2196f3; padding:15px; margin:10px 0; background:#e3f2fd;">
+        <h3>{{ group.name }}</h3>
+        <p>狀態：{{ group.status }} | 創建：{{ group.created_at|date:"Y-m-d" }}</p>
+        <p>目標：{{ group.min_goal }} | 截止：{{ group.deadline|date:"Y-m-d" }}</p>
+        {% if group.description %}
+        <p>描述：{{ group.description }}</p>
+        {% endif %}
+        {% if group.banner %}
+        <img src="{{ group.banner.url }}" alt="{{ group.name }}" style="max-width:100px;">
+        {% endif %}
+    </div>
+    {% empty %}
+    <p>您還沒有創建任何團購喔！</p>
+    {% endfor %}
 </div>
-{% empty %}
-<p>您還沒有銷售項目</p>
-{% endfor %}
-
-<p><a href="{% url 'sales:purchases' %}">我的購買紀錄</a></p>
-<p><a href="{% url 'sales:index' %}">回首頁</a></p>
 {% endblock %}

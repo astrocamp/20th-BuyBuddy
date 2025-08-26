@@ -1,5 +1,22 @@
-{% extends 'layouts/default.html'%}
+{% extends 'layouts/default.html' %}
 
-{% block content%}
-<h1>sales</h1>
+{% block content %}
+<h1>銷售首頁</h1>
+
+<div style="display: flex; gap: 15px; margin-bottom: 20px; background: #f8f9fa; padding: 15px;">
+    <div>📦 商品: {{ total_sales }}</div>
+</div>
+
+<div style="margin-bottom: 30px;">
+    {% for sales in sales_list %}
+    <div style="border:1px solid #ccc; padding:10px; margin:5px 0; background:#f8f9fa;">
+        <h3>{{ sales.name }}</h3>
+        <p>擁有者: {{ sales.owner.username }} | 價格: ${{ sales.price_per_unit }}</p>
+        <p>進度: {{ sales.current_progress }}/{{ sales.target_condition }} ({{ sales.progress_percentage|floatformat:0 }}%)</p>
+        <p>狀態: {{ sales.target_status }} | 截止: {{ sales.deadline|date:"Y-m-d" }}</p>
+    </div>
+    {% empty %}
+    <p>沒有 Sales 商品</p>
+    {% endfor %}
+</div>
 {% endblock %}
