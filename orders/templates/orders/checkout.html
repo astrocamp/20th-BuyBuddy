@@ -1,0 +1,8 @@
+{% extends "layouts/default.html"%}
+{% block content %}
+<h1>這是付款頁面</h1>
+<form action="{% url 'orders:request' %}" method="post">
+    {% csrf_token %}
+    <button>去付款</button>
+</form>
+{% endblock %}
