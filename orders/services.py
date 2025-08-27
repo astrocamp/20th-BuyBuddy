@@ -1,11 +1,13 @@
 from .models import Order
 from groups.models import JoinedGroup
+from django.db import transaction
 
 
 def create_orders(group):
     # 檢查團購是否已經有訂單
     exist_orders = Order.objects.filter(group=group)
     if exist_orders.exists():
+        # DEVLOG
         print(f"該團購已經有{exist_orders.count()}筆訂單")
         return exist_orders
 
@@ -35,6 +37,7 @@ def create_orders(group):
             quantity = joined_group_product.quantity
             subtotal += price * quantity
 
+            # DEVLOG
             print(f"{name} X {quantity}個 = {quantity*price}元")
 
         order = Order(
@@ -43,9 +46,12 @@ def create_orders(group):
 
         orders.append(order)
 
-    try:
-        Order.objects.bulk_create(orders)
-        print(f"建立訂單成功，建立了{len(orders)}筆訂單")
-    except Exception as e:
-        print(e)
-        print("建立訂單失敗")
+        try:
+            with transaction.atomic():
+                Order.objects.bulk_create(orders)
+                # DEVLOG
+                print(f"建立訂單成功，建立了{len(orders)}筆訂單")
+        except Exception as e:
+            # DEVLOG
+            print(e)
+            print("建立訂單失敗")

@@ -13,7 +13,7 @@ class PaymentStatus(models.TextChoices):
 
 
 class Order(models.Model):
-    order_number = models.CharField(max_length=50, unique=True, null=True, blank=True)
+    number = models.CharField(max_length=50, unique=True, null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     group = models.ForeignKey(Group, on_delete=models.PROTECT)
     joined_group = models.OneToOneField(JoinedGroup, on_delete=models.PROTECT)
@@ -39,11 +39,11 @@ class Order(models.Model):
     )
 
     def __str__(self):
-        return self.order_number or f"訂單 #{self.id} 尚未生成編號"
+        return self.number or f"訂單 #{self.id} 尚未生成編號"
 
     def generate_order_number(self):
         # 生成新的訂單號並儲存
         # 格式：日期 + UUID前8碼
         today = timezone.now().strftime('%Y%m%d')
-        self.order_number = f"{today}{uuid.uuid4().hex[:8].upper()}"
+        self.number = f"{today}{uuid.uuid4().hex[:8].upper()}"
         self.save()
