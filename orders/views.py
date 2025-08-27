@@ -8,6 +8,9 @@ import hmac
 import hashlib
 import base64
 import requests
+from groups.models import Group
+from .services import create_orders
+from django.http import HttpResponse
 
 
 def checkout(request):
@@ -133,3 +136,10 @@ def confirm(request):
 
 def cancel(request):
     return render(request, "orders/payment_cancel.html")
+
+
+# test
+def test(request):
+    group = Group.objects.get(pk=304)
+    create_orders(group)
+    return HttpResponse("呼叫建立訂單函數")
