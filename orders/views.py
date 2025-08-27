@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.conf import settings
@@ -9,10 +9,13 @@ import hashlib
 import base64
 import requests
 from groups.models import Group
+from .models import Order, PaymentStatus
 from .services import create_orders
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 
 
+@login_required
 def checkout(request):
     return render(request, "orders/checkout.html")
 
@@ -41,20 +44,36 @@ def create_headers(body, uri):
 
 
 @require_POST
-def request(request):
-    order_id = f"order_{str(uuid.uuid4())}"
-    package_id = f"package_{str(uuid.uuid4())}"
+@login_required
+def request(request, group_id):
+    user = request.user
+
+    # TODO 傳進來的會改成整個 group 物件 or oder 物件
+    group = get_object_or_404(Group, pk=group_id)
+    order = get_object_or_404(Order, group=group, user=user)
+    if order.payment_status == PaymentStatus.PAID:
+        messages.warning(request, "訂單已付款，請至訂單紀錄查看")
+        # TODO 需改成訂單紀錄頁面
+        return redirect("pages:homepage")
+
+    order.generate_order_number()
+    order.save()
+    package_id = f"pkg_{order.number}_{str(uuid.uuid4())[:8]}"
 
     payload = {
-        "amount": 100,
-        "currency": "TWD",
-        "orderId": order_id,
+        "amount": int(order.amount),
+        "currency": order.currency,
+        "orderId": order.number,
         "packages": [
             {
                 "id": package_id,
-                "amount": 100,
+                "amount": int(order.amount),
                 "products": [
-                    {"id": 1, "name": "測試商品", "quantity": 1, "price": 100}
+                    {
+                        "name": f"{order.group.name} - 訂單",
+                        "quantity": 1,
+                        "price": int(order.amount),
+                    }
                 ],
             }
         ],
@@ -76,7 +95,12 @@ def request(request):
             data = response.json()
             if data["returnCode"] == "0000":
                 return redirect(data["info"]["paymentUrl"]["web"])
+
             else:
+                # DEVLOG: 印出錯誤
+                error_code = data.get("returnCode")
+                error_msg = data.get("returnMessage", "未知錯誤")
+                print(f"❌ LINE Pay Error: {error_code} - {error_msg}")
                 messages.error(request, "付款發生錯誤，請稍後再試")
                 return render(request, "orders/checkout.html")
         else:
@@ -102,9 +126,11 @@ def confirm(request):
         messages.error(request, "付款發生錯誤，缺少必要付款資訊")
         return render(request, "orders/payment_fail.html")
 
+    order = get_object_or_404(Order, number=order_id)
+
     payload = {
-        "amount": 100,
-        "currency": "TWD",
+        "amount": int(order.amount),
+        "currency": order.currency,
     }
 
     signature_uri = f"/v3/payments/{transaction_id}/confirm"
@@ -117,6 +143,8 @@ def confirm(request):
         if response.status_code == 200:
             data = response.json()
             if data["returnCode"] == "0000":
+                order.payment_status = PaymentStatus.PAID
+                order.save()
                 return render(request, "orders/payment_success.html")
             else:
                 messages.error(request, "付款發生錯誤，請稍後再試")
@@ -138,8 +166,10 @@ def cancel(request):
     return render(request, "orders/payment_cancel.html")
 
 
-# test
+# DEVLOG test
+@require_POST
 def test(request):
-    group = Group.objects.get(pk=304)
+    # DEVLOG 這邊是先寫死是 304 號團購
+    group = get_object_or_404(Group, pk=304)
     create_orders(group)
     return HttpResponse("呼叫建立訂單函數")
