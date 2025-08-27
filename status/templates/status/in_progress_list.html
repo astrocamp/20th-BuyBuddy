@@ -1,4 +1,6 @@
-{% extends 'layouts/default.html'%} {% block content%}
+{% extends 'layouts/default.html'%} 
+{% load static %}
+{% block content%}
 <div class="mx-auto p-4">
   <h1 class="text-3xl font-bold mb-6">團購進行中</h1>
   <div class="grid grid-cols-3 gap-6">
@@ -28,7 +30,7 @@
             <div
               class="mb-3"
               x-data="countdown('{{ product.group.deadline|date:"c" }}')"
-              x-init="init()"
+              x-init="init(); console.log('Deadline ISO String:', '{{ product.group.deadline|date:"c" }}');"
             >
               <h3 class="text-xs font-semibold text-gray-500">截止倒數</h3>
               <div class="text-lg font-mono text-red-600">
@@ -62,43 +64,6 @@
   </div>
 </div>
 
-<script>
-  document.addEventListener("alpine:init", () => {
-    Alpine.data("countdown", (deadlineISOString) => ({
-      deadline: new Date(deadlineISOString).getTime(),
-      days: "00",
-      hours: "00",
-      minutes: "00",
-      seconds: "00",
-      init() {
-        const timer = setInterval(() => {
-          const now = new Date().getTime();
-          const distance = this.deadline - now;
-
-          if (distance < 0) {
-            clearInterval(timer);
-            this.days = "00";
-            this.hours = "00";
-            this.minutes = "00";
-            this.seconds = "00";
-            return;
-          }
-          this.days = String(
-            Math.floor(distance / (1000 * 60 * 60 * 24))
-          ).padStart(2, "0");
-          this.hours = String(
-            Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-          ).padStart(2, "0");
-          this.minutes = String(
-            Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))
-          ).padStart(2, "0");
-          this.seconds = String(
-            Math.floor((distance % (1000 * 60)) / 1000)
-          ).padStart(2, "0");
-        }, 1000);
-      },
-    }));
-  });
-</script>
+<script src="{% static 'scripts/countdown.js' %}"></script>
 
 {% endblock %}
