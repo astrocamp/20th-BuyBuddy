@@ -8,16 +8,9 @@ import hmac
 import hashlib
 import base64
 import requests
-from groups.models import Group
 from .models import Order, Payment
-from .services import create_orders
+from groups.models import JoinedGroup
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
-
-
-@login_required
-def checkout(request):
-    return render(request, "orders/checkout.html")
 
 
 def create_headers(body, uri):
@@ -55,8 +48,7 @@ def request(request, order_id):
 
     if not order.is_pending():
         messages.warning(request, "訂單已付款，請至訂單紀錄查看")
-        # TODO 需改成訂單紀錄頁面
-        return redirect("pages:homepage")
+        return redirect("orders:paid")
 
     payment = Payment.objects.create(order=order)
 
@@ -103,25 +95,27 @@ def request(request, order_id):
                 error_code = data.get("returnCode")
                 error_msg = data.get("returnMessage", "未知錯誤")
                 print(f"❌ LINE Pay Error: {error_code} - {error_msg}")
+
+                order.mark_payment_failed()
                 messages.error(request, "付款發生錯誤，請稍後再試")
                 # TODO 改成導向訂單頁面
-                return redirect("orders:checkout")
+                return redirect("orders:pending")
         else:
+            order.mark_payment_failed()
             messages.error(request, "系統發生錯誤，請稍後再試")
-            # TODO 改成導向訂單頁面
-            return redirect("orders:checkout")
+            return redirect("orders:pending")
 
     except requests.RequestException:
         # 處理所有網路相關錯誤（連線、超時等）
+        order.mark_payment_failed()
         messages.error(request, "網路連線錯誤，請稍後再試")
-        # TODO 改成導向訂單頁面
-        return redirect("orders:checkout")
+        return redirect("orders:pending")
 
     except Exception:
         # 處理其他所有錯誤
+        order.mark_payment_failed()
         messages.error(request, "取得付款資訊失敗，請稍後再試")
-        # TODO 改成導向訂單頁面
-        return redirect("orders:checkout")
+        return redirect("orders:pending")
 
 
 def confirm(request):
@@ -141,13 +135,13 @@ def confirm(request):
     if not order.is_pending():
         messages.info(request, "此訂單已經付款完成")
         # TODO 改成導向訂單頁面
-        return redirect("orders:payment_success")
+        return redirect("orders:processing")
 
     # 檢查 payment 是否已經是 paid 狀態
     if payment.is_paid():
         messages.info(request, "此付款已經完成")
         # TODO 改成導向訂單頁面
-        return redirect("orders:payment_success")
+        return redirect("orders:processing")
 
     payload = {
         "amount": int(order.amount),
@@ -169,7 +163,7 @@ def confirm(request):
                 order.mark_as_processing()
                 order.save()
                 messages.success(request, "付款成功，請至訂單頁面查看")
-                return redirect("orders:payment_success")
+                return redirect("orders:processing")
 
             else:
                 payment.mark_as_failed()
@@ -178,8 +172,7 @@ def confirm(request):
                 return redirect("orders:payment_fail")
 
         else:
-            payment.mark_as_failed()
-            payment.save()
+            order.mark_payment_failed()
             messages.error(request, "系統發生錯誤，請稍後再試")
             return redirect("orders:payment_fail")
 
@@ -208,10 +201,99 @@ def fail(request):
     return render(request, "orders/payment_fail.html")
 
 
-# DEVLOG test
+@login_required
+def my_orders(request):
+    user = request.user
+    tab = request.GET.get("tab", "all")
+    auto_tab = request.GET.get("auto_tab")
+
+    # 如果有 auto_tab，就用 auto_tab 作為初始內容
+    display_tab = auto_tab if auto_tab else tab
+
+    orders, joined_groups = get_orders_by_tab(user, display_tab)
+
+    return render(
+        request,
+        "orders/my_orders/my_orders_section.html",
+        {
+            "orders": orders,
+            "joined_groups": joined_groups,
+            "current_tab": display_tab,
+            "auto_tab": auto_tab,
+        },
+    )
+
+
+@login_required
+def my_orders_tab_content(request):
+    print("123")
+    user = request.user
+    tab = request.GET.get("tab", "all")
+
+    orders, joined_groups = get_orders_by_tab(user, tab)
+
+    return render(
+        request,
+        "orders/my_orders/my_orders_list.html",
+        {"orders": orders, "joined_groups": joined_groups},
+    )
+
+
+def get_orders_by_tab(user, tab):
+    orders = []
+    joined_groups = []
+
+    # 找出所有訂單
+    base_orders_query = (
+        Order.objects.filter(user=user)
+        .order_by("-updated_at")
+        .select_related("group", "joined_group")
+        .prefetch_related("joined_group__joined_group_products__product")
+    )
+
+    # 找出所有跟團紀錄
+    base_joined_groups = (
+        JoinedGroup.objects.filter(buyer=user, group__status="ongoing", deleted_at=None)
+        .order_by("-updated_at")
+        .select_related("group")
+        .prefetch_related("joined_group_products__product")
+    )
+
+    if tab == "all":
+        orders = base_orders_query.all()
+        joined_groups = base_joined_groups.all()
+
+    elif tab == "ongoing":
+        joined_groups = base_joined_groups.all()
+
+    elif tab == "pending":
+        orders = base_orders_query.filter(order_status=Order.OrderStatus.PENDING)
+
+    elif tab == "processing":
+        orders = base_orders_query.filter(order_status=Order.OrderStatus.PROCESSING)
+
+    elif tab == "shipped":
+        orders = base_orders_query.filter(order_status=Order.OrderStatus.SHIPPED)
+
+    elif tab == "completed":
+        orders = base_orders_query.filter(order_status=Order.OrderStatus.COMPLETED)
+
+    return orders, joined_groups
+
+
+# 確認收貨
+@login_required
 @require_POST
-def test(request):
-    # DEVLOG 這邊是先寫死是 304 號團購
-    group = get_object_or_404(Group, pk=304)
-    create_orders(group)
-    return HttpResponse("呼叫建立訂單函數")
+def received(request, order_id):
+    user = request.user
+    order = get_object_or_404(Order, user=user, pk=order_id)
+
+    if not order.is_shipped():
+        messages.error(request, "此訂單無法確認收貨")
+        return redirect("/orders/my-orders/?auto_tab=shipped")
+
+    order.mark_as_completed()
+    order.save()
+
+    messages.success(request, "訂單已確認收貨")
+    return redirect("/orders/my-orders/?auto_tab=completed")
