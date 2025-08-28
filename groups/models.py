@@ -1,9 +1,12 @@
 from django.db import models
 from users.models import User
 
+
 class Group(models.Model):
     name = models.CharField(max_length=100)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="owned_groups")
+    owner = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="owned_groups"
+    )
     min_goal = models.IntegerField()
     goal_choice = models.CharField(max_length=10)
     deadline = models.DateTimeField(null=True)
@@ -19,3 +22,4 @@ class JoinedGroup(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     deleted_at = models.DateTimeField(null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
