@@ -16,9 +16,9 @@ def index(request):
         
         context.update({
             'my_groups': my_groups,
-            'total_sales_amount': JoinedGroup.objects.filter(group__owner=request.user).aggregate(Sum('total_amount'))['total_amount__sum'] or 0,
+            # 'total_sales_amount': JoinedGroup.objects.filter(group__owner=request.user).aggregate(Sum('total_amount'))['total_amount__sum'] or 0,
             'purchases': purchases,
-            'total_purchase_amount': purchases.aggregate(Sum('total_amount'))['total_amount__sum'] or 0,
+            # 'total_purchase_amount': purchases.aggregate(Sum('total_amount'))['total_amount__sum'] or 0,
         })
     
     return render(request, "sales/index.html", context)
