@@ -56,12 +56,14 @@ class Order(models.Model):
     )
     def mark_as_processing(self):
         """標記為待出貨"""
+        self.paid_at = timezone.now()
         pass
 
     @transition(
         field=order_status, source=OrderStatus.PROCESSING, target=OrderStatus.SHIPPED
     )
     def mark_as_shipped(self):
+        self.shipped_at = timezone.now()
         """標記為已出貨"""
         pass
 
@@ -69,6 +71,7 @@ class Order(models.Model):
         field=order_status, source=OrderStatus.SHIPPED, target=OrderStatus.COMPLETED
     )
     def mark_as_completed(self):
+        self.completed_at = timezone.now()
         """標記為已完成"""
         pass
 
@@ -90,14 +93,18 @@ class Order(models.Model):
 
     def generate_order_number(self):
         # 生成新的訂單號，不儲存，交由呼叫端儲存
-        # 格式：日期(年月日) + UUID前8碼
+        # 格式：日期(年月日時分秒) + UUID前8碼
         today = timezone.now().strftime("%Y%m%d%H%M%S")
-        self.order_number = f"{today}{uuid.uuid4().hex[:8].upper()}"
+        self.number = f"{today}{uuid.uuid4().hex[:8].upper()}"
 
     def save(self, *args, **kwargs):
         if not self.pk or not self.order_number:
             self.generate_order_number()
         super().save(*args, **kwargs)
+
+    @property
+    def formatted_amount(self):
+        return f"{self.amount:,.0f}"
 
     def __str__(self):
         return self.order_number
@@ -149,7 +156,7 @@ class Payment(models.Model):
 
     def generate_payment_number(self):
         # 生成新的付款號，不儲存，交由呼叫端儲存
-        # 格式：日期 + UUID前8碼
+        # 格式：日期(年月日時分秒) + UUID前8碼
         today = timezone.now().strftime("%Y%m%d%H%M%S")
         self.payment_number = f"{today}{uuid.uuid4().hex[:8].upper()}"
 
