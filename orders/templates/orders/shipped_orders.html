@@ -1,0 +1,41 @@
+{% extends "layouts/default.html"%}
+{% block content %}
+
+{% include "orders/shared/my_orders_navbar.html" %}
+
+{% if orders %}
+    <ul class="flex flex-col gap-4">
+    {% for order in orders %}
+    {% comment %} {{order.user.username}} {% endcomment %}
+        <li class="flex gap-4">
+            <span>{{order.number}}</span>
+            <p>{{order.group.name}}</p>
+            <div>
+                    {% for jgp in order.joined_group.joined_group_products.all %}
+                    <div class="flex flex-col">
+                        <div class="flex gap-10">
+                            <span>{{jgp.product.name}} ${{jgp.product.price}} x{{jgp.quantity}}</span>
+                            <span>{{jgp.subtotal}}</span>
+                        </div>
+                    
+                    </div>
+                    {% endfor %}
+            </div>
+            <span>總價 {{order.formatted_amount}}</span>
+            <div class="flex gap-4">
+                <span>
+                    {{order.get_order_status_display}}
+                </span>
+                <form action="{% url 'orders:received' order.id %}" method="post">
+                    {% csrf_token %}
+                    <button class="border-b-2 cursor-pointer">我收到貨了</button>
+                </form>
+            </div>  
+        </li>
+        <hr/>
+    {% endfor %}
+    </ul>
+{% else %}
+<p>尚無已出貨的訂單</p>
+{% endif %}
+{% endblock %}

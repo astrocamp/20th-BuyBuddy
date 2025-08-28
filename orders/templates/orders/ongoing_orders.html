@@ -1,0 +1,32 @@
+{% extends "layouts/default.html"%}
+{% block content %}
+
+{% include "orders/shared/my_orders_navbar.html" %}
+
+{% if joined_groups %}
+<ul class="flex flex-col gap-4">
+    {% for jg in joined_groups %}
+        <li class="flex gap-4">
+            <p>尚未成團</p>
+            <p>{{jg.group.name}}</p>
+            <ul>
+                {% for jgp in jg.joined_group_products.all %}
+                <li class="flex gap-8">
+                    <p>{{jgp.product.name}}</p>
+                    <p>{{jgp.product.formatted_price}} x {{jgp.quantity}}</p>
+                    <p>{{jgp.subtotal}}</p>
+                    <span>總價 {{jgp.subtotal}}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            
+            {% comment %} # TODO 通往團購商品頁 {% endcomment %}
+            <a href="#" class="underline">修改跟團</a>
+        </li>
+        <hr/>
+    {% endfor %}
+</ul>
+{% else %}
+<p>尚無未成團的訂單</p>
+{% endif %}
+{% endblock %}

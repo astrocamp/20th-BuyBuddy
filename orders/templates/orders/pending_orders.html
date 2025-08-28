@@ -1,0 +1,41 @@
+{% extends "layouts/default.html"%}
+{% block content %}
+
+{% include "orders/shared/my_orders_navbar.html" %}
+
+{% if orders %}
+    <ul class="flex flex-col gap-4">
+    {% for order in orders %}
+        <li class="flex gap-4">
+            <span>尚未付款</span>
+            <p>{{order.group.name}}</p>
+            <div>
+                    {% for jgp in order.joined_group.joined_group_products.all %}
+                    <div class="flex flex-col">
+                        <div class="flex gap-10">
+                            <span>{{jgp.product.name}} ${{jgp.product.price}} x{{jgp.quantity}}</span>
+                            <span>{{jgp.subtotal}}</span>
+                        </div>
+                    
+                    </div>
+                    {% endfor %}
+            </div>
+            <span>總價 {{order.formatted_amount}}</span>
+            <div>
+                {% if order.payment_status == order.PaymentStatus.PAID %}
+                <span>待出貨</span>
+                {% else %}
+                <form action="{% url 'orders:request' order.id %}" method="post">
+                    {% csrf_token %}
+                    <button class="border-b-2 cursor-pointer">去付款</button>
+                </form>
+                {% endif %}
+            </div>  
+        </li>
+        <hr/>
+    {% endfor %}
+    </ul>
+{% else %}
+<p>尚無未付款的訂單</p>
+{% endif %}
+{% endblock %}

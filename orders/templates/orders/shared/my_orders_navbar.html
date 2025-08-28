@@ -1,0 +1,9 @@
+{% include "orders/shared/navbar.html" %}
+<ul class="flex gap-6">
+    <a href="{% url 'orders:my_orders' %}" class="border-b-2">全部訂單</a>
+    <a href="{% url 'orders:ongoing' %}" class="border-b-2">未成團訂單</a>
+    <a href="{% url 'orders:pending' %}" class="border-b-2">未付款訂單</a>
+    <a href="{% url 'orders:paid' %}" class="border-b-2">待出貨訂單</a>
+    <a href="{% url 'orders:shipped' %}" class="border-b-2">已出貨訂單</a>
+    <a href="{% url 'orders:completed' %}" class="border-b-2">已完成訂單</a>
+</ul>

@@ -8,16 +8,9 @@ import hmac
 import hashlib
 import base64
 import requests
-from groups.models import Group
-from .models import Order, PaymentStatus
-from .services import create_orders
+from groups.models import Group, JoinedGroup
+from .models import Order
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
-
-
-@login_required
-def checkout(request):
-    return render(request, "orders/checkout.html")
 
 
 def create_headers(body, uri):
@@ -45,19 +38,16 @@ def create_headers(body, uri):
 
 @require_POST
 @login_required
-def request(request, group_id):
+def request(request, order_id):
     user = request.user
 
-    # TODO 傳進來的會改成整個 group 物件 or oder 物件
-    group = get_object_or_404(Group, pk=group_id)
-    order = get_object_or_404(Order, group=group, user=user)
-    if order.payment_status == PaymentStatus.PAID:
+    order = get_object_or_404(Order, user=user, pk=order_id)
+
+    if order.payment_status == order.PaymentStatus.PAID:
         messages.warning(request, "訂單已付款，請至訂單紀錄查看")
-        # TODO 需改成訂單紀錄頁面
-        return redirect("pages:homepage")
+        return redirect("orders:paid")
 
     order.generate_order_number()
-    order.save()
     package_id = f"pkg_{order.number}_{str(uuid.uuid4())[:8]}"
 
     payload = {
@@ -101,19 +91,24 @@ def request(request, group_id):
                 error_code = data.get("returnCode")
                 error_msg = data.get("returnMessage", "未知錯誤")
                 print(f"❌ LINE Pay Error: {error_code} - {error_msg}")
+
+                order.mark_payment_failed()
                 messages.error(request, "付款發生錯誤，請稍後再試")
                 return render(request, "orders/checkout.html")
         else:
+            order.mark_payment_failed()
             messages.error(request, "系統發生錯誤，請稍後再試")
             return render(request, "orders/checkout.html")
 
     except requests.RequestException:
         # 處理所有網路相關錯誤（連線、超時等）
+        order.mark_payment_failed()
         messages.error(request, "網路連線錯誤，請稍後再試")
         return render(request, "orders/checkout.html")
 
     except Exception:
         # 處理其他所有錯誤
+        order.mark_payment_failed()
         messages.error(request, "取得付款資訊失敗，請稍後再試")
         return render(request, "orders/checkout.html")
 
@@ -143,21 +138,27 @@ def confirm(request):
         if response.status_code == 200:
             data = response.json()
             if data["returnCode"] == "0000":
-                order.payment_status = PaymentStatus.PAID
-                order.save()
-                return render(request, "orders/payment_success.html")
+                if order.mark_as_paid():
+                    return render(request, "orders/payment_success.html")
+                else:
+                    messages.error(request, "訂單狀態異常，可能重複付款")
+                    return render(request, "orders/payment_fail.html")
             else:
+                order.mark_payment_failed()
                 messages.error(request, "付款發生錯誤，請稍後再試")
                 return render(request, "orders/payment_fail.html")
         else:
+            order.mark_payment_failed()
             messages.error(request, "系統發生錯誤，請稍後再試")
             return render(request, "orders/payment_fail.html")
 
     except requests.RequestException:
+        order.mark_payment_failed()
         messages.error(request, "網路連線錯誤，請稍後再試")
         return render(request, "orders/payment_fail.html")
 
     except Exception:
+        order.mark_payment_failed()
         messages.error(request, "付款確認失敗，請稍後再試")
         return render(request, "orders/payment_fail.html")
 
@@ -166,10 +167,161 @@ def cancel(request):
     return render(request, "orders/payment_cancel.html")
 
 
-# DEVLOG test
+# 全部跟團訂單
+@login_required
+def my_orders(request):
+    # 找出使用者
+    user = request.user
+
+    # 找出所有跟團紀錄
+    joined_groups = (
+        JoinedGroup.objects.filter(buyer=user, group__status="ongoing")
+        .select_related("group")
+        .order_by("-updated_at")
+        .prefetch_related("joined_group_products__product")
+    )
+
+    # 找出所有訂單
+    orders = (
+        Order.objects.filter(user=user)
+        .order_by("-created_at")
+        .select_related("group", "joined_group")
+        .prefetch_related("joined_group__joined_group_products__product")
+    )
+
+    return render(
+        request,
+        "orders/my_orders.html",
+        {"orders": orders, "joined_groups": joined_groups},
+    )
+
+
+# 未成團
+@login_required
+def ongoing(request):
+    # 找出使用者
+    user = request.user
+
+    # 找出所有跟團且未成團紀錄
+    joined_groups = (
+        JoinedGroup.objects.filter(buyer=user, group__status="ongoing")
+        .select_related("group")
+        .order_by("-updated_at")
+        .prefetch_related("joined_group_products__product")
+    )
+
+    return render(
+        request,
+        "orders/ongoing_orders.html",
+        {"joined_groups": joined_groups},
+    )
+
+
+# 待付款
+@login_required
+def pending(request):
+    # 找出使用者
+    user = request.user
+    # 找出待付款訂單
+    orders = (
+        Order.objects.filter(user=user, payment_status=Order.PaymentStatus.PENDING)
+        .order_by("-created_at")
+        .select_related("group", "joined_group")
+        .prefetch_related("joined_group__joined_group_products__product")
+    )
+
+    return render(
+        request,
+        "orders/pending_orders.html",
+        {"orders": orders},
+    )
+
+
+# 已付款待出貨
+@login_required
+def paid(request):
+    # 找出使用者
+    user = request.user
+    # 找出所有訂單
+    orders = (
+        Order.objects.filter(
+            user=user,
+            payment_status=Order.PaymentStatus.PAID,
+            order_status=Order.OrderStatus.PROCESSING,
+        )
+        .order_by("-created_at")
+        .select_related("group", "joined_group")
+        .prefetch_related("joined_group__joined_group_products__product")
+    )
+
+    return render(
+        request,
+        "orders/paid_orders.html",
+        {"orders": orders},
+    )
+
+
+# 已出貨
+@login_required
+def shipped(request):
+    # 找出使用者
+    user = request.user
+    # 找出所有訂單
+    orders = (
+        Order.objects.filter(
+            user=user,
+            payment_status=Order.PaymentStatus.PAID,
+            order_status=Order.OrderStatus.SHIPPED,
+        )
+        .order_by("-created_at")
+        .select_related("group", "joined_group")
+        .prefetch_related("joined_group__joined_group_products__product")
+    )
+
+    return render(
+        request,
+        "orders/shipped_orders.html",
+        {"orders": orders},
+    )
+
+
+# 已完成
+@login_required
+def completed(request):
+    # 找出使用者
+    user = request.user
+    # 找出所有訂單
+    orders = (
+        Order.objects.filter(
+            user=user,
+            payment_status=Order.PaymentStatus.PAID,
+            order_status=Order.OrderStatus.COMPLETED,
+        )
+        .order_by("-created_at")
+        .select_related("group", "joined_group")
+        .prefetch_related("joined_group__joined_group_products__product")
+    )
+
+    return render(
+        request,
+        "orders/completed_orders.html",
+        {"orders": orders},
+    )
+
+
+# 確認收貨
+@login_required
 @require_POST
-def test(request):
-    # DEVLOG 這邊是先寫死是 304 號團購
-    group = get_object_or_404(Group, pk=304)
-    create_orders(group)
-    return HttpResponse("呼叫建立訂單函數")
+def received(request, order_id):
+    # 找出使用者
+    user = request.user
+
+    # 找出訂單
+    order = get_object_or_404(Order, user=user, pk=order_id)
+
+    if order.mark_as_completed():
+        messages.success(request, "訂單已確認收貨")
+    else:
+        messages.error(request, "無法確認收貨，訂單狀態不正確")
+
+    return redirect("orders:completed")

@@ -23,7 +23,7 @@ class Order(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class PaymentStatus(models.TextChoices):
-        PENDING = "pending", "待處理"
+        PENDING = "pending", "待付款"
         PAID = "paid", "已付款"
         FAILED = "failed", "付款失敗"
 
@@ -48,6 +48,7 @@ class Order(models.Model):
         null=True,
         blank=True,
         default=None,
+        help_text="付款完成後才會有訂單狀態",
     )
 
     shipped_at = models.DateTimeField(null=True, blank=True)
@@ -56,11 +57,50 @@ class Order(models.Model):
     def __str__(self):
         return self.number or f"訂單 #{self.id} 尚未生成編號"
 
+    # 生成新的訂單號並儲存
+    # 格式：日期 + UUID前8碼
     def generate_order_number(self):
-        # 生成新的訂單號，不儲存，交由呼叫端儲存
-        # 格式：日期 + UUID前8碼
         today = timezone.now().strftime('%Y%m%d')
         self.number = f"{today}{uuid.uuid4().hex[:8].upper()}"
+        self.save()
+
+    # 標記付款失敗並儲存
+    def mark_payment_failed(self):
+        self.payment_status = self.PaymentStatus.FAILED
+        self.save()
+
+    # 付款成功，轉為待處理並儲存
+    def mark_as_paid(self):
+        if self.payment_status == self.PaymentStatus.PENDING:
+            self.payment_status = self.PaymentStatus.PAID
+            self.order_status = self.OrderStatus.PROCESSING
+            self.save()
+            return True
+        return False
+
+    # 標記為已出貨並儲存
+    def mark_as_shipped(self):
+        if (
+            self.payment_status == self.PaymentStatus.PAID
+            and self.order_status == self.OrderStatus.PROCESSING
+        ):
+            self.order_status = self.OrderStatus.SHIPPED
+            self.shipped_at = timezone.now()
+            self.save()
+            return True
+        return False
+
+    # 確認收貨，標記為已完成並儲存
+    def mark_as_completed(self):
+        if (
+            self.payment_status == self.PaymentStatus.PAID
+            and self.order_status == self.OrderStatus.SHIPPED
+        ):
+            self.order_status = self.OrderStatus.COMPLETED
+            self.completed_at = timezone.now()
+            self.save()
+            return True
+        return False
 
     @property
     def formatted_amount(self):
