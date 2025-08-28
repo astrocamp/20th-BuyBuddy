@@ -6,12 +6,6 @@ from django.utils import timezone
 import uuid
 
 
-class PaymentStatus(models.TextChoices):
-    PENDING = "pending", "待處理"
-    PAID = "paid", "已付款"
-    FAILED = "failed", "付款失敗"
-
-
 class Order(models.Model):
     number = models.CharField(max_length=50, unique=True, null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
@@ -28,6 +22,11 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class PaymentStatus(models.TextChoices):
+        PENDING = "pending", "待處理"
+        PAID = "paid", "已付款"
+        FAILED = "failed", "付款失敗"
+
     payment_status = models.CharField(
         max_length=30,
         choices=PaymentStatus.choices,
@@ -38,6 +37,22 @@ class Order(models.Model):
         UserAddress, on_delete=models.PROTECT, null=True, blank=True
     )
 
+    class OrderStatus(models.TextChoices):
+        PROCESSING = "processing", "待出貨"
+        SHIPPED = "shipped", "已出貨"
+        COMPLETED = "completed", "已完成"
+
+    order_status = models.CharField(
+        max_length=30,
+        choices=OrderStatus.choices,
+        null=True,
+        blank=True,
+        default=None,
+    )
+
+    shipped_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
     def __str__(self):
         return self.number or f"訂單 #{self.id} 尚未生成編號"
 
@@ -46,3 +61,7 @@ class Order(models.Model):
         # 格式：日期 + UUID前8碼
         today = timezone.now().strftime('%Y%m%d')
         self.number = f"{today}{uuid.uuid4().hex[:8].upper()}"
+
+    @property
+    def formatted_amount(self):
+        return f"${self.amount:,.0f}"
