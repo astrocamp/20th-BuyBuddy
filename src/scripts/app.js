@@ -1,3 +1,4 @@
+import "htmx.org";
 import Alpine from "alpinejs";
 import { messagesControl } from "./messages.js";
 import { validators } from "./validators.js";

@@ -1,6 +1,5 @@
 {% extends "layouts/default.html"%}
 {% block content %}
 <h1>付款失敗</h1>
-{% comment %} # TODO 改成導向訂單頁面 {% endcomment %}
-<a href="{% url 'pages:homepage' %}">返回首頁</a>
+<a href="{% url 'orders:pending' %}">返回我的訂單</a>
 {% endblock %}
