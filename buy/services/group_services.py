@@ -1,11 +1,44 @@
 from django.db import transaction
-from django.db.models import Sum, F, Count
+from django.db.models import Sum, F
 from django.utils import timezone
-from groups.models import Group, JoinedGroup
-from products.models import Product, JoinedGroupProduct, ProductImage
+from groups.models import JoinedGroup
+from products.models import  JoinedGroupProduct
 from .exceptions import *
 
 class GroupService:
+
+    @staticmethod
+    def get_total(group):
+        products = JoinedGroupProduct.objects.filter(
+            joined_group__group=group,
+            deleted_at__isnull=True
+            )
+        totals = products.aggregate(
+            total_quantity=Sum("quantity"), 
+            total_amount=Sum(F("quantity") * F("product__price"))
+            )
+        if group.goal_choice == "quantity":
+            return totals.get("total_quantity") or 0
+        elif group.goal_choice == "amount":
+            return totals.get("total_amount") or 0
+        else:
+            return 0
+    
+    @staticmethod
+    def get_progress(current_total, min_goal):
+        progress = 0
+        if min_goal > 0:
+            progress = min((current_total / min_goal) * 100, 100)
+            progress = round(progress) 
+        return progress
+
+    @staticmethod
+    def update_total_and_progress(group):
+        current_total = GroupService.get_total(group)
+        current_progress = GroupService.get_progress(current_total, group.min_goal)
+        group.total = current_total
+        group.current_progress = current_progress
+        group.save(update_fields=["total",  "current_progress"])
 
     @staticmethod
     def prepare_products_data(request_post):
@@ -72,11 +105,12 @@ class GroupService:
         for product in existing_active_products:
             product.quantity = product_data_map[product.product_id]
             products_to_update.append(product)
-
+        
+        products_to_restore = []
         for product in existing_deleted_products:
             product.quantity = product_data_map[product.product_id]
             product.deleted_at = None
-            products_to_update.append(product)
+            products_to_restore.append(product)
 
         products_to_delete = JoinedGroupProduct.objects.filter(
             joined_group=joined_group,
@@ -88,16 +122,16 @@ class GroupService:
             JoinedGroupProduct.objects.bulk_create(products_to_create)
         
         if products_to_update:
-            products_to_restore = [p for p in products_to_update]
-            products_to_only_update = [p for p in products_to_update]
-            if products_to_restore:
-                JoinedGroupProduct.objects.bulk_update(products_to_restore, ["quantity"])
-            if products_to_only_update:
-                JoinedGroupProduct.objects.bulk_update(products_to_only_update, ["quantity", "deleted_at"])
-
-        if products_to_delete:
-            products_to_delete.update(deleted_at=timezone.now())
+            JoinedGroupProduct.objects.bulk_update(products_to_update, ["quantity"])
+        
+        if products_to_restore:
+            JoinedGroupProduct.objects.bulk_update(products_to_restore, ["quantity", "deleted_at"])
             
+        if products_to_delete.exists():
+            products_to_delete.update(deleted_at=timezone.now())
+
+        group = joined_group.group
+        GroupService.update_total_and_progress(group)
 
         update_products = JoinedGroupProduct.objects.filter(
             joined_group=joined_group,
