@@ -1,21 +1,120 @@
-{% extends 'layouts/default.html' %}
-
-{% block content %}
+{% extends 'layouts/default.html'%} {% block content%}
 <div x-data="validators">
-  <h1 class="text-2xl font-bold text-center">座標位置：groups / edit_group</h1>
-  <form class="flex flex-col gap-4 items-center" method="POST" enctype="multipart/form-data" action="{% url 'groups:edit_group' group.id %}">
+  <form
+    class="flex gap-5 flex-col items-center mt-5 px-5"
+    method="POST"
+    enctype="multipart/form-data"
+    action="{% url 'groups:edit_group' group_form.instance.id %}"
+  >
     {% csrf_token %}
-    <div class="flex gap-4 justify-center">
-      <div>
-        {{ group_form.as_div }}
-      </div>
-      <div>
-        {{ product_form.as_div }}
-        {{ productImage_form.as_div }}
-      </div>
+    <!--=== 團購表單 ===-->
+    <div class="bg-white flex flex-col gap-2 w-full p-5">
+      <label for="{{ group_form.name.auto_id }}">{{ group_form.name.label }}</label>
+      <input
+        class="w-full border-2 border-gray-300 rounded-md p-2"
+        type="text"
+        name="{{ group_form.name.html_name }}"
+        id="{{ group_form.name.auto_id }}"
+        value="{{ group_form.name.value }}"
+      />
+      <label for="{{ group_form.banner.auto_id }}">{{ group_form.banner.label }}</label>
+      <input
+        class="w-full border-2 border-gray-300 rounded-md p-2"
+        type="file"
+        name="{{ group_form.banner.html_name }}"
+        id="{{ group_form.banner.auto_id }}"
+      />
+      <img class="h-60 object-cover" src="{{ group_form.banner.value.url }}" alt="">
+      <label for="{{ group_form.description.auto_id }}">{{ group_form.description.label }}</label>
+      <textarea
+        class="w-full border-2 border-gray-300 rounded-md p-2 resize-y"
+        name="{{ group_form.description.html_name }}"
+        id="{{ group_form.description.auto_id }}"
+      >{{ group_form.description.value }}</textarea>
+      <label for="{{ group_form.deadline.auto_id }}">{{ group_form.deadline.label }}</label>
+      <input
+        class="w-full border-2 border-gray-300 rounded-md p-2"
+        type="date"
+        name="{{ group_form.deadline.html_name }}"
+        id="{{ group_form.deadline.auto_id }}"
+        value="{{ group_form.deadline.value|date:'Y-m-d' }}"
+      />
+      <label for="{{ group_form.goal_choice.auto_id }}">{{ group_form.goal_choice.label }}</label>
+      <select
+        class="w-full border-2 border-gray-300 rounded-md p-2"
+        name="{{ group_form.goal_choice.html_name }}"
+        id="{{ group_form.goal_choice.auto_id }}"
+      >
+      {% for choice_value, choice_label in group_form.goal_choice.field.choices %}
+        {% if choice_value == group_form.goal_choice.value %}
+          <option value="{{ choice_value }}" selected>
+              {{ choice_label }}
+          </option>
+        {% endif %}
+      {% endfor %}
+      </select>
+      <label for="{{ group_form.min_goal.auto_id }}">{{ group_form.min_goal.label }}</label>
+      <input
+        class="w-full border-2 border-gray-300 rounded-md p-2"
+        type="number"
+        name="{{ group_form.min_goal.html_name }}"
+        id="{{ group_form.min_goal.auto_id }}"
+        min="1"
+        x-model="min_goal"
+        x-ref="min_goal"
+        x-on:input="removeZero()"
+        value="{{ group_form.min_goal.value }}"
+      />
     </div>
-    <button class="bg-blue-500 text-white px-4 py-2 rounded-md" type="submit">更新團購</button>
+    <!--=== 產品表單 ===-->
+    <div class="flex gap-5 flex-wrap w-full">
+      {{ product_form.management_form }}
+      {% for form in product_form %}
+        {{ form.id }}
+        <div class="shrink-0 w-100 bg-white p-5 flex flex-col gap-2">
+          <label for="{{ form.name.auto_id }}">{{ form.name.label }}</label>
+          <input
+            class="w-full border-2 border-gray-300 rounded-md p-2"
+            type="text"
+            name="{{ form.name.html_name }}"
+            id="{{ form.name.auto_id }}"
+            value="{{ form.name.value }}"
+          />
+          <label for="{{ form.price.auto_id }}">{{ form.price.label }}</label>
+          <input
+            class="w-full border-2 border-gray-300 rounded-md p-2"
+            type="number"
+            name="{{ form.price.html_name }}"
+            id="{{ form.price.auto_id }}"
+            value="{{ form.price.value }}"
+          />
+          <label for="{{ form.description.auto_id }}">{{ form.description.label }}</label>
+          <textarea
+            class="w-full border-2 border-gray-300 rounded-md p-2 resize-y"
+            name="{{ form.description.html_name }}"
+            id="{{ form.description.auto_id }}"
+          >{{ form.description.value }}</textarea>
+          
+          <label for="{{ image_form.url.auto_id }}_{{ forloop.counter0 }}">{{ image_form.url.label }}</label>
+          <input
+            class="w-full border-2 border-gray-300 rounded-md p-2"
+            type="file"
+            name="url_{{ forloop.counter0 }}"
+            id="{{ image_form.url.auto_id }}_{{ forloop.counter0 }}"
+            multiple
+          />
+          <div class="flex flex-nowrap gap-2 overflow-scroll w-full">
+            {% if form.instance.id %}
+              {% for image in form.instance.images.all %}
+                  <img class="h-60 object-cover transition-all" src="{{ image.url.url }}" alt="">
+              {% endfor %}
+          {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    <button class="fixed bottom-2 right-2 bg-blue-500 text-white px-4 py-2 rounded-md" type="submit">
+      新增團購
+    </button>
   </form>
 </div>
-
 {% endblock %}
