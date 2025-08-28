@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'pages',
     'users',
     'groups',
-    'buy',
     'status',
     'notifications',
     'sales',

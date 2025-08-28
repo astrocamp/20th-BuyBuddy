@@ -1,0 +1,38 @@
+{% extends 'layouts/default.html'%}
+
+{% block content%}
+
+<h1 class="text-2xl font-bold text-center text-amber-400">我開的團購</h1>
+<div class="flex justify-center gap-2 mt-5">
+  <a class="border-2 border-gray-300 rounded-md p-2 hover:bg-gray-200" href="{% url 'groups:index' %}">團購一覽</a>
+  <a class="border-2 border-gray-300 rounded-md p-2 hover:bg-gray-200" href="{% url 'groups:followed' %}">我跟的團</a>
+</div>
+
+
+<h1>可團購列表</h1>
+
+{% if groups %}
+    <table border="1" width="100%">
+        <tr>
+            <th>群組名稱</th>
+            <th>創建者</th>
+            <th>創建時間</th>
+            <th>操作</th>
+        </tr>
+        {% for group in groups %}
+        <tr>
+            <td>{{ group.name }}</td>
+            <td>{{ group.owner.username }}</td>
+            <td>{{ group.created_at|date:"Y-m-d H:i" }}</td>
+            <td>
+                <a href="{% url 'groups:detail' group.id %}">查看詳情</a>
+
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <p>目前沒有任何群組</p>
+{% endif %}
+
+{% endblock %}

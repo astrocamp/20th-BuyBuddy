@@ -5,15 +5,12 @@ from . import views
 app_name = "groups"
 
 urlpatterns = [
-    path('', views.index, name="index"),
-    # 團購表單
-    path('render_form', views.render_form, name="render_form"),
-    # 團購新增
-    path('create_group', views.create_group, name="create_group"),
-    # 團購列表
-    path('read_group', views.read_group, name="read_group"),
-    # 團購編輯
-    path('edit_group/<int:id>', views.edit_group, name="edit_group"),
-    # 團購刪除
-    path('delete_group/<int:id>', views.delete_group, name="delete_group")
+    path("", views.index, name="index"),
+    path("owned/",views.owned, name="owned"),
+    path("followed/", views.followed, name="followed"),
+    path("<int:id>/", views.detail, name="detail"),
+	path("<int:id>/member/edit", views.update_quantity, name="update_quantity"),
+	path("<int:id>/manage/", views.manage, name="manage"),
+	path("<int:id>/manage/edit", views.manage_edit, name="manage_edit"),
+    path('new/', views.new, name="new"),
 ]

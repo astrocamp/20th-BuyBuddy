@@ -2,9 +2,97 @@
 
 {% block content%}
 
-<h1 class="text-2xl font-bold text-center">座標位置：groups</h1>
+<h1 class="text-2xl font-bold text-center text-amber-400">進行中團購</h1>
 <div class="flex justify-center gap-2 mt-5">
-  <a class="border-2 border-gray-300 rounded-md p-2 hover:bg-gray-200" href="{% url 'groups:read_group' %}">read_group</a>
-  <a class="border-2 border-gray-300 rounded-md p-2 hover:bg-gray-200" href="{% url 'groups:render_form' %}">new_group</a>
+  <a class="border-2 border-gray-300 rounded-md p-2 hover:bg-gray-200" href="{% url 'groups:owned' %}">我開的團</a>
+  <a class="border-2 border-gray-300 rounded-md p-2 hover:bg-gray-200" href="{% url 'groups:followed' %}">我跟的團</a>
 </div>
+
+
+<h1>可團購列表</h1>
+
+{% if groups %}
+    <table border="1" width="100%">
+        <tr>
+            <th>群組名稱</th>
+            <th>創建者</th>
+            <th>創建時間</th>
+            <th>操作</th>
+        </tr>
+        {% for group in groups %}
+        <tr>
+            <td>{{ group.name }}</td>
+            <td>{{ group.owner.username }}</td>
+            <td>{{ group.created_at|date:"Y-m-d H:i" }}</td>
+            <td>
+                <a href="{% url 'groups:detail' group.id %}">查看詳情</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <p>目前沒有任何群組</p>
+{% endif %}
+
+<hr>
+
+{% if user.is_authenticated %}
+    <h2>我開團列表</h2>
+    <p>總銷售金額：${{ total_sales_amount }}</p>
+
+    {% if my_groups %}
+        <table border="1" width="100%">
+            <tr>
+                <th>群組名稱</th>
+                <th>創建時間</th>
+                <th>操作</th>
+            </tr>
+            {% for group in my_groups %}
+            <tr>
+                <td>{{ group.name }}</td>
+                <td>{{ group.created_at|date:"Y-m-d H:i" }}</td>
+                <td>
+                    <a href="#">編輯</a> | 
+                    <a href="#">管理</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>您還沒有創建任何群組</p>
+        <p><a href="#">創建新群組</a></p>
+    {% endif %}
+
+    <hr>
+
+    <h2>已跟團列表</h2>
+    <p>總購買金額：${{ total_purchase_amount }}</p>
+
+    {% if purchases %}
+        <table border="1" width="100%">
+            <tr>
+                <th>群組名稱</th>
+                <th>群組創建者</th>
+                <th>購買金額</th>
+                <th>購買時間</th>
+            </tr>
+            {% for purchase in purchases %}
+            <tr>
+                <td>{{ purchase.group.name }}</td>
+                <td>{{ purchase.group.owner.username }}</td>
+                <td>${{ purchase.total_amount }}</td>
+                <td>{{ purchase.created_at|date:"Y-m-d H:i" }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>您還沒有參與任何團購</p>
+    {% endif %}
+
+{% else %}
+    <!-- 未登入提示 -->
+    <h2>會員專區</h2>
+    <p>請先 <a href="/">登入</a> 以查看您的群組和購買記錄</p>
+{% endif %}
+
 {% endblock %}
