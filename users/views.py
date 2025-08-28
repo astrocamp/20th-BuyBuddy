@@ -44,7 +44,7 @@ def send_verification_mail(request, user, email):
 def new(request):
     if request.user.is_authenticated:
         messages.info(request, "您已經登入了")
-        return redirect("pages:homepage")
+        return redirect("groups:index")
     form = RegistrationForm()
     return render(request, "users/new.html", {"form": form})
 
@@ -80,7 +80,7 @@ def create(request):
             )
 
         login(request, new_user)
-        return redirect("pages:homepage")
+        return redirect("groups:index")
 
     except Exception as e:
         print(f"註冊時發生錯誤: {e}")
@@ -91,7 +91,7 @@ def create(request):
 def sessions_new(request):
     if request.user.is_authenticated:
         messages.info(request, "您已經登入了")
-        return redirect("pages:homepage")
+        return redirect("groups:index")
     if request.GET.get("next"):
         messages.warning(request, "請先登入，以繼續訪問頁面")
 
@@ -121,7 +121,7 @@ def sessions_create(request):
             messages.success(request, "登入成功")
             return redirect(next_url)
         messages.success(request, "登入成功")
-        return redirect("pages:homepage")
+        return redirect("groups:index")
 
     else:
         messages.error(request, "帳號或密碼錯誤")
@@ -136,7 +136,7 @@ def sessions_delete(request):
         return redirect(next_url)
     logout(request)
     messages.success(request, "登出成功")
-    return redirect("pages:homepage")
+    return redirect("groups:index")
 
 
 @login_required
@@ -177,7 +177,7 @@ def verify_email(request, uid, token):
             user.save()
             login(request, user)
             messages.success(request, "驗證信箱成功！")
-            return redirect("pages:homepage")
+            return redirect("groups:index")
         else:
             # token 無效（可能過期）
             messages.error(

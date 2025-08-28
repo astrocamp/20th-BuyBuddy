@@ -3,16 +3,13 @@
     class="px-10 py-6 flex justify-between items-center h-[98px] fixed w-full top-0">
         <ul class="flex gap-10 items-center">
             <li>
-                <a href="{% url 'pages:homepage' %}" class="relative leading-8 flex items-center px-4 font-extrabold">
+                <a href="{% url 'groups:index' %}" class="relative leading-8 flex items-center px-4 font-extrabold">
                 <img class="h-20 w-52" src="{% static 'asset/logo.svg' %}" alt="logo">
                 </a>
             </li>
 
-            <li><a href="{% url 'buy:index' %}" class="relative leading-8 flex items-center px-4 outline-main-color hover:outline hover:outline-[1.5px] hover:outline-offset-8 rounded-full transition-all">購買</a></li>
-            <li><a href="{% url 'groups:index' %}" class="relative leading-8 flex items-center px-4 outline-main-color hover:outline hover:outline-[1.5px] hover:outline-offset-8 rounded-full transition-all">團購</a></li>
-            <li><a href="{% url 'products:index' %}" class="relative leading-8 flex items-center px-4 outline-main-color hover:outline hover:outline-[1.5px] hover:outline-offset-8 rounded-full transition-all">商品</a></li>
-            <li><a href="{% url 'sales:index' %}" class="relative leading-8 flex items-center px-4 outline-main-color hover:outline hover:outline-[1.5px] hover:outline-offset-8 rounded-full transition-all">銷售頁面</a></li>
-            <li><a href="{% url 'status:index' %}" class="relative leading-8 flex items-center px-4 outline-main-color hover:outline hover:outline-[1.5px] hover:outline-offset-8 rounded-full transition-all">團購狀態</a></li>
+            <li><a href="{% url 'groups:index' %}" class="relative leading-8 flex items-center px-4 outline-main-color hover:outline hover:outline-[1.5px] hover:outline-offset-8 rounded-full transition-all">團購一覽</a></li>
+			<li><a href="{% url 'groups:new' %}" class="relative leading-8 flex items-center px-4 outline-main-color hover:outline hover:outline-[1.5px] hover:outline-offset-8 rounded-full transition-all">我要開團</a></li>
             {% comment %} LINE Pay 測試 {% endcomment %}
             <li><a href="{% url 'orders:checkout' %}" class="relative leading-8 flex items-center px-4 outline-main-color hover:outline hover:outline-[1.5px] hover:outline-offset-8 rounded-full transition-all">LINE Pay 測試</a></li>
             

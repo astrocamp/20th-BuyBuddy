@@ -3,7 +3,7 @@
 {% block content %}
 <div x-data="validators">
   <h1 class="text-2xl font-bold text-center">座標位置：groups / edit_group</h1>
-  <form class="flex flex-col gap-4 items-center" method="POST" enctype="multipart/form-data" action="{% url 'groups:edit_group' group.id %}">
+  <form class="flex flex-col gap-4 items-center" method="POST" enctype="multipart/form-data" action="{% url 'groups:manage_edit' group.id %}">
     {% csrf_token %}
     <div class="flex gap-4 justify-center">
       <div>
