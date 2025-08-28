@@ -1,0 +1,13 @@
+{% extends "layouts/default.html"%}
+{% block content %}
+
+{% include "orders/shared/navbar.html" %}
+<div>
+   {% include 'orders/my_orders/my_orders_navbar.html' %}
+</div>
+
+<div id="my-order-list">
+    {% include 'orders/my_orders/my_orders_list.html' %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,76 @@
+{% if joined_groups or orders %}
+    {% if joined_groups %}
+    <ul class="flex flex-col gap-4">
+        {% for jg in joined_groups %}
+            <li class="flex gap-4">
+                <p>尚未成團</p>
+                <p>{{jg.group.name}}</p>
+                <ul>
+                    {% for jgp in jg.joined_group_products.all %}
+                    <li class="flex gap-8">
+                        <p>{{jgp.product.name}}</p>
+                        <p>{{jgp.product.formatted_price}} x {{jgp.quantity}}</p>
+                        <p>{{jgp.subtotal}}</p>
+                    </li>
+                    {% endfor %}
+                </ul>
+                
+                {% comment %} # TODO 通往團購商品頁 {% endcomment %}
+                <a href="#" class="underline">修改跟團</a>
+            </li>
+            <hr/>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+
+    {% if orders %}
+        <ul class="flex flex-col gap-4">
+        {% for order in orders %}
+            <li class="flex gap-4">
+                <span>{{order.order_number}}</span>
+                <p>{{order.group.name}}</p>
+                <div>
+                        {% for jgp in order.joined_group.joined_group_products.all %}
+                        <div class="flex flex-col">
+                            <div class="flex gap-10">
+                                <span>{{jgp.product.name}} ${{jgp.product.price}} x{{jgp.quantity}}</span>
+                                <span>{{jgp.subtotal}}</span>
+                            </div>
+                        
+                        </div>
+                        {% endfor %}
+                </div>
+                <span>總價 {{order.formatted_amount}}</span>
+                <div>
+                    {% if order.order_status == order.OrderStatus.PENDING %}
+                        <form action="{% url 'orders:payment_request' order.id %}" method="post">
+                            {% csrf_token %}
+                            <button class="underline cursor-pointer">去付款</button>
+                        </form>
+
+                    {% else %}
+                        <div class="flex gap-4">
+                        <span>
+                            {{order.get_order_status_display}}
+                        </span>
+
+                        {% if order.order_status == order.OrderStatus.SHIPPED %}
+                            <form action="{% url 'orders:received' order.id %}" method="post">
+                                {% csrf_token %}
+                                <button class="underline cursor-pointer">我收到貨了</button>
+                            </form>
+                        {% endif %}
+
+                    </div> 
+                    {% endif %}
+                </div>  
+            </li>
+            <hr/>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
+{% else %}
+<span>尚無此分類的訂單</span>
+{% endif %}
