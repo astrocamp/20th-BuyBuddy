@@ -10,6 +10,7 @@
 	<form action="{% url 'groups:owned' %}" method="post">
 	{% csrf_token %}
 		<input type="hidden" name="_method" value="delete">
+        <input type="hidden" name="group-id" value="{{ group.id }}">
 		<button>刪團</button>
 	</form>
 	

@@ -13,8 +13,8 @@ def index(request):
 	return render(request, "groups/index.html", {"groups": groups})
 
 def new(request):
-	product_form = ProductForm()
-	group_form = GroupForm()
+	product_form = ProductForm(prefix='product')
+	group_form = GroupForm(prefix='group')
 	productImage_form = ProductImageForm()
 	return render(request, 'groups/new.html', {'product_form': product_form, 'group_form': group_form, 'productImage_form': productImage_form})
 
@@ -32,8 +32,8 @@ def owned(request):
 			messages.success(request, "團購已刪除")
 			return redirect('groups:owned')
 
-		group_form = GroupForm(request.POST, request.FILES)
-		product_form = ProductForm(request.POST)
+		group_form = GroupForm(request.POST, request.FILES, prefix='group')
+		product_form = ProductForm(request.POST, prefix='product')
 		productImage_form = ProductImageForm(request.POST, request.FILES)
 
 		if group_form.is_valid() and product_form.is_valid() and productImage_form.is_valid():
