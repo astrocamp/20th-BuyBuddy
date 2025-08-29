@@ -145,16 +145,24 @@ LOGIN_URL = "/users/sessions/new/"
 
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 3
 
-# MEDIA_URL = '/media/'
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+HOSTNAME = os.getenv("HOSTNAME")
 
+# 開發階段
 if DEBUG:
     SITE_URL = "http://127.0.0.1:8000"
     SITE_NAME = "buybuddy (dev)"
+
+    # Session Cookie 設定
+    SESSION_COOKIE_SECURE = False
+    SESSION_COOKIE_SAMESITE = "Lax"
+
+# 正式環境階段
 else:
-    # TODO
+    # TODO 正式上線要改網域
     SITE_URL = "https://yourdomain.com"
     SITE_NAME = "buybuddy"
+    SESSION_COOKIE_SECURE = True
+
 
 # 開發階段：在 terminal 顯示郵件內容
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
@@ -189,8 +197,6 @@ AWS_S3_OBJECT_PARAMETERS = {
 }
 
 MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
-
-HOSTNAME = os.getenv("HOSTNAME")
 
 LINE_CHANNEL_ID = os.getenv("LINE_CHANNEL_ID")
 LINE_CHANNEL_SECRET_KEY = os.getenv("LINE_CHANNEL_SECRET_KEY")
