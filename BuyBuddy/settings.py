@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'products',
     'anymail',
     'orders',
+    'django_fsm',
 ]
 
 MIDDLEWARE = [
