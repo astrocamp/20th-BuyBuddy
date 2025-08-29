@@ -5,7 +5,8 @@
     {% csrf_token %}
     <button class="border-b cursor-pointer">建立訂單</button>
 </form>
-<form action="{% url 'orders:request' %}" method="post">
+{% comment %} #TODO 先給訂單 id 預設值，需改成完整 order 物件 {% endcomment %}
+<form action="{% url 'orders:payment_request' order.id|default:3 %}" method="post">
     {% csrf_token %}
     <button class="border-b cursor-pointer">去付款</button>
 </form>
