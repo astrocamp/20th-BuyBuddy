@@ -95,7 +95,7 @@ class Order(models.Model):
         # 生成新的訂單號，不儲存，交由呼叫端儲存
         # 格式：日期(年月日時分秒) + UUID前8碼
         today = timezone.now().strftime("%Y%m%d%H%M%S")
-        self.number = f"{today}{uuid.uuid4().hex[:8].upper()}"
+        self.order_number = f"{today}{uuid.uuid4().hex[:8].upper()}"
 
     def save(self, *args, **kwargs):
         if not self.pk or not self.order_number:
