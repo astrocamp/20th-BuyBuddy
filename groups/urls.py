@@ -5,6 +5,7 @@ from . import views
 app_name = "groups"
 
 urlpatterns = [
+	path("upload/", views.upload_image, name="upload_image"),
     path("", views.index, name="index"),
 	path('new/', views.new, name="new"),
     path("<int:id>/", views.detail, name="detail"),

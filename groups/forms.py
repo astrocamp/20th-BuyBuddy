@@ -3,6 +3,8 @@ from django import forms
 from .models import Group
 from products.models import Product
 from django.forms.widgets import *
+from tinymce.widgets import TinyMCE
+from django.conf import settings
 
 
 class GroupForm(ModelForm):
@@ -44,5 +46,16 @@ ProductFormSet = inlineformset_factory(
       'price': '產品價格',
       'description': '產品描述'
     },
-    formset = ProductForm
-)
+    
+    widgets = {
+      'description': TinyMCE(mce_attrs=settings.TINYMCE_LIMITED_CONFIG),
+    }
+  def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # 只有在編輯現有物件時才鎖定欄位
+        if self.instance and self.instance.pk:
+            exclude_fields = ['deadline', 'min_goal']
+            for field_name, field in self.fields.items():
+                if field_name not in exclude_fields:
+                    field.widget.attrs['readonly'] = True
+                    field.widget.attrs['class'] += ' cursor-not-allowed'  

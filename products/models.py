@@ -1,12 +1,13 @@
 from django.db import models
 from groups.models import Group, JoinedGroup
+from tinymce.models import HTMLField
 
 
 class Product(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="products")
     name = models.CharField(max_length=255)
     price = models.IntegerField()
-    description = models.TextField()
+    description = HTMLField()
 
     @property
     def formatted_price(self):
