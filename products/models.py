@@ -31,4 +31,4 @@ class JoinedGroupProduct(models.Model):
 
     @property
     def subtotal(self):
-        return f"${self.product.price * self.quantity:,.0f}"
+        return self.product.price * self.quantity
