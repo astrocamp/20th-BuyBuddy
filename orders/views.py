@@ -11,6 +11,7 @@ import requests
 from .models import Order, Payment
 from groups.models import JoinedGroup
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse
 
 
 def create_headers(body, uri):
@@ -44,11 +45,11 @@ def request(request, order_id):
 
     if not order.user == user:
         messages.error(request, "訂單發生錯誤，請稍後再試")
-        return redirect("groups:index")
+        return redirect(f"{reverse('orders:my_orders')}?auto_tab=pending")
 
     if not order.is_pending():
         messages.warning(request, "訂單已付款，請至訂單紀錄查看")
-        return redirect("orders:paid")
+        return redirect(f"{reverse('orders:my_orders')}?auto_tab=processing")
 
     payment = Payment.objects.create(order=order)
 
@@ -72,8 +73,8 @@ def request(request, order_id):
             }
         ],
         "redirectUrls": {
-            "confirmUrl": f"https://{settings.HOSTNAME}/orders/payment/confirm",
-            "cancelUrl": f"https://{settings.HOSTNAME}/orders/payment/cancel",
+            "confirmUrl": f"https://{settings.HOSTNAME}/orders/my-orders/payment/confirm",
+            "cancelUrl": f"https://{settings.HOSTNAME}/orders/my-orders/payment/cancel",
         },
     }
 
@@ -96,26 +97,25 @@ def request(request, order_id):
                 error_msg = data.get("returnMessage", "未知錯誤")
                 print(f"❌ LINE Pay Error: {error_code} - {error_msg}")
 
-                order.mark_payment_failed()
+                payment.mark_as_failed()
                 messages.error(request, "付款發生錯誤，請稍後再試")
-                # TODO 改成導向訂單頁面
-                return redirect("orders:pending")
+                return redirect(f"{reverse('orders:my_orders')}?auto_tab=pending")
         else:
-            order.mark_payment_failed()
+            payment.mark_as_failed()
             messages.error(request, "系統發生錯誤，請稍後再試")
-            return redirect("orders:pending")
+            return redirect(f"{reverse('orders:my_orders')}?auto_tab=pending")
 
     except requests.RequestException:
         # 處理所有網路相關錯誤（連線、超時等）
-        order.mark_payment_failed()
+        payment.mark_as_failed()
         messages.error(request, "網路連線錯誤，請稍後再試")
-        return redirect("orders:pending")
+        return redirect(f"{reverse('orders:my_orders')}?auto_tab=pending")
 
     except Exception:
         # 處理其他所有錯誤
-        order.mark_payment_failed()
+        payment.mark_as_failed()
         messages.error(request, "取得付款資訊失敗，請稍後再試")
-        return redirect("orders:pending")
+        return redirect(f"{reverse('orders:my_orders')}?auto_tab=pending")
 
 
 def confirm(request):
@@ -135,13 +135,13 @@ def confirm(request):
     if not order.is_pending():
         messages.info(request, "此訂單已經付款完成")
         # TODO 改成導向訂單頁面
-        return redirect("orders:processing")
+        return redirect(f"{reverse('orders:my_orders')}?auto_tab=pending")
 
     # 檢查 payment 是否已經是 paid 狀態
     if payment.is_paid():
         messages.info(request, "此付款已經完成")
         # TODO 改成導向訂單頁面
-        return redirect("orders:processing")
+        return redirect(f"{reverse('orders:my_orders')}?auto_tab=pending")
 
     payload = {
         "amount": int(order.amount),
@@ -163,7 +163,7 @@ def confirm(request):
                 order.mark_as_processing()
                 order.save()
                 messages.success(request, "付款成功，請至訂單頁面查看")
-                return redirect("orders:processing")
+                return redirect(f"{reverse('orders:my_orders')}?auto_tab=processing")
 
             else:
                 payment.mark_as_failed()
@@ -172,7 +172,7 @@ def confirm(request):
                 return redirect("orders:payment_fail")
 
         else:
-            order.mark_payment_failed()
+            payment.mark_as_failed()
             messages.error(request, "系統發生錯誤，請稍後再試")
             return redirect("orders:payment_fail")
 
@@ -214,7 +214,7 @@ def my_orders(request):
 
     return render(
         request,
-        "orders/my_orders/my_orders_section.html",
+        "orders/my_orders/section.html",
         {
             "orders": orders,
             "joined_groups": joined_groups,
@@ -226,7 +226,6 @@ def my_orders(request):
 
 @login_required
 def my_orders_tab_content(request):
-    print("123")
     user = request.user
     tab = request.GET.get("tab", "all")
 
@@ -234,7 +233,7 @@ def my_orders_tab_content(request):
 
     return render(
         request,
-        "orders/my_orders/my_orders_list.html",
+        "orders/my_orders/list.html",
         {"orders": orders, "joined_groups": joined_groups},
     )
 
@@ -290,10 +289,10 @@ def received(request, order_id):
 
     if not order.is_shipped():
         messages.error(request, "此訂單無法確認收貨")
-        return redirect("/orders/my-orders/?auto_tab=shipped")
+        return redirect(f"{reverse('orders:my_orders')}?auto_tab=shipped")
 
     order.mark_as_completed()
     order.save()
 
     messages.success(request, "訂單已確認收貨")
-    return redirect("/orders/my-orders/?auto_tab=completed")
+    return redirect(f"{reverse('orders:my_orders')}?auto_tab=completed")

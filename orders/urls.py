@@ -28,5 +28,5 @@ urlpatterns = [
     # 付款成功
     path("my-orders/payment/success/", views.success, name="payment_success"),
     # 付款失敗
-    path("payment/fail/", views.fail, name="payment_fail"),
+    path("my-orders/payment/fail/", views.fail, name="payment_fail"),
 ]
