@@ -59,7 +59,13 @@
                 {% for product in group.products.all %}
                 <div class="border border-gray-200 rounded-lg p-4 bg-gray-50 flex gap-4">
                     <div>
-                        <img class="h-30 object-cover" src="{{ product.images.first.url.url }}" alt="{{ product.name }}">
+                        {% if product.images.first %}
+                        <img class="h-32 object-cover" src="{{ product.images.first.url.url }}" alt="{{ product.name }}">
+                        {% else %}
+                        <div class="h-32 bg-gray-200 flex items-center justify-center text-gray-500">
+                            No image
+                        </div>
+                        {% endif %}
                     </div>
                     <div class="flex-1 flex flex-col justify-end">
                         <div class="flex justify-between items-center mb-2">
