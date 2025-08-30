@@ -1,6 +1,6 @@
 from django.db import models
-from django.db.models import Sum, F
 from users.models import User
+from tinymce.models import HTMLField
 
 
 class Group(models.Model):
@@ -14,8 +14,8 @@ class Group(models.Model):
     banner = models.ImageField(upload_to='groups/banners/')
     created_at = models.DateTimeField(auto_now_add=True)
     deleted_at = models.DateTimeField(null=True)
-    description = models.TextField(null=True)
-    total = models.IntegerField(null=True, blank=True)
+    description = HTMLField()
+    total = models.IntegerField(null=True, blank=True)  
 
     class Meta:
         indexes = [

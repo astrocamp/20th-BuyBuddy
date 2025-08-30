@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'anymail',
     'orders',
     'django_fsm',
+    'tinymce',
 ]
 
 MIDDLEWARE = [
@@ -133,10 +134,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'assets/'
+STATIC_URL = '/assets/'
 STATICFILES_DIRS = [
     BASE_DIR / "public",
 ]
+STATIC_ROOT = BASE_DIR / "staticfiles" # 部署時用
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
@@ -203,3 +207,27 @@ LINE_CHANNEL_ID = os.getenv("LINE_CHANNEL_ID")
 LINE_CHANNEL_SECRET_KEY = os.getenv("LINE_CHANNEL_SECRET_KEY")
 LINE_SIGNATURE_REQUEST_URI = os.getenv("LINE_SIGNATURE_REQUEST_URI")
 LINE_SANDBOX_URL = os.getenv("LINE_SANDBOX_URL")
+
+
+# 富文本設定
+TINYMCE_JS_URL = STATIC_URL + 'tinymce/tinymce.min.js'
+TINYMCE_DEFAULT_CONFIG = {
+    "height": 500,
+    "menubar": False,
+    "plugins": "advlist,autolink,lists,link,image,charmap,preview,searchreplace,visualblocks,fullscreen,insertdatetime,media,table,code,help,wordcount",
+    "toolbar": "undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | link image",
+    "images_upload_url": "/groups/upload/",
+    "csrf_cookie_name": "csrftoken",
+    "csrf_token_header": "X-CSRFToken",
+    }
+TINYMCE_LIMITED_CONFIG = {
+    "height": 300,
+    "menubar": False,
+    "plugins": "advlist,autolink,lists,link,charmap,preview,searchreplace,visualblocks,fullscreen,insertdatetime,media,table,code,help,wordcount",
+    "toolbar": "undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | link",
+    "paste_data_images": False, 
+    "images_upload_url": "",
+    "csrf_cookie_name": "csrftoken",
+    "csrf_token_header": "X-CSRFToken",
+    
+}

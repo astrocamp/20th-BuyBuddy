@@ -9,6 +9,10 @@ from .services.exceptions import *
 from .services.group_services import GroupService
 from django.utils import timezone
 from datetime import datetime
+from django.core.files.storage import default_storage
+from django.http import JsonResponse
+import os
+import uuid
 
 from django.core.paginator import Paginator
 from django.urls import reverse
@@ -69,8 +73,7 @@ def new(request):
     if request.method == "POST":
         group_form = GroupForm(request.POST, request.FILES)
         product_form = ProductForm(request.POST)
-        productImage_form = ProductImageForm(request.POST, request.FILES)
-
+ 
         if group_form.is_valid() and product_form.is_valid():
             with transaction.atomic():
                 group = group_form.save(commit=False)
@@ -102,10 +105,19 @@ def new(request):
 
 
 def detail(request, id):
-    group = get_object_or_404(Group, pk=id)
-    if request.user.is_authenticated:
-        if group.owner == request.user:
-            return redirect('groups:manage', id=id)
+	group = get_object_or_404(Group, pk=id)
+	if request.user.is_authenticated:
+		if group.owner == request.user:
+			return redirect('groups:manage', id=id)
+	
+		try:
+			joined_group = JoinedGroup.objects.get(
+				group=group,
+				buyer=request.user,
+			)
+			return redirect("groups:update_quantity", id=id)
+		except JoinedGroup.DoesNotExist:
+			return render(request, "groups/detail.html", {"group": group})
 
         try:
             joined_group = JoinedGroup.objects.get(
@@ -148,23 +160,49 @@ def manage(request, id):
 
 @login_required
 def manage_edit(request, id):
-    group = get_object_or_404(Group, id=id)
-    group_form = GroupForm(instance=group, prefix="group")
-    product_formset = ProductFormSet(instance=group, prefix="product")
-    if request.user != group.owner:
-        messages.warning(request, "您無權編輯此團購")
-        return redirect("groups:owned")
-    if request.method == "POST":
-        try:
-            update = []
-            if "group-deadline" in request.POST:
-                deadline = request.POST.get("group-deadline")
-                if not deadline:
-                    raise ValueError("請選擇截止日期")
-                deadline_naive = datetime.strptime(deadline, '%Y-%m-%d')
-                deadline_aware = timezone.make_aware(deadline_naive)
-                group.deadline = deadline_aware
-                update.append("deadline")
+	group = get_object_or_404(Group, id=id)
+	product = get_object_or_404(Product, group=group)
+	productImage = get_object_or_404(ProductImage, product=product)
+	group_form = GroupForm(instance=group, prefix='group')
+	product_form = ProductForm(instance=product, prefix='product')
+	productImage_form = ProductImageForm(instance=productImage, prefix='product_image')
+	if request.method == 'POST':
+		if request.user == group.owner:
+			group_form = GroupForm(request.POST, request.FILES, instance=group, prefix='group')
+			product_form = ProductForm(request.POST, instance=product, prefix='product')
+			productImage_form = ProductImageForm(request.POST, request.FILES, instance=productImage, prefix='product_image')
+			if group_form.is_valid() and product_form.is_valid() and productImage_form.is_valid():
+				with transaction.atomic():
+					group = group_form.save()
+					product = product_form.save()
+					productImage = productImage_form.save()
+					messages.success(request, "團購已更新")
+				return redirect('groups:owned')
+			else:
+				messages.warning(request, "欄位填寫有誤，請檢查後再試")
+				return redirect('groups:manage_edit', id=id)
+		else:
+			messages.warning(request, "您無權編輯此團購")
+			return redirect('groups:manage_edit', id=id)
+	return render(request, 'groups/manage_edit.html', {'group_form': group_form, 'group': group, 'product_form': product_form, 'productImage_form': productImage_form})
+
+@login_required
+def upload_image(request):
+	if request.method == "POST" and request.FILES:
+		try:
+			upload_file = request.FILES['file']
+			file_extension = os.path.splitext(upload_file.name)[1].lower()
+			file_name = f"{uuid.uuid4()}{file_extension}"
+
+			s3_path = f"groups/detail/{file_name}"
+			path = default_storage.save(s3_path, upload_file)
+			file_url = default_storage.url(path)
+			return JsonResponse({"location": file_url})
+		
+		except Exception as e:
+			return JsonResponse({"error": "上傳失敗，請稍後再試"}, status=500)
+	return JsonResponse({"error": "無效請求"}, status=400)
+
 
             if "group-min_goal" in request.POST:
                 min_goal_str = request.POST.get("group-min_goal")

@@ -1,4 +1,7 @@
 {% extends 'layouts/default.html'%} 
+{% block extra_head%}
+	 {{ group_form.media }}
+{% endblock%}
 {% block content%}
 <div x-data="validators" >
   <form
