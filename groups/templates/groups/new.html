@@ -89,12 +89,12 @@ x-on:input="removeZero()"
     id="{{ form.description.auto_id }}"
     ></textarea>
     
-    <label for="{{ image_form.url.auto_id }}_{{ forloop.counter0 }}">{{ image_form.url.label }}</label>
+    <label for="url_{{ forloop.counter0 }}">產品圖片</label>
     <input
     class="w-full border-2 border-gray-300 rounded-md p-2"
     type="file"
     name="url_{{ forloop.counter0 }}"
-    id="{{ image_form.url.auto_id }}_{{ forloop.counter0 }}"
+    id="url_{{ forloop.counter0 }}"
     />
   </div>
   {% endfor %}

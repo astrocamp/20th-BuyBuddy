@@ -24,7 +24,7 @@ def new(request):
 def owned(request):
 	groups = Group.objects.filter(owner=request.user)
 	
-	if request.method == 'POST':
+	if request.method == "POST":
 		
 		if request.POST.get("_method") == "delete":
 			group_id = request.POST.get("group-id")
@@ -36,20 +36,20 @@ def owned(request):
 			messages.success(request, "團購已刪除")
 			return redirect('groups:owned')
 
-		group_form = GroupForm(request.POST, request.FILES, prefix='group')
+		group_form = GroupForm(request.POST, request.FILES, prefix="group")
 		if group_form.is_valid():
 			with transaction.atomic():
 				group = group_form.save(commit=False)
 				group.owner = request.user
-				group.status = 'ongoing'
+				group.status = "ongoing"
 				group.save()	
-				product_formset = ProductFormSet(request.POST, instance=group, prefix='product')
+				product_formset = ProductFormSet(request.POST, instance=group, prefix="product")
 				if product_formset.is_valid():
 					products = product_formset.save(commit=False)
 					for i, product in enumerate(products):
 						product.group = group
 						product.save()
-						image = request.FILES.get(f'url_{i}')
+						image = request.FILES.get(f"url_{i}")
 						if image:
 							ProductImage.objects.create(
 									product=product,
@@ -60,7 +60,7 @@ def owned(request):
 					return redirect("groups:owned")
 		else:
 			messages.warning(request, "欄位填寫有誤，請檢查後再試")
-		return redirect("groups:new")	
+		return render(request, "groups/new.html", {"product_form": product_formset, "group_form": group_form})	
 	return render(request, "groups/owned.html", {"groups": groups})
 
 @login_required
@@ -110,30 +110,44 @@ def manage(request, id):
 @login_required
 def manage_edit(request, id):
 	group = get_object_or_404(Group, id=id)
-	group_form = GroupForm(instance=group, prefix='group')
-	product_formset = ProductFormSet(instance=group, prefix='product')
+	group_form = GroupForm(instance=group, prefix="group")
+	product_formset = ProductFormSet(instance=group, prefix="product")
 	if request.user != group.owner:
 		messages.warning(request, "您無權編輯此團購")
-		return redirect('groups:owned')
-	if request.method == 'POST':
+		return redirect("groups:owned")
+	if request.method == "POST":
 		try:
-			if 'group-deadline' in request.POST:
-				deadline = request.POST.get('group-deadline')
+			update = []
+			if "group-deadline" in request.POST:
+				deadline = request.POST.get("group-deadline")
+				if not deadline:
+					raise ValueError("請選擇截止日期")
 				deadline_naive = datetime.strptime(deadline, '%Y-%m-%d')
 				deadline_aware = timezone.make_aware(deadline_naive)
 				group.deadline = deadline_aware
+				update.append("deadline")
 
-			if 'group-min_goal' in request.POST:
-				group.min_goal = int(request.POST.get('group-min_goal'))
-				group.save(update_fields=['deadline', 'min_goal'])
+
+			if "group-min_goal" in request.POST:
+				min_goal_str = request.POST.get("group-min_goal")
+				if not min_goal_str:
+					raise ValueError("請選擇最小目標")
+
+				min_goal = int(min_goal_str)
+				if min_goal < 1:
+					raise ValueError("最小目標不能小於1")
+				group.min_goal = min_goal
+				update.append("min_goal")
+
+			if update:
+				group.save(update_fields=update)
 			
 			messages.success(request, "團購已更新")
-			return redirect('groups:owned')
-		except Exception as error:
-			print(error)
-			messages.warning(request, "欄位填寫有誤，請檢查後再試")
-			return render(request, 'groups/manage_edit.html', {'product_form': product_formset, 'group_form': group_form})
-	return render(request, 'groups/manage_edit.html', {'product_form': product_formset, 'group_form': group_form})
+			return redirect("groups:owned")
+		except (ValueError, TypeError) as error:
+			messages.warning(request, f"欄位填寫有誤，{str(error)}")
+			return render(request, "groups/manage_edit.html", {"product_form": product_formset, "group_form": group_form})
+	return render(request, "groups/manage_edit.html", {"product_form": product_formset, "group_form": group_form})
 	
 
 
