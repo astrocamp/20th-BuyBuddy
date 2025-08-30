@@ -2,20 +2,109 @@
 
 {% block content %}
 <div x-data="validators">
-  <h1 class="text-2xl font-bold text-center">座標位置：groups / edit_group</h1>
-  <form class="flex flex-col gap-4 items-center" method="POST" enctype="multipart/form-data" action="{% url 'groups:manage_edit' group.id %}">
-    {% csrf_token %}
-    <div class="flex gap-4 justify-center">
-      <div>
-        {{ group_form.as_div }}
-      </div>
-      <div>
-        {{ product_form.as_div }}
-        {{ productImage_form.as_div }}
-      </div>
+  <form
+  class="flex gap-5 flex-col items-center mt-5 px-5"
+  method="POST"
+  enctype="multipart/form-data"
+  action="{% url 'groups:manage_edit' group_form.instance.id %}"
+  >
+  {% csrf_token %}
+  <!--=== 團購表單 ===-->
+  <div class="flex flex-col gap-2 w-full p-5">
+    <label class="cursor-not-allowed">{{ group_form.name.label }}</label>
+    <input
+    class="w-full border-2 border-gray-300 rounded-md p-2 cursor-not-allowed"
+    type="text"
+    value="{{ group_form.name.value }}"
+    disabled
+    />
+    <label class="cursor-not-allowed">{{ group_form.banner.label }}</label>
+    <input
+    class="w-full border-2 border-gray-300 rounded-md p-2 cursor-not-allowed"
+    type="file"
+    disabled
+    />
+    <img class="h-60 object-cover" src="{{ group_form.banner.value.url }}" alt="">
+    <label class="cursor-not-allowed">{{ group_form.description.label }}</label>
+    <textarea
+    class="w-full border-2 border-gray-300 rounded-md p-2 resize-y cursor-not-allowed"
+    disabled
+    >{{ group_form.description.value }}</textarea>
+    <label for="{{ group_form.deadline.auto_id }}">{{ group_form.deadline.label }}</label>
+    <input
+    class="w-full border-2 border-gray-300 rounded-md p-2"
+    type="date"
+    name="{{ group_form.deadline.html_name }}"
+    id="{{ group_form.deadline.auto_id }}"
+    value="{{ group_form.deadline.value|date:'Y-m-d' }}"
+    />
+    <label class="cursor-not-allowed">{{ group_form.goal_choice.label }}</label>
+    <select
+    class="w-full border-2 border-gray-300 rounded-md p-2 cursor-not-allowed"
+    disabled
+    >
+    {% for choice_value, choice_label in group_form.goal_choice.field.choices %}
+    {% if choice_value == group_form.goal_choice.value %}
+    <option selected>
+      {{ choice_label }}
+    </option>
+    {% endif %}
+    {% endfor %}
+  </select>
+  <label for="{{ group_form.min_goal.auto_id }}">{{ group_form.min_goal.label }}</label>
+  <input
+  class="w-full border-2 border-gray-300 rounded-md p-2"
+  type="number"
+  name="{{ group_form.min_goal.html_name }}"
+  id="{{ group_form.min_goal.auto_id }}"
+  min="1"
+  x-model="min_goal"
+  x-ref="min_goal"
+  x-on:input="removeZero()"
+  value="{{ group_form.min_goal.value }}"
+  />
+  <div class="fixed bottom-2 right-2 flex justify-between gap-2">
+    <a class="bg-blue-500 text-white px-4 py-2 rounded-md"  href="{% url 'groups:owned' %}">
+        取消
+    </a>
+    <button class="bg-blue-500 text-white px-4 py-2 rounded-md" type="submit">
+      更新團購
+    </button>
+  </div>
+</form>
+  <!--=== 產品表單 ===-->
+  <div class="flex gap-5 flex-wrap w-full">
+    {{ product_form.management_form }}
+    {% for form in product_form %}
+    <div class="shrink-0 w-100 bg-white p-5 flex flex-col gap-2">
+      <label class="cursor-not-allowed">{{ form.name.label }}</label>
+      <input
+      class="w-full border-2 border-gray-300 rounded-md p-2 cursor-not-allowed"
+      type="text"
+      value="{{ form.name.value }}"
+      disabled
+      />
+      <label class="cursor-not-allowed">{{ form.price.label }}</label>
+      <input
+      class="w-full border-2 border-gray-300 rounded-md p-2 cursor-not-allowed"
+      type="number"
+      value="{{ form.price.value }}"
+      disabled
+      />
+      <label class="cursor-not-allowed">{{ form.description.label }}</label>
+      <textarea
+      class="w-full border-2 border-gray-300 rounded-md p-2 resize-y cursor-not-allowed"
+      disabled
+      >{{ form.description.value }}</textarea>
+      
+      <label class="cursor-not-allowed">{{ image_form.url.label }}</label>
+      <input
+      class="w-full border-2 border-gray-300 rounded-md p-2 cursor-not-allowed"
+      type="file"
+      disabled
+      />
+      <img class="h-60 object-cover" src="{{ form.instance.images.first.url.url }}" alt="">
     </div>
-    <button class="bg-blue-500 text-white px-4 py-2 rounded-md" type="submit">更新團購</button>
-  </form>
+    {% endfor %}
 </div>
-
 {% endblock %}
