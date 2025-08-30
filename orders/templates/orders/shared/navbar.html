@@ -1,4 +1,15 @@
-<ul class="flex gap-6">
-    <a href="{% url 'orders:my_orders' %}" class="border-b-2">我跟團的訂單</a>
-    <a href="#" class="border-b-2">我開團的訂單</a>
-</ul>
+<nav aria-label="主要導航" class="my-4">
+    <div class="mx-auto text-center">
+    <div class="bg-[#ededed] rounded-full px-3 py-2 inline-flex items-center gap-3">
+            <a href="{% url 'orders:my_orders' %}"
+               class="inline-flex items-center px-6 py-2 rounded-full text-base font-medium text-white bg-black cursor-pointer opacity-100">
+                我跟團的訂單
+            </a>
+
+            <a href="#"
+               class="inline-flex items-center px-6 py-2 rounded-full text-base font-medium text-gray-800 cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
+                我開團的訂單
+            </a>
+        </div>
+    </div>
+</nav>
