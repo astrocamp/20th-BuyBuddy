@@ -1,98 +1,62 @@
 {% extends 'layouts/default.html'%}
+{% load static %}
 
 {% block content%}
+  <!-- Hero Pic -->
+  <section class="max-w-[1440px] mx-auto px-8 sm:px-12">
+    <div class="relative w-full h-[300px] sm:h-[350px] lg:h-[400px] rounded-4xl overflow-hidden">
+      <div class="absolute inset-0 bg-center bg-cover" style="background-image:url({% static 'asset/hero-pic.jpg' %});"></div>
+      <!-- Overlay -->
+      <div class="bg-black/30 absolute inset-0 flex items-center justify-center">
+        <div class="w-full max-w-[844px] px-5 flex flex-col items-center gap-10 text-center text-white">
+          <!-- Page title -->
+          <div class="w-full px-5">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-4">Group Up! Save Up!</h1>
+            <p class="text-md sm:text-lg md:text-xl lg:text-2xl text-white/90">加入團購，享受優惠價格，與夥伴一起購物更划算！</p>
+          </div>
+          <!-- Button -->
+          <a href="{% url 'groups:new' %}" class="main-btn px-[34px] py-[15px] text-[#1E1F24] text-base">
+            我要開團
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Section -->
+  <section class="max-w-[1440px] mx-auto px-16 sm:px-24 mt-12 lg:mt-16">
+    <div class="w-full max-w-[1105px] mx-auto">
+    
+        <!-- Tab Group -->
+        <div class="flex justify-center mt-6 lg:mt-8">
+            {% include "shared/tab_group.html" %}
+        </div>
+
+        <!-- Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mt-6 lg:mt-8">
+            {% if groups %}
+                {% for group in groups %}
+                    {% include 'groups/shared/group_card.html' with group=group only %}
+                {% endfor %}
+            {% else %}
+                    <div class="w-full text-center">
+                        <h3 class="text-lg sm:text-xl tertiary-color-500">目前沒有此分類團購</h3>
+                    </div>
+            {% endif %}
+            
+        </div>
+        
+     
+
+      
+    </div>
+  </section>
+
+
 
 <h1 class="text-2xl font-bold text-center text-amber-400">進行中團購</h1>
 <div class="flex justify-center gap-2 mt-5">
   <a class="border-2 border-gray-300 rounded-md p-2 hover:bg-gray-200" href="{% url 'groups:owned' %}">我開的團</a>
   <a class="border-2 border-gray-300 rounded-md p-2 hover:bg-gray-200" href="{% url 'groups:followed' %}">我跟的團</a>
 </div>
-
-
-<h1>可團購列表</h1>
-
-{% if groups %}
-    <table border="1" width="100%">
-        <tr>
-            <th>群組名稱</th>
-            <th>創建者</th>
-            <th>創建時間</th>
-            <th>操作</th>
-        </tr>
-        {% for group in groups %}
-        <tr>
-            <td>{{ group.name }}</td>
-            <td>{{ group.owner.username }}</td>
-            <td>{{ group.created_at|date:"Y-m-d H:i" }}</td>
-            <td>
-                <a href="{% url 'groups:detail' group.id %}">查看詳情</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
-{% else %}
-    <p>目前沒有任何群組</p>
-{% endif %}
-
-<hr>
-
-{% if user.is_authenticated %}
-    <h2>我開團列表</h2>
-    <p>總銷售金額：${{ total_sales_amount }}</p>
-
-    {% if my_groups %}
-        <table border="1" width="100%">
-            <tr>
-                <th>群組名稱</th>
-                <th>創建時間</th>
-                <th>操作</th>
-            </tr>
-            {% for group in my_groups %}
-            <tr>
-                <td>{{ group.name }}</td>
-                <td>{{ group.created_at|date:"Y-m-d H:i" }}</td>
-                <td>
-                    <a href="#">編輯</a> | 
-                    <a href="#">管理</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </table>
-    {% else %}
-        <p>您還沒有創建任何群組</p>
-        <p><a href="#">創建新群組</a></p>
-    {% endif %}
-
-    <hr>
-
-    <h2>已跟團列表</h2>
-    <p>總購買金額：${{ total_purchase_amount }}</p>
-
-    {% if purchases %}
-        <table border="1" width="100%">
-            <tr>
-                <th>群組名稱</th>
-                <th>群組創建者</th>
-                <th>購買金額</th>
-                <th>購買時間</th>
-            </tr>
-            {% for purchase in purchases %}
-            <tr>
-                <td>{{ purchase.group.name }}</td>
-                <td>{{ purchase.group.owner.username }}</td>
-                <td>${{ purchase.total_amount }}</td>
-                <td>{{ purchase.created_at|date:"Y-m-d H:i" }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-    {% else %}
-        <p>您還沒有參與任何團購</p>
-    {% endif %}
-
-{% else %}
-    <!-- 未登入提示 -->
-    <h2>會員專區</h2>
-    <p>請先 <a href="/">登入</a> 以查看您的群組和購買記錄</p>
-{% endif %}
-
 {% endblock %}

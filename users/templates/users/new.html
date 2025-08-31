@@ -2,11 +2,10 @@
 {% load static %}
 
 {% block content%}
-<div class="flex flex-col items-center mt-20">
+<div class="flex flex-col items-center">
     <div class="w-full max-w-md">
-        <img class="w-30 mt-12 mx-auto" src="{% static "asset/buddy_1.svg" %}" alt="">
+        <img class="w-30 mt-12 mx-auto" src="{% static "asset/avatar_default.svg" %}" alt="">
         <h1 class="text-2xl font-bold mt-5 mb-2 text-center">註冊</h1>
-        <h1 class="text-lg font-bold mb-8 text-center">Be Our Buddy!</h1>
         <form action="{% url 'users:create' %}" method="post" class="space-y-8" novalidate>
             {% csrf_token %}
             <div class="space-y-2">

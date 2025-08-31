@@ -1,0 +1,72 @@
+<!-- 漢堡選單 -->
+<button class="flex flex-col gap-2 w-8 h-8 justify-center cursor-pointer" @click="open = !open">
+    <span class="w-8 h-[2px] bg-secondary-color transition-all rounded-full" :class="open ? 'rotate-45 translate-y-[7px]' : ''"></span>
+    <span class="w-8 h-[2px] bg-secondary-color transition-all rounded-full" :class="open ? 'opacity-0' : ''"></span>
+    <span class="w-8 h-[2px] bg-secondary-color transition-all rounded-full" :class="open ? '-rotate-45 -translate-y-[12.5px]' : ''"></span>
+</button>
+
+<div x-show="open"
+x-cloak
+x-transition:enter="transition ease-out duration-300"
+x-transition:enter-start="opacity-0 transform translate-x-4"
+x-transition:enter-end="opacity-100 transform translate-x-0"
+x-transition:leave="transition ease-in duration-300"
+x-transition:leave-start="opacity-100 transform translate-x-0"
+x-transition:leave-end="opacity-0 transform translate-x-4"
+@click.outside="open=false"  
+class="pl-[100px] pb-12 bg-[#EDEDED]  fixed top-0 right-0 w-[80%] md:w-[500px] rounded-l-4xl h-screen flex flex-col overflow-hidden secondary-color">
+<div class="sticky top-0 bg-[#EDEDED] pt-[85px] pb-4 z-10 rounded-t-[50px]">
+    <button class="absolute top-[35px] md:top-[40px] right-[25px] md:right-[50px] cursor-pointer 
+    hover:outline-[var(--secondary-color)] hover:outline-[1.5px] hover:outline-offset-8 rounded-full transition-all" @click="open=false">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="[var(--secondary-color)]" viewBox="0 0 256 256"><path d="M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z"></path></svg>
+    </button>
+
+    {% if user.is_authenticated %}
+        <ul class="text-brand-black pr-[100px]">
+            <li class="py-8">
+                <a href="{% url 'groups:new' %}" class="w-[128px] flex flex-col main-btn hover:scale-115 hover:py-2 text-center">
+                    我要開團
+                </a>
+            </li>
+
+            <li class="py-8">
+                <a href="{% url 'users:profiles'%}"
+                class="flex hover:scale-115 hover:py-2 transition-all duration-300 origin-left items-center gap-4">
+                    <div class="rounded-full overflow-hidden w-8 h-8">
+                        <img src="{{ user.avatar_url.url }}" alt="User Avatar">
+                    </div>
+                    <p>
+                        {{user.username}}
+                    </p>
+                </a>
+            </li>
+
+            <li class="py-8">
+                <a href="{% url 'orders:my_orders' %}" class="flex flex-col hover:scale-115 hover:py-2 transition-all duration-300 origin-left">
+                    我的訂單
+                </a>
+            </li>
+            <li class="py-8 transition-all duration-300">
+                <a href="{% url 'users:sessions_delete' %}" class="flex flex-col hover:scale-115 hover:py-2 transition-all duration-300 origin-left">
+                    登出
+                </a>
+            </li>
+        </ul>
+
+    {% else %}
+        <ul class="text-brand-black pr-[100px]">
+            <li class="py-8">
+                <a href="{% url 'users:new' %}" class="w-[128px] flex flex-col m-auto main-btn hover:scale-115 hover:py-2 text-center">
+                    註冊
+                </a>
+            </li>
+
+             <li class="py-8 transition-all duration-300">
+                <a href="{% url 'users:sessions_new' %}" class="flex flex-col hover:scale-115 hover:py-2 transition-all duration-300 origin-center text-center">
+                    登入
+                </a>
+            </li>
+
+        </ul>
+    {% endif %}
+</div>

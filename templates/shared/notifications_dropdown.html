@@ -1,8 +1,7 @@
 
 {% if unread_count %}
-<div class="absolute bg-[var(--brand-red)] p-2 top-0 right-[-3px] rounded-full w-[25px] h-[25px]         
-     flex justify-center items-center">
-    <span class="text-[13px] text-white font-extrabold ">
+<div class="absolute bg-primary-color p-2 top-0 right-[-3px] rounded-full w-[25px] h-[25px] flex justify-center items-center">
+    <span class="text-xs secondary-color font-extrabold ">
         {{unread_count}}
     </span>
 </div>
@@ -17,54 +16,59 @@
      x-transition:leave-start="opacity-100 transform translate-x-0"
      x-transition:leave-end="opacity-0 transform translate-x-4"
      @click.outside="show=false"  
-     class="pl-[100px] pb-12 bg-main-color absolute w-[500px] top-[-25px] right-[-80px] rounded-l-[80px] h-screen flex flex-col overflow-hidden">
-     <div class="sticky top-0 bg-main-color pt-[85px] pb-4 z-10 rounded-t-[50px]">
-         <button class="absolute top-10 right-[85px] cursor-pointer 
+     class="pl-[80px]  sm:pl-[100px] bg-secondary-color fixed top-0 right-0 w-[80%] md:w-[500px] rounded-l-4xl h-screen flex flex-col overflow-hidden text-white">
+     <div class="sticky top-0 bg-secondary-color pt-[85px] pb-4 z-10 rounded-t-[50px]">
+         <button class="absolute cursor-pointer 
+         top-[35px] md:top-[40px] lg:top-[35px] 
+         right-[25px] md:right-[50px] 
          hover:outline hover:outline-[1.5px] hover:outline-offset-8 rounded-full transition-all" @click="show=false">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#000000" viewBox="0 0 256 256"><path d="M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#ffffff" viewBox="0 0 256 256"><path d="M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z"></path></svg>
          </button>
-{% if notifications %}
-         <form action="{% url 'notifications:read_all' %}" method="post" class="">
-            {% csrf_token %}
-            <input type="hidden" name="next" value="{{request.path}}">
-            <button class="flex items-center gap-2 py-3 px-6 rounded-full text-sm cursor-pointer hover:outline hover:outline-[1.5px] hover:outline-offset-2 rounded-full transition-all">
-                全部已讀
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256"><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"></path></svg>
-            </button>
-         </form>
-        
-     </div>
-     <div class="overflow-auto flex-1">
-        <ul class="space-y-6 text-brand-black">
-        {% for un in notifications %}
-            {% if not un.is_read %}
-                <li class="pb-6 hover:text-[#d85c34] transition-all duration-300">
-                    <a href="{% url 'notifications:open' un.id %}" class="flex flex-col hover:scale-105 transition-transform duration-300 origin-left">
-                        <div class="flex items-center gap-2">
-                            <div class="w-[12px] h-[12px] rounded-full bg-[var(--brand-red)]"></div>
-                            <strong class="flex-1">{{un.notification.title}}</strong>
-                        </div>
-                        <p class="text-sm mb-2 pl-6">{{un.notification.content}}</p>
-                        <span class="text-xs pl-6">{{un.notification.created_at|date:"Y-m-d H:i"}}</span>
-                    </a>
-                </li>
-            {% else %}
-                <li class="pb-6 opacity-40 hover:opacity-100 transition-all duration-300 pl-6">
-                    <a href="{% url 'notifications:open' un.id %}" class="flex flex-col hover:scale-105 transition-transform duration-300 origin-left">
-                        <div>
-                            <strong class="flex-1">{{un.notification.title}}</strong>
-                        </div>
-                        <p class="text-sm mb-2">{{un.notification.content}}</p>
-                        <span class="text-xs">{{un.notification.created_at|date:"Y-m-d H:i"}}</span>
-                    </a>
-                </li>                   
-            {% endif %}
-        {% endfor %}
-        </ul>
-     </div>
-{% else %}
-    <div class="flex-1 flex items-center">
-        <p>目前沒有您的通知</p>
-    </div>
-{% endif %}
+    {% if notifications %}
+            <form action="{% url 'notifications:read_all' %}" method="post" class="">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{request.path}}">
+                <button class="flex items-center gap-2 py-3 px-6 rounded-full text-sm cursor-pointer hover:outline hover:outline-[1.5px] hover:outline-offset-2 rounded-full transition-all">
+                    全部已讀
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256"><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"></path></svg>
+                </button>
+            </form>
+            
+        </div>
+        <div class="overflow-auto">
+            <ul class=" text-brand-black pr-10 md:pr-[100px]">
+            {% for un in notifications %}
+                {% if un.is_read %}
+                    <li class="py-6 opacity-40 hover:opacity-100 transition-all duration-300 pl-6">
+                        <a href="{% url 'notifications:open' un.id %}" class="flex flex-col hover:scale-115 hover:py-2 transition-all duration-300 origin-left">
+                            <div>
+                                <strong class="flex-1 text-sm sm:text-base">{{un.notification.title}}</strong>
+                            </div>
+                            <p class="text-xs sm:text-sm mb-2">{{un.notification.content}}</p>
+                            <span class="text-xs">{{un.notification.created_at|date:"Y-m-d H:i"}}</span>
+                        </a>
+                    </li>  
+                {% else %}
+                    <li class="py-8 transition-all duration-300">
+                            <a href="{% url 'notifications:open' un.id %}" class="flex flex-col hover:scale-115 hover:py-2 transition-all duration-300 origin-left">
+                                <div class="flex items-center gap-2">
+                                    <!-- 小黃點 -->
+                                    <div class="w-[12px] h-[12px] rounded-full bg-primary-color"></div>
+                                    <strong class="flex-1 text-sm sm:text-base pl-1">{{un.notification.title}}</strong>
+                                </div>
+                                <p class="text-xs md:text-sm mb-2 pl-6">{{un.notification.content}}</p>
+
+                                <span class="text-xs pl-6">{{un.notification.created_at|date:"Y-m-d H:i"}}</span>
+                            </a>
+                    </li>
+                                     
+                {% endif %}
+            {% endfor %}
+            </ul>
+        </div>
+    {% else %}
+        <div class="flex-1 flex items-center">
+            <p>目前沒有您的通知</p>
+        </div>
+    {% endif %}
 </div>
