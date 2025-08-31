@@ -24,3 +24,4 @@ public/scripts/*
 !public/scripts/.keep
 
 staticfiles
+celerybeat-schedule
