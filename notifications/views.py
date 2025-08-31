@@ -13,8 +13,9 @@ def open(request, id):
         un.read_at = timezone.now()
         un.save(update_fields=["is_read", "read_at"])
 
+    notification_id = un.notification.group_id
     # TODO 需導向銷售頁面
-    return redirect("groups:index")
+    return redirect("groups:detail", notification_id)
 
 
 @require_POST

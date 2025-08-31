@@ -1,4 +1,4 @@
-{% load static%}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,14 +8,20 @@
     <link rel="stylesheet" href="{% static 'styles/style.css' %}">
     <script type="module" src="{% static 'scripts/app.js' %}"></script>
 </head>
-<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
-    {% include 'shared/navbar.html' %}
+<body class="min-h-screen flex flex-col" hx-headers='{"X-CSRFToken": "{{ 
+csrf_token }}"}'>
+    <header class="w-full bg-[var(--bg-color)] fixed z-100">
+        {% include 'shared/navbar.html' %}
+    </header>
 
     {% include 'shared/messages.html' %}
-    <main class="mt-[98px]">
+    <main class="pt-[90px] flex-1">
         {% block content %}
         {% endblock %}
     </main>
     
+    {% include 'shared/footer.html' %}
 </body>
+
+
 </html>
