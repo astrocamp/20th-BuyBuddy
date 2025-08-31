@@ -58,9 +58,7 @@ def create(request):
     try:
         # 先建立用戶資料
         new_user = form.save(commit=False)
-        new_user.avatar_url = (
-            'image/upload/v1755754867/avatars/tyzned8ajzgzeokgarve.png'
-        )
+        new_user.avatar_url = "avatars/avatar_default.png"
         new_user.set_password(form.cleaned_data["password"])  # 手動雜湊密碼
         new_user.save()
 
