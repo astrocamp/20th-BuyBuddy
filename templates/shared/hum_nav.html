@@ -32,10 +32,10 @@ class="pl-[100px] pb-12 bg-[#EDEDED]  fixed top-0 right-0 w-[80%] md:w-[500px] r
             <li class="py-8">
                 <a href="{% url 'users:profiles'%}"
                 class="flex hover:scale-115 hover:py-2 transition-all duration-300 origin-left items-center gap-4">
-                    <div class="rounded-full overflow-hidden w-8 h-8">
+                    <div id="navbar-avatar-mobile" class="rounded-full overflow-hidden w-8 h-8">
                         <img src="{{ user.avatar_url.url }}" alt="User Avatar">
                     </div>
-                    <p>
+                    <p id="navbar-username-mobile">
                         {{user.username}}
                     </p>
                 </a>

@@ -1,10 +1,10 @@
 import Toastify from "toastify-js";
 
 const bgList = {
-  success: "#3d7757ff",
-  info: "#293343",
-  warning: "#d78512ff",
-  error: "#d85c34ff",
+  success: "#06890aff",
+  warning: "#e57d0dff",
+  error: "#df2e1aff",
+  info: "#1e1f24",
 };
 const infoColor = bgList["info"];
 

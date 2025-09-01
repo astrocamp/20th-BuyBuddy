@@ -25,10 +25,10 @@
             <li>
                 <a href="{% url 'users:profiles'%}"
                    class="nav-btn flex gap-2 items-center">
-                   <p>
+                   <p id="navbar-username-desktop">
                        {{user.username}}
                    </p>
-                   <div class="rounded-full overflow-hidden w-8 h-8">
+                   <div id="navbar-avatar-desktop" class="rounded-full overflow-hidden w-8 h-8">
                        <img src="{{ user.avatar_url.url }}" alt="User Avatar">
                    </div>
                 </a>

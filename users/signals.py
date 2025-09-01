@@ -1,8 +1,7 @@
-from django.db.models.signals import post_save, pre_delete
+from django.db.models.signals import post_save, pre_save, pre_delete
 from django.dispatch import receiver
 from django.conf import settings
 from .models import UserAddress, DefaultAddressRequiredError
-from django.db import transaction
 
 User = settings.AUTH_USER_MODEL
 
@@ -15,37 +14,35 @@ def create_user_address(sender, instance, created, **kwargs):
 
 # 檢查有沒有其他預設
 def _has_other_default(user, exclude_pk=None):
-    qs = UserAddress.object.filter(user=user, is_default=True)
+    qs = UserAddress.objects.filter(user=user, is_default=True)
     if exclude_pk:
         qs = qs.exclude(pk=exclude_pk)
 
-    return qs.exist()
+    return qs.exists()
 
 
-# 檢查是不是唯一一筆預設
-def _is_only_default(user, exclude):
-    qs = UserAddress.objects.filter(user=user, is_default=True)
-    return qs.count() == 1
-
-
-@receiver(post_save, sender=UserAddress)
-def ensure_default_on_update(sender, instance: UserAddress, **kwargs):
-
-    # 檢查儲存的資料是否為預設
+@receiver(pre_save, sender=UserAddress)
+def ensure_default_before_save(sender, instance: UserAddress, **kwargs):
+    # 若將新的設為預設，先把其他預設拿掉
     if instance.is_default:
-        # 是的話要把其他的預設拿掉
-        with transaction.atomic():
-            UserAddress.objects.filter(user=instance.user, is_default=True).exclude(
-                pk=instance.pk
-            ).update(is_default=False)
-
+        qs = UserAddress.objects.filter(user=instance.user, is_default=True)
+        if instance.pk:
+            qs = qs.exclude(pk=instance.pk)
+        qs.update(is_default=False)
     else:
-        # 不是的話檢查是否有其他預設
-        if not _has_other_default(instance.user, exclude_pk=isinstance.pk):
-            raise DefaultAddressRequiredError("使用者至少需要一個預設地址")
+        # 若這筆沒有要成為預設，但系統裡沒有其他預設，禁止儲存
+        has_other = (
+            UserAddress.objects.filter(user=instance.user, is_default=True)
+            .exclude(pk=instance.pk)
+            .exists()
+        )
+        if not has_other:
+            from django.core.exceptions import ValidationError
+
+            raise ValidationError("至少需要有一個預設地址")
 
 
 @receiver(pre_delete, sender=UserAddress)
 def ensure_default_on_delete(sender, instance: UserAddress, **kwargs):
-    if not _has_other_default(instance.user, exclude_pk=isinstance.pk):
+    if not _has_other_default(instance.user, exclude_pk=instance.pk):
         raise DefaultAddressRequiredError("刪除失敗，無法刪除最後一個預設地址")
