@@ -1,7 +1,6 @@
-from django.forms import ModelForm, inlineformset_factory, BaseInlineFormSet
+from django.forms import ModelForm
 from django import forms
 from .models import Group
-from products.models import Product
 from django.forms.widgets import *
 
 
@@ -25,24 +24,3 @@ class GroupForm(ModelForm):
         'min_goal': '成團目標'
     }
 
-class ProductForm(BaseInlineFormSet):
-
-  def __init__(self, *args, **kwargs):
-    super().__init__(*args, **kwargs)
-    instance = kwargs.get('instance', None)
-    if instance and instance.pk:
-      self.extra = 0
-
-ProductFormSet = inlineformset_factory(
-    Group,
-    Product,
-    fields=['name', 'price', 'description'],
-    extra=2,
-    can_delete=False,
-    labels = {
-      'name': '產品名稱',
-      'price': '產品價格',
-      'description': '產品描述'
-    },
-    formset = ProductForm
-)

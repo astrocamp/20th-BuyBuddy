@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Group, JoinedGroup
-from .forms import GroupForm, ProductFormSet
-from products.models import ProductImage
+from products.models import Product
+from .forms import GroupForm
+from products.forms import ProductFormSet
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import transaction
@@ -9,6 +10,7 @@ from .services.exceptions import *
 from .services.group_services import GroupService
 from django.utils import timezone
 from datetime import datetime
+from django.forms import inlineformset_factory
 
 
 def index(request):
@@ -16,16 +18,32 @@ def index(request):
 	return render(request, "groups/index.html", {"groups": groups})
 
 def new(request):
-	product_form = ProductFormSet(prefix='product')
-	group_form = GroupForm(prefix='group')
-	return render(request, 'groups/new.html', {'product_form': product_form, 'group_form': group_form})
+	if request.method == "POST":
+		group_form = GroupForm(request.POST, request.FILES, prefix="group")
+		product_formset = ProductFormSet(request.POST, request.FILES, prefix="product")
+		if group_form.is_valid() and product_formset.is_valid():
+			with transaction.atomic():
+				group = group_form.save(commit=False)
+				group.owner = request.user
+				group.status = "ongoing"
+				group.save()	
+
+				product_formset.instance = group
+				product_formset.save()		
+			messages.success(request, "團購已建立")
+			return redirect("groups:owned")
+		else:
+			messages.warning(request, "欄位填寫有誤，請檢查後再試")
+	else:
+		group_form = GroupForm(prefix="group")
+		product_formset = ProductFormSet(prefix="product")
+	return render(request, "groups/new.html", {"product_form": product_formset, "group_form": group_form})
+
 
 @login_required
 def owned(request):
 	groups = Group.objects.filter(owner=request.user)
-	
 	if request.method == "POST":
-		
 		if request.POST.get("_method") == "delete":
 			group_id = request.POST.get("group-id")
 			group = get_object_or_404(Group, pk=group_id)
@@ -35,32 +53,6 @@ def owned(request):
 			group.delete()
 			messages.success(request, "團購已刪除")
 			return redirect('groups:owned')
-
-		group_form = GroupForm(request.POST, request.FILES, prefix="group")
-		if group_form.is_valid():
-			with transaction.atomic():
-				group = group_form.save(commit=False)
-				group.owner = request.user
-				group.status = "ongoing"
-				group.save()	
-				product_formset = ProductFormSet(request.POST, instance=group, prefix="product")
-				if product_formset.is_valid():
-					products = product_formset.save(commit=False)
-					for i, product in enumerate(products):
-						product.group = group
-						product.save()
-						image = request.FILES.get(f"url_{i}")
-						if image:
-							ProductImage.objects.create(
-									product=product,
-									url=image,
-									order=0
-							)			
-					messages.success(request, "團購已建立")
-					return redirect("groups:owned")
-		else:
-			messages.warning(request, "欄位填寫有誤，請檢查後再試")
-		return render(request, "groups/new.html", {"product_form": product_formset, "group_form": group_form})	
 	return render(request, "groups/owned.html", {"groups": groups})
 
 @login_required
@@ -150,4 +142,12 @@ def manage_edit(request, id):
 	return render(request, "groups/manage_edit.html", {"product_form": product_formset, "group_form": group_form})
 	
 
+def add_product_form(request):
+	if request.method == "POST":
+		total_forms = int(request.POST.get('product-TOTAL_FORMS', 0))
+		new_total = total_forms + 1
+		data = request.POST.copy()
+		data['product-TOTAL_FORMS'] = str(new_total)
+		formset = ProductFormSet(data=data, prefix="product")
+		return render(request, "groups/product_form.html", {"product_form": formset})
 

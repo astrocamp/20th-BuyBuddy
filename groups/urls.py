@@ -13,4 +13,5 @@ urlpatterns = [
 	path("<int:id>/manage/", views.manage, name="manage"),
 	path("<int:id>/manage/edit", views.manage_edit, name="manage_edit"),
     path('new/', views.new, name="new"),
+	path('new/product-form/', views.add_product_form, name="add_product_form")
 ]

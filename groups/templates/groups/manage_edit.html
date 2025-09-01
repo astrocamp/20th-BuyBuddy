@@ -103,8 +103,8 @@
       type="file"
       disabled
       />
-      {% if form.instance.images.first %}
-      <img class="h-60 object-cover" src="{{ form.instance.images.first.url.url }}" alt="">
+      {% if form.instance.image %}
+      <img class="h-60 object-cover" src="{{ form.instance.image.url }}" alt="">
       {% else %}
       <div class="h-60 bg-gray-200 flex items-center justify-center text-gray-500">
         No image
