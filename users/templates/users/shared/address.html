@@ -1,0 +1,52 @@
+{% if show and not include_address_list_oob %}
+    {% include "users/shared/messages.html" %}
+{% endif %}
+
+{% if not delete %}
+<div class="flex flex-col" id="user_address_{{user_address_form.instance.id}}">
+            <div class="flex justify-between">
+            <span class="font-semibold">{{ user_address_form.recipient_name.label_tag }}</span>
+            <span>{{ user_address_form.recipient_name.value }}</span>
+    </div>
+    <div class="flex justify-between">
+        <span class="font-semibold">{{ user_address_form.is_default.label_tag }}</span>
+        <span>{{ user_address_form.is_default.value }}</span>
+    </div>
+    <div class="flex justify-between">
+        <span class="font-semibold">{{ user_address_form.phone.label_tag }}</span>
+        <span>{{ user_address_form.phone.value }}</span>
+    </div>
+    <div class="flex justify-between">
+        <span class="font-semibold">{{ user_address_form.postal_code.label_tag }}</span>
+        <span>{{ user_address_form.postal_code.value }}</span>
+    </div>
+    <div class="flex justify-between">
+        <span class="font-semibold">{{ user_address_form.county.label_tag }}</span>
+        <span>{{ user_address_form.county.value }}</span>
+    </div>
+    <div class="flex justify-between">
+        <span class="font-semibold">{{ user_address_form.district.label_tag }}</span>
+        <span>{{ user_address_form.district.value }}</span>
+    </div>
+    <div class="flex justify-between">
+        <span class="font-semibold">{{ user_address_form.road.label_tag }}</span>
+        <span>{{ user_address_form.road.value }}</span>
+    </div>
+    <div class="flex justify-between">
+        <span class="font-semibold">{{ user_address_form.detail.label_tag }}</span>
+        <span>{{ user_address_form.detail.value }}</span>
+    </div>
+    <div class="flex gap-4">
+        <button hx-get="{% url 'users:address_edit' user_address_form.instance.id %}"
+                hx-target="#user_address_{{user_address_form.instance.id}}"
+                class="border-b-2 cursor-pointer"
+                >編輯</button>
+        <button 
+                hx-delete="{% url 'users:address_delete' user_address_form.instance.id %}"
+                hx-target="#user_address_{{user_address_form.instance.id}}
+                "
+                hx-swap="outerHTML"
+                class="border-b-2 cursor-pointer">刪除</button>
+    </div>
+</div>
+{% endif %}
