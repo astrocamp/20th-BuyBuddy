@@ -5,6 +5,7 @@ from groups.models import Group, JoinedGroup
 from django.utils import timezone
 import uuid
 from django_fsm import FSMField, transition
+from django.core.exceptions import ValidationError
 
 
 def _generate_unique_number():
@@ -54,9 +55,18 @@ class Order(models.Model):
     shipped_at = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
 
-    shipping_address = models.ForeignKey(
-        UserAddress, on_delete=models.PROTECT, null=True, blank=True
-    )
+    # shipping_address = models.ForeignKey(
+    #     UserAddress, on_delete=models.SET_NULL, null=True, blank=True
+    # )
+
+    # ---- 地址快照 ----
+    ship_recipient_name = models.CharField(max_length=50, null=True, blank=True)
+    ship_phone = models.CharField(max_length=20, null=True, blank=True)
+    ship_postal_code = models.CharField(max_length=5, null=True, blank=True)
+    ship_county = models.CharField(max_length=10, null=True, blank=True)
+    ship_district = models.CharField(max_length=10, null=True, blank=True)
+    ship_road = models.CharField(max_length=100, null=True, blank=True)
+    ship_detail = models.CharField(max_length=100, null=True, blank=True)
 
     @transition(
         field=order_status, source=OrderStatus.PENDING, target=OrderStatus.PROCESSING
@@ -106,6 +116,32 @@ class Order(models.Model):
     @property
     def formatted_amount(self):
         return f"{self.amount:,.0f}"
+
+    def apply_address(self, address: UserAddress, *, save=True):
+        if address.user_id != self.user_id:
+            raise ValidationError("地址不屬於該訂單的使用者")
+
+        self.ship_recipient_name = address.recipient_name
+        self.ship_phone = address.phone
+        self.ship_postal_code = address.postal_code
+        self.ship_county = address.county
+        self.ship_district = address.district
+        self.ship_road = address.road
+        self.ship_detail = address.detail
+
+        if save:
+            self.save(
+                update_fields=[
+                    "ship_recipient_name",
+                    "ship_phone",
+                    "ship_postal_code",
+                    "ship_county",
+                    "ship_district",
+                    "ship_road",
+                    "ship_detail",
+                    "updated_at",
+                ]
+            )
 
     def __str__(self):
         return self.order_number
