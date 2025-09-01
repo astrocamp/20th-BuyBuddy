@@ -1,0 +1,7 @@
+<div x-data="messagesControl" x-init="showAllFrom($refs.msgsJson)" class="hidden">
+   <script type="application/json" x-ref="msgsJson">
+   [
+      {"text":"{{ message|escapejs }}","tag":"{{type}}"}
+   ]
+   </script>
+</div>

@@ -4,8 +4,19 @@ from . import views
 app_name = "users"
 
 urlpatterns = [
-    path('profiles/edit', views.edit, name="edit"),
-    path('profiles', views.profiles, name="profiles"),
+    path('profiles/', views.profiles, name="profiles"),
+    path('profiles/edit/', views.profiles_edit, name="profiles_edit"),
+    path('profiles/address/create/', views.address_create, name="address_create"),
+    path(
+        'profiles/address/<int:address_id>/edit/',
+        views.address_edit,
+        name="address_edit",
+    ),
+    path(
+        'profiles/address/<int:address_id>/delete/',
+        views.address_delete,
+        name="address_delete",
+    ),
     path("new/", views.new, name="new"),
     path("", views.create, name="create"),
     path("sessions/new/", views.sessions_new, name="sessions_new"),
@@ -16,4 +27,3 @@ urlpatterns = [
         "verify-email/<str:uid>/<str:token>/", views.verify_email, name="verify_email"
     ),
 ]
-    
