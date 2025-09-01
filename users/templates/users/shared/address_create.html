@@ -1,0 +1,11 @@
+{% if show %}
+    {% include "users/shared/messages.html" %}
+{% endif %}
+
+
+<form action="{% url 'users:address_create' %}"
+      method="post">
+    {% csrf_token %}
+    {% include "users/shared/address_form_fields.html" %}
+    <button class="border-b-2 cursor-pointer">新增</button>
+</form>
