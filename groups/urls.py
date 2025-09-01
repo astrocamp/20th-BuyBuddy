@@ -6,11 +6,10 @@ app_name = "groups"
 
 urlpatterns = [
     path("", views.index, name="index"),
-    path("owned/",views.owned, name="owned"),
-    path("followed/", views.followed, name="followed"),
+	path('new/', views.new, name="new"),
     path("<int:id>/", views.detail, name="detail"),
 	path("<int:id>/member/edit", views.update_quantity, name="update_quantity"),
 	path("<int:id>/manage/", views.manage, name="manage"),
 	path("<int:id>/manage/edit", views.manage_edit, name="manage_edit"),
-    path('new/', views.new, name="new"),
+	path("<str:filter_type>/", views.index, name="index_filtered"),
 ]

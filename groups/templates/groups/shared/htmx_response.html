@@ -1,0 +1,11 @@
+<div id="tab-group-container" hx-swap-oob="innerHTML">
+	 {% include "shared/tab_group.html" with active_tab=active_tab only %}
+</div>
+
+<div id="sub-tabs-container" hx-swap-oob="innerHTML">
+	{% if active_tab == 'owned' or active_tab == 'followed' %}
+    	{% include "groups/shared/sub_groups_tabs.html" with active_tab=active_tab active_status=active_status only %}
+	{% endif %}
+</div>
+
+{% include "groups/shared/group_with_paginator.html" with page_groups=page_groups active_tab=active_tab active_status=active_status only %}
