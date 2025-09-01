@@ -4,6 +4,7 @@ from django.forms import (
     TextInput,
     CheckboxInput,
     NumberInput,
+    modelformset_factory,
 )
 from .models import User, UserAddress
 from django import forms
@@ -76,7 +77,9 @@ class UserForm(ModelForm):
             "username": "用戶名稱",
         }
         widgets = {
-            "avatar_url": FileInput(attrs={"@change": "handleFile($event)", "accept": "image/*"}),
+            "avatar_url": FileInput(
+                attrs={"@change": "handleFile($event)", "accept": "image/*"}
+            ),
             "username": TextInput(),
         }
 
@@ -99,10 +102,10 @@ class UserAddressForm(ModelForm):
             "is_default": "設爲預設",
             "phone": "收件人手機",
             "postal_code": "郵遞區號",
-            "county": "縣市",
-            "district": "鄉鎮市區",
-            "road": "住址1",
-            "detail": "住址2",
+            "county": "城市/縣",
+            "district": "區",
+            "road": "路名/街道",
+            "detail": "地址",
         }
         widgets = {
             "recipient_name": TextInput(),
@@ -114,3 +117,11 @@ class UserAddressForm(ModelForm):
             "road": TextInput(),
             "detail": TextInput(),
         }
+
+
+UserAddressFormSet = modelformset_factory(
+    UserAddress,
+    form=UserAddressForm,
+    extra=0,  # 不要額外的空表單
+    can_delete=True,  # 如果需要刪除功能
+)

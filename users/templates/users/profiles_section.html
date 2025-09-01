@@ -1,0 +1,26 @@
+{% extends 'layouts/default.html'%}
+
+{% block content%}
+<h1 class="text-2xl font-bold text-center mb-6">用戶資料</h1>
+
+<section class="flex flex-col md:flex-row gap-8">
+    <!-- 個人資料 -->
+    {% include "users/shared/profiles.html" %}
+    
+    <!-- 地址們 -->
+    <div class="flex flex-col">
+        <a hx-get="{% url 'users:address_create' %}"
+       hx-target="#address_create"
+       hx-swap="outerHTML"
+       id="address_create"
+       class="border-b-2">新增地址</a>
+        <div class="flex flex-col gap-8" id="address-list">
+            {% include "users/shared/address_list.html" %}
+        </div>
+    </div>
+    
+</section> 
+
+
+
+{% endblock %}
