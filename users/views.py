@@ -1,16 +1,23 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
 from users.models import User, UserAddress
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db import IntegrityError
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.urls import reverse
-from .forms import UserForm, UserAddressForm, RegistrationForm, LoginForm
+from .forms import (
+    UserForm,
+    UserAddressForm,
+    RegistrationForm,
+    LoginForm,
+    UserAddressFormSet,
+)
 from anymail.message import AnymailMessage
+from django.core.exceptions import ValidationError
+from django.db import transaction
 
 
 def send_verification_mail(request, user, email):
@@ -193,38 +200,228 @@ def verify_email(request, uid, token):
         return redirect("users:new")
 
 
+# 查看個人頁面
 @login_required
 def profiles(request):
     user = request.user
-    user_address = get_object_or_404(UserAddress, user=user)
     user_form = UserForm(instance=user)
-    user_address_form = UserAddressForm(instance=user_address)
-    if request.method == "POST":
-        user_form = UserForm(request.POST, request.FILES, instance=user)
-        user_address_form = UserAddressForm(request.POST, instance=user_address)
-        if user_form.is_valid() and user_address_form.is_valid():
-            user_form.save()
-            user_address_form.save()
-        else:
-            print("-" * 10)
-            print(user_form.errors)
-        return redirect("users:profiles")
+    user_addresses = UserAddress.objects.filter(user=user).order_by(
+        "-is_default", "-created_at"
+    )
+
+    user_address_forms = UserAddressFormSet(queryset=user_addresses)
 
     return render(
         request,
-        "users/profiles.html",
-        {"user_form": user_form, "user_address_form": user_address_form},
+        "users/profiles_section.html",
+        {"user_form": user_form, "user_address_forms": user_address_forms},
     )
+
+
+# 編輯或更新個人資訊
+@login_required
+def profiles_edit(request):
+    user = request.user
+
+    # POST 請求，更新資訊
+    if request.method == "POST":
+        user_form = UserForm(request.POST, request.FILES, instance=user)
+        if user_form.is_valid():
+            user_form.save()
+            updated_form = UserForm(instance=user)
+
+            # 儲存成功，返回顯示模式
+            context = {
+                "user_form": updated_form,
+                "message": "用戶資訊更新成功！",
+                "type": "success",
+                "show": True,
+            }
+            return render(
+                request,
+                "users/shared/profiles.html",
+                context,
+            )
+
+        else:
+            # 有錯誤，返回編輯模式並顯示錯誤
+            context = {
+                "user_form": user_form,
+                "message": "更新發生錯誤，請稍後再試",
+                "type": "error",
+                "show": True,
+            }
+            return render(
+                request,
+                "users/shared/profiles.html",
+                context,
+            )
+
+    # GET 請求，顯示編輯表單
+    else:
+        user_form = UserForm(instance=user)
+        return render(
+            request,
+            "users/shared/profiles_edit.html",
+            {"user_form": user_form},
+        )
+
+
+# 顯示編輯畫面或更新地址
+@login_required
+def address_edit(request, address_id):
+    user = request.user
+    address = get_object_or_404(UserAddress, pk=address_id, user=user)
+
+    # POST 請求，更新地址
+    if request.method == "POST":
+        # 得到原本的預設狀態
+        original_is_default = address.is_default
+
+        # 處理表單
+        user_address_form = UserAddressForm(request.POST, instance=address)
+        if user_address_form.is_valid():
+            try:
+                # 保存地址
+                user_address_form.save()
+
+                # 檢查是否變成了預設地址
+                if not original_is_default and address.is_default:
+                    # 重新抓所有地址
+                    user_addresses = UserAddress.objects.filter(user=user).order_by(
+                        "-is_default", "-created_at"
+                    )
+                    all_address_forms = UserAddressFormSet(queryset=user_addresses)
+
+                    # render 包含 OOB
+                    return render(
+                        request,
+                        "users/shared/address_with_oob.html",
+                        {
+                            # "user_address_form": user_address_form,
+                            "all_address_forms": all_address_forms,
+                            "include_address_list_oob": True,
+                            "message": "地址更新成功！",
+                            "type": "success",
+                            "show": True,
+                        },
+                    )
+
+                # 預設沒動，只回更新的地址
+                # 不包含 OOB 更新
+                context = {
+                    "user_address_form": user_address_form,
+                    "message": "地址更新成功！",
+                    "type": "success",
+                    "show": True,
+                    "include_address_list_oob": False,
+                }
+                return render(
+                    request,
+                    "users/shared/address.html",
+                    context,
+                )
+
+            except ValidationError as e:
+                context = {
+                    "user_address_form": user_address_form,
+                    "message": "; ".join(e.messages),
+                    "type": "error",
+                    "show": True,
+                }
+                return render(
+                    request,
+                    "users/shared/address_edit.html",
+                    context,
+                )
+
+        else:
+            # 有錯誤，回到編輯模式並顯示錯誤
+            context = {
+                "user_address_form": user_address_form,
+                "message": "更新發生錯誤，請稍後再試",
+                "type": "error",
+                "show": True,
+            }
+            return render(
+                request,
+                "users/shared/address_edit.html",
+                context,
+            )
+
+    # GET 請求，顯示編輯頁面
+    else:
+        user_address_form = UserAddressForm(instance=address)
+        return render(
+            request,
+            "users/shared/address_edit.html",
+            {"user_address_form": user_address_form},
+        )
+
+
+# 刪除地址
+@require_http_methods(["DELETE"])
+@login_required
+def address_delete(request, address_id):
+    user = request.user
+    target_address = get_object_or_404(UserAddress, pk=address_id, user=user)
+
+    try:
+        target_address.delete()
+        user_address_form = UserAddressForm(instance=target_address)
+        context = {
+            "user_address_form": user_address_form,
+            "delete": True,
+            "message": "地址刪除成功！",
+            "type": "success",
+            "show": True,
+        }
+        return render(request, "users/shared/address.html", context)
+
+    except ValidationError as e:
+        user_address_form = UserAddressForm(instance=target_address)
+        context = {
+            "user_address_form": user_address_form,
+            "message": "; ".join(e.messages),
+            "type": "error",
+            "show": True,
+        }
+        return render(request, "users/shared/address.html", context)
 
 
 @login_required
-def edit(request):
+# 新增地址
+def address_create(request):
     user = request.user
-    user_address = get_object_or_404(UserAddress, user=user)
-    user_form = UserForm(instance=user)
-    user_address_form = UserAddressForm(instance=user_address)
-    return render(
-        request,
-        "users/edit.html",
-        {"user_form": user_form, "user_address_form": user_address_form},
-    )
+
+    # POST 請求，新增地址
+    if request.method == "POST":
+        address_form = UserAddressForm(request.POST)
+        if address_form.is_valid():
+            # 創建新地址
+            new_address_form = address_form.save(commit=False)
+            new_address_form.user = user
+            new_address_form.save()
+            messages.success(request, "新增地址成功")
+            return redirect("users:profiles")
+        else:
+            context = {
+                "user_address_form": address_form,
+                "message": "地址資訊有誤，請稍後再試",
+                "type": "error",
+                "show": True,
+            }
+            return render(
+                request,
+                "users/shared/address_create.html",
+                context,
+            )
+
+    # GET 請求，取得地址空表單
+    else:
+        blank_address_form = UserAddressForm()
+        return render(
+            request,
+            "users/shared/address_create.html",
+            {"user_address_form": blank_address_form},
+        )
