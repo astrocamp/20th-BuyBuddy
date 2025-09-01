@@ -5,10 +5,10 @@
 
 <form action="{% url 'users:profiles' %}" method="post" enctype="multipart/form-data">
 {% csrf_token %}
-    <div class="max-w-md mx-auto bg-white shadow-md rounded-lg p-6">
+    <div x-data="avatarPreview('{{ user_form.instance.avatar_url.url|escapejs }}')"  class="max-w-md mx-auto bg-white shadow-md rounded-lg p-6">
         <div class="flex justify-center mb-6">
             <img 
-                src="{{ user_form.instance.avatar_url.url }}" 
+                :src="avatarUrl" 
                 alt="User Avatar" 
                 class="w-40 h-40 rounded-full border-4 border-gray-300 object-contain"
             >
