@@ -1,0 +1,26 @@
+<div class="flex justify-center items-center gap-4 my-6">
+    <a href="{% url 'groups:index_filtered' filter_type=active_tab %}?status=ongoing"
+       hx-get="{% url 'groups:index_filtered' filter_type=active_tab %}?status=ongoing"
+       hx-target="#groups-container"
+       hx-push-url="true"
+       class="px-4 py-2 text-sm font-medium rounded-full transition-colors 
+              {% if active_status == 'ongoing' %}
+                  bg-secondary-color text-white shadow
+              {% else %}
+                  bg-gray-200 text-gray-700 hover:bg-gray-300
+              {% endif %}">
+        進行中
+    </a>
+    <a href="{% url 'groups:index_filtered' filter_type=active_tab %}?status=reached"
+       hx-get="{% url 'groups:index_filtered' filter_type=active_tab %}?status=reached"
+       hx-target="#groups-container"
+       hx-push-url="true"
+       class="px-4 py-2 text-sm font-medium rounded-full transition-colors 
+              {% if active_status == 'reached' %}
+                  bg-secondary-color text-white shadow
+              {% else %}
+                  bg-gray-200 text-gray-700 hover:bg-gray-300
+              {% endif %}">
+        已達標
+    </a>
+</div>
