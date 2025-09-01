@@ -5,7 +5,7 @@
     class="flex flex-col gap-2 items-center mt-5"
     method="POST"
     enctype="multipart/form-data"
-    action="{% url 'groups:owned' %}"
+    action="{% url 'groups:new' %}"
   >
     {% csrf_token %}
     <div class="flex gap-2">
