@@ -1,0 +1,18 @@
+{% load humanize %}
+<td class="px-4 py-8 align-top w-[300px] min-w-0">
+    <ul class="list-none space-y-8">
+        {% for p in items %}
+            <li class="flex items-center gap-3 min-w-0">
+                <div class="text-sm text-gray-700 truncate">{{ p.name }}</div>
+            </li>
+        {% endfor %}
+    </ul>
+</td>
+
+<td class="px-4 py-8 align-top text-left text-sm text-gray-700 w-[100px]">
+    <ul class="list-none flex flex-col items-start text-left space-y-8">
+        {% for p in items %}
+            <li class="text-sm text-gray-700">{{ p.formatted_price }}</li>
+        {% endfor %}
+    </ul>
+</td>

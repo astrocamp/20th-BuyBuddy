@@ -1,3 +1,4 @@
+from tokenize import group
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 from django.contrib import messages
@@ -9,7 +10,7 @@ import hashlib
 import base64
 import requests
 from .models import Order, Payment
-from groups.models import JoinedGroup
+from groups.models import JoinedGroup, Group
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 
@@ -200,12 +201,12 @@ def success(request):
 def fail(request):
     return render(request, "orders/payment_fail.html")
 
-
+# 我跟團的訂單
 @login_required
 def my_orders(request):
     user = request.user
     tab = request.GET.get("tab", "all")
-    auto_tab = request.GET.get("auto_tab")
+    auto_tab = request.GET.get("auto_tab")    
 
     # 如果有 auto_tab，就用 auto_tab 作為初始內容
     display_tab = auto_tab if auto_tab else tab
@@ -278,6 +279,87 @@ def get_orders_by_tab(user, tab):
         orders = base_orders_query.filter(order_status=Order.OrderStatus.COMPLETED)
 
     return orders, joined_groups
+
+# 我開團的訂單
+@login_required
+def owned_orders(request):
+    user = request.user
+    tab = request.GET.get("tab", "all")
+    auto_tab = request.GET.get("auto_tab")    
+
+    # 如果有 auto_tab，就用 auto_tab 作為初始內容
+    display_tab = auto_tab if auto_tab else tab
+
+    ongoing_groups, completed_groups, orders = get_data_by_tab(user, display_tab)
+
+    return render(
+        request,
+        "orders/owned_orders/section.html",
+        {
+            "ongoing_groups": ongoing_groups,
+            "completed_groups": completed_groups,
+            "orders": orders,
+            "current_tab": display_tab,
+            "auto_tab": auto_tab,
+        },
+    )
+
+@login_required
+def owned_orders_tab_content(request):
+    user = request.user
+    tab = request.GET.get("tab", "all")
+
+    ongoing_groups, completed_groups, orders = get_data_by_tab(user, tab)
+
+    return render(
+        request,
+        "orders/owned_orders/list.html",
+        {
+            "ongoing_groups": ongoing_groups,
+            "completed_groups": completed_groups,
+            "orders": orders,
+            "current_tab": tab,
+        },
+    )
+
+def get_data_by_tab(user, tab):
+    ongoing_groups = []
+    completed_groups = []
+    orders = []
+
+    base_groups_query = (
+        Group.objects.filter(owner=user)
+        .order_by("-created_at")
+        .select_related("owner")
+        .prefetch_related("products__images", "order_set")
+    )
+
+    base_orders_query = (
+        Order.objects.filter(group__status="completed", group__owner=user)
+        .order_by("updated_at")
+        .select_related("group", "user")
+        .prefetch_related("joined_group__joined_group_products__product")
+    )
+
+    if tab == "all":
+        ongoing_groups = base_groups_query.filter(status="ongoing")
+        completed_groups = base_groups_query.filter(status="completed")
+    
+    if tab == "pending":
+        orders = base_orders_query.filter(order_status=Order.OrderStatus.PENDING)
+
+    if tab == "processing":
+        orders = base_orders_query.filter(order_status=Order.OrderStatus.PROCESSING)
+
+    if tab == "shipped":
+        orders = base_orders_query.filter(order_status=Order.OrderStatus.SHIPPED)
+
+    if tab == "completed":
+        orders = base_orders_query.filter(order_status=Order.OrderStatus.COMPLETED)
+
+
+    return ongoing_groups, completed_groups, orders
+
 
 
 # 確認收貨

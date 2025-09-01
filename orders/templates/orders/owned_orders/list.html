@@ -1,0 +1,266 @@
+<div class="max-w-[1280px] mx-auto px-10 py-12">
+  {% if ongoing_groups or completed_groups%}
+  {% if completed_groups %}
+  <section class="mb-10">
+    <h2 class="text-center text-lg font-medium text-gray-800 mb-4">已成團</h2>
+    <div class="overflow-x-auto bg-transparent rounded-2xl border border-gray-300">
+      <table class="min-w-full border-collapse table-fixed text-sm" style="border-spacing:0">
+        <colgroup>
+          <col style="width:340px;" /> <!-- 團購/訂單(含圖) -->
+          <col style="width:373px;" /> <!-- 商品 -->
+          <col style="width:97px;" /> <!-- 價格 -->
+          <col style="width:65px;" /> <!-- 數量 -->
+          <col style="width:97px;" /> <!-- 小計 -->
+          <col style="width:97px;" /> <!-- 合計 -->
+          <col style="width:97px;" /> <!-- 狀態 -->
+          <col style="width:113px;" /> <!-- 操作 -->
+        </colgroup>
+        <thead class="bg-transparent">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[300px]">團購</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[300px]">商品</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[100px]">價格</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[100px]">目標金額</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[150px]">截止日期</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[150px]">建立日期</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[113px]">狀態</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[113px]">操作</th>
+          </tr>
+        </thead>
+        <tbody class="bg-transparent">
+          {% for g in completed_groups %}
+          <tr class="border-t border-gray-300 hover:bg-transparent transition">
+            <td class="px-4 py-8 align-top text-sm font-medium text-gray-900 w-[300px]">
+              <div class="flex items-center gap-3"> <!-- 團名與圖片水平對齊 -->
+                <div class="w-12 h-12 bg-transparent overflow-hidden rounded border border-gray-300 flex-shrink-0">
+                  {% if g.banner %}
+                  <img src="{{ g.banner.url }}" alt="{{ g.name }}" class="w-full h-full object-cover object-center block">
+                  {% else %}
+                  <div class="w-full h-full bg-transparent"></div>
+                  {% endif %}
+                </div>
+                <div class="text-base font-semibold text-gray-900 mt-1 truncate">{{ g.name }}</div>
+              </div>
+            </td>
+            
+            {% include 'orders/owned_orders/list_columns.html' with items=g.products.all %}
+            
+            <td class="px-4 py-8 align-top text-left text-sm font-semibold text-gray-900 w-[97px]">${{ g.min_goal }}</td>
+            
+            <td class="px-4 py-8 align-top text-left text-sm text-yellow-700 w-[150px]">
+              {{ g.deadline|date:"Y-m-d" }}
+            </td>
+            
+            <td class="px-4 py-8 align-top text-left text-sm text-yellow-700 w-[150px]">
+              {{ g.created_at|date:"Y-m-d" }}
+            </td>
+            
+            <td class="px-4 py-8 align-top text-left text-sm text-yellow-700 w-[113px]">
+              {% if g.status == 'ongoing' %}
+              未成團
+              {% else %}
+              已成團
+              {% endif %}
+            </td>
+            
+            <td class="px-4 py-8 align-top text-left w-[113px]">
+              <div class="flex flex-row flex-wrap items-start justify-start gap-2">
+                <a href="{% url 'groups:manage' g.id %}" class="px-2 py-1 rounded-full border border-gray-300 text-sm text-gray-800 whitespace-nowrap">團購頁面</a>
+                <a href="#buyers-list-{{ g.id }}" class="px-2 py-1 rounded-full border border-gray-300 text-sm text-gray-800 whitespace-nowrap bg-gray-900 text-white">檢視跟團者</a>
+              </div>
+              <div class="fixed inset-x-0 inset-y-[20px] mx-auto border w-[900px] h-[700px] overflow-y-auto rounded-2xl border border-gray-300 bg-white p-4 hidden target:block" id="buyers-list-{{ g.id }}">
+                {% include 'orders/owned_orders/buyers_list.html' with buyers=g.order_set.all %}
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% else %}
+  <section class="mb-20 pb-20 border-b border-gray-300">
+    <h2 class="text-center text-lg font-medium text-gray-800 mb-4">已成團</h2>
+    <p class="text-center text-gray-300 mb-4">還沒有任何成團的團購</p>
+  </section>
+  {% endif %}
+  
+  {% if ongoing_groups %}
+  <section class="mb-10">
+    <h2 class="text-center text-lg font-medium text-gray-800 mb-4">尚未成團</h2>
+    <div class="overflow-x-auto bg-transparent rounded-2xl border border-gray-300">
+      <table class="min-w-full border-collapse table-fixed text-sm" style="border-spacing:0">
+        <colgroup>
+          <col style="width:340px;" /> <!-- 團購/訂單(含圖) -->
+          <col style="width:373px;" /> <!-- 商品 -->
+          <col style="width:97px;" /> <!-- 價格 -->
+          <col style="width:65px;" /> <!-- 數量 -->
+          <col style="width:97px;" /> <!-- 小計 -->
+          <col style="width:97px;" /> <!-- 合計 -->
+          <col style="width:97px;" /> <!-- 狀態 -->
+          <col style="width:113px;" /> <!-- 操作 -->
+        </colgroup>
+        <thead class="bg-transparent">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[300px]">團購</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[300px]">商品</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[100px]">價格</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[100px]">目標金額</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[150px]">截止日期</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[150px]">建立日期</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[113px]">狀態</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[113px]">操作</th>
+          </tr>
+        </thead>
+        <tbody class="bg-transparent">
+          {% for g in ongoing_groups %}
+          <tr class="border-t border-gray-300 hover:bg-transparent transition">
+            <td class="px-4 py-8 align-top text-sm font-medium text-gray-900 w-[300px]">
+              <div class="flex items-center gap-3"> <!-- 團名與圖片水平對齊 -->
+                <div class="w-12 h-12 bg-transparent overflow-hidden rounded border border-gray-300 flex-shrink-0">
+                  {% if g.banner %}
+                  <img src="{{ g.banner.url }}" alt="{{ g.name }}" class="w-full h-full object-cover object-center block">
+                  {% else %}
+                  <div class="w-full h-full bg-transparent"></div>
+                  {% endif %}
+                </div>
+                <div class="text-base font-semibold text-gray-900 mt-1 truncate">{{ g.name }}</div>
+              </div>
+            </td>
+            
+            {% include 'orders/owned_orders/list_columns.html' with items=g.products.all %}
+            
+            <td class="px-4 py-8 align-top text-left text-sm font-semibold text-gray-900 w-[97px]">${{ g.min_goal }}</td>
+            
+            <td class="px-4 py-8 align-top text-left text-sm text-yellow-700 w-[150px]">
+              {{ g.deadline|date:"Y-m-d" }}
+            </td>
+            
+            <td class="px-4 py-8 align-top text-left text-sm text-yellow-700 w-[150px]">
+              {{ g.created_at|date:"Y-m-d" }}
+            </td>
+            
+            <td class="px-4 py-8 align-top text-left text-sm text-yellow-700 w-[113px]">
+              未成團
+            </td>
+            
+            <td class="px-4 py-8 align-top text-left w-[113px]">
+              <div class="flex flex-row flex-wrap items-start justify-start gap-2">
+                <a href="{% url 'groups:manage' g.id %}" class="px-2 py-1 rounded-full border border-gray-300 text-sm text-gray-800 whitespace-nowrap">團購頁面</a>
+                <a href="#buyers-list-{{ g.id }}" class="px-2 py-1 rounded-full border border-gray-300 text-sm text-gray-800 whitespace-nowrap bg-gray-900 text-white">檢視跟團者</a>
+              </div>
+              <div class="fixed inset-x-0 inset-y-[20px] mx-auto border w-[900px] h-[800px] overflow-y-auto rounded-2xl border border-gray-300 bg-white p-4 hidden target:block" id="buyers-list-{{ g.id }}">
+                {% include 'orders/owned_orders/buyers_list.html' with buyers=g.order_set.all %}
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% else %}
+  <section class="mb-20 pb-20 border-b border-gray-300">
+    <h2 class="text-center text-lg font-medium text-gray-800 mb-4">尚未成團</h2>
+    <p class="text-center text-gray-300 mb-4">沒有任何尚未成團的團購</p>
+  </section>
+  {% endif %}
+  {% elif orders %}
+  <section>
+    <h2 class="text-center text-lg font-medium text-gray-800 mb-4">訂單紀錄</h2>
+    <div class="overflow-x-auto bg-transparent rounded-2xl border border-gray-300">
+      <table class="min-w-full border-collapse table-fixed text-sm" style="border-spacing:0">
+        <colgroup>
+          <col style="width:340px;" /> <!-- 團購/訂單(含圖) -->
+          <col style="width:373px;" /> <!-- 商品 -->
+          <col style="width:97px;" /> <!-- 價格 -->
+          <col style="width:65px;" /> <!-- 數量 -->
+          <col style="width:97px;" /> <!-- 小計 -->
+          <col style="width:97px;" /> <!-- 合計 -->
+          <col style="width:97px;" /> <!-- 狀態 -->
+          <col style="width:113px;" /> <!-- 操作 -->
+        </colgroup>
+        <thead class="bg-transparent">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[340px]">團購 / 訂單</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[373px]">商品</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[97px]">價格</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[65px]">數量</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[97px]">小計</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[97px]">合計</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[97px]">狀態</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[113px]">操作</th>
+          </tr>
+        </thead>
+        {% for order in orders %}
+        <tbody class="bg-transparent">
+          <tr class="border-t border-gray-300 hover:bg-transparent transition">
+            <td class="px-4 py-8 align-top text-sm font-medium text-gray-900 w-[340px]">
+              <div class="flex items-center gap-3"> <!-- 團名與圖片水平對齊 -->
+                <div class="w-12 h-12 bg-transparent overflow-hidden rounded border border-gray-300 flex-shrink-0">
+                  {% if order.group.banner %}
+                  <img src="{{ order.group.banner.url }}" alt="{{ order.group.name }}" class="w-full h-full object-cover object-center block">
+                  {% else %}
+                  <div class="w-full h-full bg-transparent"></div>
+                  {% endif %}
+                </div>
+                <div>
+                  <div class="text-xs text-gray-500">#{{ order.order_number }}</div>
+                  <div class="text-base font-semibold text-gray-900 mt-1 truncate">{{ order.group.name }}</div>
+                </div>
+              </div>
+            </td>
+            
+            {% include 'orders/my_orders/list_columns.html' with items=order.joined_group.joined_group_products.all %}
+            
+            <td class="px-4 py-8 align-top text-left text-lg font-semibold text-gray-900 w-[97px]">{% if order.formatted_amount %}${{ order.formatted_amount }}{% endif %}</td>
+            
+            <td class="px-4 py-8 align-top text-left text-sm {% if order.order_status == order.OrderStatus.PENDING or order.order_status == order.OrderStatus.SHIPPED %}text-yellow-700{% else %}text-gray-700{% endif %} w-[97px]">
+              {{ order.get_order_status_display }}
+            </td>
+            
+            <td class="px-4 py-8 align-top text-left w-[113px]">
+              <div class="flex flex-row flex-wrap items-start justify-start gap-2">
+                
+                {% if current_tab == "processing" %}
+                <a
+                href="#address-list-{{ order.id }}"
+                class="px-2 py-1 rounded-full border border-gray-300 text-sm text-gray-800 whitespace-nowrap">檢視寄件資訊</a>
+                <a href="#" class="px-2 py-1 rounded-full border border-gray-300 text-sm text-gray-800 whitespace-nowrap bg-gray-900 text-white">已經出貨</a>
+                {% else %}
+                <a href="#" class="px-2 py-1 rounded-full border border-gray-300 text-sm text-gray-800 whitespace-nowrap">檢視</a>
+                {% endif %}
+              </div>
+              
+            </td>
+          </tr>
+          <tr class="border-t border-gray-300 hover:bg-transparent transition">
+            <td class="px-4 py-2 align-top text-sm font-medium text-gray-900" colspan="8">
+              <div id="address-list-{{ order.id }}" class="border border-gray-300 w-full bg-white rounded-lg p-4
+   hidden target:block items-center justify-center z-50">
+              <div class="flex justify-between">
+                <div>
+                  <p>收件人：{{ order.shipping_address.recipient_name }}</p>
+                  <p>電話：{{ order.shipping_address.phone }}</p>
+                  <p>寄件地址：{{ order.shipping_address.postal_code }} {{ order.shipping_address.county }} {{ order.shipping_address.district }} {{ order.shipping_address.road }} {{ order.shipping_address.detail }}</p>
+                  <p>更新時間：{{ order.shipping_address.updated_at|date:"Y-m-d H:i:s" }}</p>                  
+                </div>
+                <div>
+                  <a href="#" class="px-4 py-1 rounded-full border border-gray-300 text-sm text-gray-800 whitespace-nowrap bg-gray-900 text-white">關閉</a>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tr>
+    </tbody>
+    {% endfor %}
+  </table>
+</div>
+</section>
+{% else %}
+<section class="mb-10">
+  <h2 class="text-center text-lg font-medium text-gray-800 mb-4">尚未有此分類訂單</h2>
+</section>
+{% endif %}
+</div>

@@ -1,0 +1,36 @@
+{% load humanize %}
+<div class="sticky top-0 text-center">
+  <a href="#" class="px-10 py-1 rounded-full border text-sm text-gray-800 whitespace-nowrap bg-gray-900 text-white">關閉</a>
+</div>
+{% for buyer in g.order_set.all %}
+<div class="box-border flex flex-col gap-2"> 
+  <div class="mt-5">
+  <div class="flex justify-between items-center mb-2">
+    <div>訂單號碼: {{ buyer.order_number }}</div>
+    <a href="#" class="px-5 rounded-full border text-sm text-gray-800 whitespace-nowrap bg-gray-900 text-white">出貨</a>
+  </div>
+      <div class="grid grid-cols-3 text-center border">
+        <div>品項</div>
+        <div class="border-x">數量</div>
+        <div>單價</div>
+      </div>
+      {% for item in buyer.joined_group.joined_group_products.all %}
+      <div class="grid grid-cols-3 text-center border-x">
+        <div class="border-b">{{ item.product.name }}</div>
+        <div class="border-x border-b">{{ item.quantity }}</div>
+        <div class="border-b">${{ item.product.price }}</div>
+      </div>
+      {% endfor %}
+      <div class="grid grid-cols-3 border-x">
+        <div class="col-span-2 text-right border-r">合計：</div>
+        <div class="text-center">${{ buyer.amount }}</div>
+      </div>
+    <div class="border">
+      <div>收件人: {{ buyer.shipping_address.recipient_name }}</div>
+      <div>電話: {{ buyer.shipping_address.phone }}</div>
+      <div>付款狀態: {{ buyer.get_order_status_display }}</div>
+      <div>寄件地址: {{ buyer.shipping_address.postal_code }} {{ buyer.shipping_address.county }} {{ buyer.shipping_address.district }} {{ buyer.shipping_address.road }} {{ buyer.shipping_address.detail }}</div>
+    </div>
+  </div>
+</div>
+{% endfor %}
