@@ -76,7 +76,7 @@ class UserForm(ModelForm):
             "username": "用戶名稱",
         }
         widgets = {
-            "avatar_url": FileInput(),
+            "avatar_url": FileInput(attrs={"@change": "handleFile($event)", "accept": "image/*"}),
             "username": TextInput(),
         }
 
