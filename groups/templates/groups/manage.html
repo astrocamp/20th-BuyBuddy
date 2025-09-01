@@ -7,7 +7,7 @@
 	<h1>這是開團修者詳細頁面</h1>
 	<a href="">查詢跟團者資訊</a><br>
 	<a href="{% url 'groups:manage_edit' group.id%}">編輯開團</a>
-	<form action="{% url 'groups:owned' %}" method="post">
+	<form action="{% url 'groups:manage' group.id %}" method="post">
 	{% csrf_token %}
 		<input type="hidden" name="_method" value="delete">
 		<button>刪團</button>

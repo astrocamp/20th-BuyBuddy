@@ -7,68 +7,85 @@ from django.contrib import messages
 from django.db import transaction
 from .services.exceptions import *
 from .services.group_services import GroupService
+from django.core.paginator import Paginator
+from django.urls import reverse
+from django.http import HttpResponse
 
-def index(request):
-	groups = Group.objects.filter(status="ongoing")
-	return render(request, "groups/index.html", {"groups": groups})
+def index(request, filter_type="ongoing"):
+	user = request.user
 
-def new(request):
-	product_form = ProductForm()
-	group_form = GroupForm()
-	productImage_form = ProductImageForm()
-	return render(request, 'groups/new.html', {'product_form': product_form, 'group_form': group_form, 'productImage_form': productImage_form})
+	protected_filters = ["owned", "followed"]
+
+	if filter_type in protected_filters and not user.is_authenticated:
+		login_url = reverse("users:sessions_new")
+		next_url = request.path
+
+		if request.headers.get("HX-Request") == "true":
+			response = HttpResponse()
+			response["HX-Redirect"] = f"{login_url}?next={next_url}"
+			return response
+		else:
+			return redirect(f"{login_url}?next={next_url}")
+
+	status_filter = request.GET.get("status", "ongoing")
+
+	if filter_type == "owned" and user.is_authenticated:
+		all_groups = Group.objects.filter(owner=user)
+		if status_filter in ["ongoing", "reached" ]:
+			all_groups = all_groups.filter(status=status_filter)
+	elif filter_type == "followed" and user.is_authenticated:
+		all_groups = Group.objects.filter(joinedgroup__buyer=user)
+		if status_filter in ["ongoing", "reached" ]:
+			all_groups = all_groups.filter(status=status_filter)
+	else:
+		filter_type = "ongoing"
+		all_groups = Group.objects.filter(status="ongoing")
+		status_filter = None
+
+	all_groups = all_groups.order_by("-id")
+
+	paginator = Paginator(all_groups, 3)
+	page_number = request.GET.get("page")
+	page_groups = paginator.get_page(page_number)
+
+	context = {
+		"page_groups": page_groups, 
+		"active_tab": filter_type,
+		"active_status": status_filter,
+	}
+	
+	if request.headers.get("HX-Request") == "true":
+		return render(request, "groups/shared/htmx_response.html", context)
+	else:
+		return render(request, "groups/index.html", context)
 
 @login_required
-def owned(request):
-	groups = Group.objects.filter(owner=request.user)
-	if request.method == 'POST':
-		if request.POST.get("_method") == "delete":
-			group_id = request.POST.get("group-id")
-			group = get_object_or_404(Group, pk=group_id)
-			if group.owner != request.user:
-				messages.warning(request, "您無權刪除此團購")
-				return redirect('groups:owned')
-			group.delete()
-			messages.success(request, "團購已刪除")
-			return redirect('groups:owned')
-
+def new(request):
+	if request.method == "POST":
 		group_form = GroupForm(request.POST, request.FILES)
 		product_form = ProductForm(request.POST)
 		productImage_form = ProductImageForm(request.POST, request.FILES)
 
-		if group_form.is_valid() and product_form.is_valid() and productImage_form.is_valid():
+		if group_form.is_valid() and product_form.is_valid():
 			with transaction.atomic():
 				group = group_form.save(commit=False)
 				group.owner = request.user
-				group.status = '進行中'
+				group.status = "ongoing"
 				group.save()	
 
 				product = product_form.save(commit=False)
 				product.group = group
 				product.save()
 
-				productImage = productImage_form.save(commit=False)
-				productImage.order = 1
-				productImage.product = product
-				productImage.save()
-
 				messages.success(request, "團購已建立")
-			return redirect("groups:owned")
+			return redirect('groups:index_filtered', filter_type="owned")
 		else:
 			messages.warning(request, "欄位填寫有誤，請檢查後再試")
-		return redirect("groups:new")	
-	return render(request, "groups/owned.html", {"groups": groups})
-
-@login_required
-def followed(request):
-	groups = Group.objects.filter(
-		joinedgroup__buyer=request.user,
-		status__in=["ongoing", "reached"]
-	)
-	ongoing_groups = [ group for group in groups if group.status == "ongoing"]
-	reached_groups = [ group for group in groups if group.status == "reached"]
-
-	return render(request, "groups/followed.html", {"ongoing_groups": ongoing_groups, "reached_groups": reached_groups})
+	else:	
+		product_form = ProductForm()
+		group_form = GroupForm()
+		productImage_form = ProductImageForm()
+	return render(request, 'groups/new.html', {'product_form': product_form, 'group_form': group_form, 'productImage_form': productImage_form})
 
 def detail(request, id):
 	group = get_object_or_404(Group, pk=id)
@@ -99,8 +116,19 @@ def update_quantity(request, id):
 	return render(request, "groups/member_edit.html", {"group": group})
 
 
+@login_required
 def manage(request, id):
 	group = get_object_or_404(Group, pk=id)
+	if request.method == "POST":
+		if request.POST.get("_method") == "delete":
+			group_id = request.POST.get("group-id")
+			group = get_object_or_404(Group, pk=group_id)
+			if group.owner != request.user:
+				messages.warning(request, "您無權刪除此團購")
+				return redirect('groups:manage')
+			group.delete()
+			messages.success(request, "團購已刪除")
+			return redirect('groups:index_filtered', filter_type="owned")	
 	return render(request, "groups/manage.html", {"group": group})
 
 @login_required
