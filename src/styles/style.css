@@ -17,6 +17,8 @@
   --tertiary-color-50: #f8f8f8;
   --tertiary-color-300: #bdbdbd;
   --tertiary-color-500: #7c7c7c;
+  --red-color-500: #fb2c36;
+  --red-color-700: #c10007;
 }
 
 html {
@@ -67,6 +69,10 @@ html {
 
 .bg-tertiary-color {
   background-color: var(--tertiary-color);
+}
+
+.red-color-700 {
+  color: var(--red-color-700);
 }
 
 /* main-btn */
