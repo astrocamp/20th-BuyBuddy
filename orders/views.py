@@ -9,11 +9,40 @@ import hmac
 import hashlib
 import base64
 import requests
+from users.models import UserAddress
 from .models import Order, Payment
 from groups.models import JoinedGroup, Group
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.db.models import Sum, F
+
+REQUIRED_ADDR_FIELDS = (
+    "recipient_name",
+    "phone",
+    "postal_code",
+    "county",
+    "district",
+    "road",
+    "detail",
+)
+
+
+# TODO
+@login_required
+def go_to_payment(request, order_id):
+    order = get_object_or_404(Order, pk=order_id, user=request.user)
+    address_id = request.POST.get("address_id")
+    addr = get_object_or_404(UserAddress, pk=address_id, user=request.user)
+
+    # 檢查這筆地址是否完整
+    missing = [f for f in REQUIRED_ADDR_FIELDS if not getattr(addr, f)]
+    if missing:
+        messages.error(request, "這個地址資料不完整，請先進行編輯")
+        return redirect("users:profile")
+
+    # 存地址快照，建立 payment
+    order.apply_address(addr)
+    return redirect("orders:request", order.id)
 
 
 def create_headers(body, uri):

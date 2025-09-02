@@ -1,3 +1,4 @@
+{% load static %}
 {% if show %}
     {% include "users/shared/messages.html" %}
 {% endif %}
@@ -6,8 +7,17 @@
 <form hx-post="{% url 'users:address_edit' user_address_form.instance.id %}"
       hx-target="#user_address_{{user_address_form.instance.id}}"
       hx-swap="outerHTML"
-      id="user_address_{{user_address_form.instance.id}}">
+      id="user_address_{{user_address_form.instance.id}}"
+      x-data="addressFormControl()"
+      novalidate>
     {% csrf_token %}
     {% include "users/shared/address_form_fields.html" %}
+    
     <button class="border-b-2 cursor-pointer">儲存</button>
+
+    <button hx-post="{% url 'users:address_cancel' user_address_form.instance.id %}"
+    hx-target="#user_address_{{user_address_form.instance.id}}"
+    hx-swap="outerHTML"
+    class="border-b-2 cursor-pointer"
+    type="button">取消</button>
 </form>
