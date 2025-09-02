@@ -17,7 +17,6 @@ from .forms import (
 )
 from anymail.message import AnymailMessage
 from django.core.exceptions import ValidationError
-from django.db import transaction
 
 
 def send_verification_mail(request, user, email):
@@ -339,14 +338,14 @@ def address_edit(request, address_id):
             # 有錯誤，回到編輯模式並顯示錯誤
             context = {
                 "user_address_form": user_address_form,
-                "message": "更新發生錯誤，請稍後再試",
-                "type": "error",
-                "show": True,
+                # "message": "更新發生錯誤，請稍後再試",
+                # "type": "error",
+                # "show": True,
             }
             return render(
                 request,
                 "users/shared/address_edit.html",
-                context,
+                {"user_address_form": user_address_form},
             )
 
     # GET 請求，顯示編輯頁面
@@ -389,8 +388,8 @@ def address_delete(request, address_id):
         return render(request, "users/shared/address.html", context)
 
 
-@login_required
 # 新增地址
+@login_required
 def address_create(request):
     user = request.user
 
@@ -403,18 +402,30 @@ def address_create(request):
             new_address_form.user = user
             new_address_form.save()
             messages.success(request, "新增地址成功")
-            return redirect("users:profiles")
-        else:
+
+            # 重新載入地址列表供 OOB 使用
+            user_addresses = UserAddress.objects.filter(user=user).order_by(
+                "-is_default", "-created_at"
+            )
+            user_address_forms = UserAddressFormSet(queryset=user_addresses)
+
             context = {
-                "user_address_form": address_form,
-                "message": "地址資訊有誤，請稍後再試",
-                "type": "error",
+                "user_address_forms": user_address_forms,
+                "message": "地址新增成功！",
+                "type": "success",
                 "show": True,
+                "include_address_list_oob": True,
             }
             return render(
                 request,
-                "users/shared/address_create.html",
+                "users/shared/address_create_success.html",
                 context,
+            )
+        else:
+            return render(
+                request,
+                "users/shared/address_create.html",
+                {"user_address_form": address_form},
             )
 
     # GET 請求，取得地址空表單
@@ -425,3 +436,19 @@ def address_create(request):
             "users/shared/address_create.html",
             {"user_address_form": blank_address_form},
         )
+
+
+# 取消更新、取消新增
+@login_required
+def address_cancel(request, address_id):
+    user = request.user
+
+    # 代表是取消新增
+    if address_id == 0:
+        return render(request, "users/shared/create_btn.html")
+    address = get_object_or_404(UserAddress, pk=address_id, user=user)
+    user_address_form = UserAddressForm(instance=address)
+
+    return render(
+        request, "users/shared/address.html", {"user_address_form": user_address_form}
+    )

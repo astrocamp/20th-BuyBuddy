@@ -17,6 +17,11 @@ urlpatterns = [
         views.address_delete,
         name="address_delete",
     ),
+    path(
+        'profiles/address/<int:address_id>/cancel/',
+        views.address_cancel,
+        name="address_cancel",
+    ),
     path("new/", views.new, name="new"),
     path("", views.create, name="create"),
     path("sessions/new/", views.sessions_new, name="sessions_new"),

@@ -4,7 +4,7 @@
 {% block content%}
 <div class="flex flex-col items-center">
     <div class="w-full max-w-md">
-        <img class="w-32 mt-12 mx-auto" src="{% static "asset/avatar_default.svg" %}" alt="">
+        <img class="w-32 mt-12 mx-auto" src="{% static "assets/avatar_default.svg" %}" alt="">
         <h1 class="text-2xl font-bold mt-5 mb-2 text-center">註冊</h1>
         <form action="{% url 'users:create' %}" method="post" class="space-y-8" novalidate>
             {% csrf_token %}
@@ -17,7 +17,7 @@
                            class="w-full h-15 pl-8 pr-1 py-2 border-b-[1.2px] border-brand-black focus:outline-none transition-colors"
                            value="{{form.username.value|default:''}}">
                     {% if form.username.errors %}
-                        <div class="text-[var(--brand-red)] text-sm ml-8 mt-2">
+                        <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
                             {{ form.username.errors.0 }}
                         </div>
                     {% endif %}
@@ -32,7 +32,7 @@
                            class="w-full h-15 pl-8 pr-1 py-2 border-b-[1.2px] border-brand-black focus:outline-none transition-colors"
                            value="{{form.email.value|default:''}}">
                     {% if form.email.errors %}
-                        <div class="text-[var(--brand-red)] text-sm ml-8 mt-2">
+                        <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
                             {{ form.email.errors.0 }}
                         </div>
                     {% endif %}
@@ -47,7 +47,7 @@
                            class="w-full h-15  pl-8 pr-1 py-2 border-b-[1.2px] border-brand-black focus:outline-none transition-colors"
                            value="{{form.password.value|default:''}}">
                     {% if form.password.errors %}
-                        <div class="text-[var(--brand-red)] text-sm ml-8 mt-2">
+                        <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
                             {{ form.password.errors.0 }}
                         </div>
                     {% endif %}

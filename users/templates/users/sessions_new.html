@@ -4,7 +4,7 @@
 {% block content%}
 <div class="flex flex-col items-center">
     <div class="w-full max-w-md">
-        <img class="w-32 mt-12 mx-auto" src="{% static "asset/avatar_default.svg" %}" alt="">
+        <img class="w-32 mt-12 mx-auto" src="{% static "assets/avatar_default.svg" %}" alt="">
         <h1 class="text-2xl font-bold mt-5 mb-2 text-center">登入</h1>
         <form action="{% url 'users:sessions_create' %}" method="post" class="space-y-8" novalidate>
             {% csrf_token %}
@@ -18,7 +18,7 @@
                            value="{{form.email.value|default:''}}"
                            class="w-full h-15 pl-8 pr-1 py-2 border-b-[1.2px] border-brand-black focus:outline-none transition-colors bg-transparent [&:-webkit-autofill]:!bg-[#ece7d9] [&:-webkit-autofill]:shadow-[0_0_0_100px_#ece7d9_inset] ">
                     {% if form.email.errors %}
-                        <div class="text-[var(--brand-red)] text-sm ml-8 mt-2">
+                        <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
                             {{ form.email.errors.0 }}
                         </div>
                     {% endif %}
@@ -32,7 +32,7 @@
                            name="password" 
                            class="w-full h-15 pl-8 pr-1 py-2 border-b-[1.2px] border-brand-black focus:outline-none transition-colors bg-transparent [&:-webkit-autofill]:!bg-[#ece7d9] [&:-webkit-autofill]:shadow-[0_0_0_100px_#ece7d9_inset] ">
                     {% if form.password.errors %}
-                        <div class="text-[var(--brand-red)] text-sm ml-8 mt-2">
+                        <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
                             {{ form.password.errors.0 }}
                         </div>
                     {% endif %}
