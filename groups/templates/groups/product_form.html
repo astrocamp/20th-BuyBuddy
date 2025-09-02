@@ -1,0 +1,87 @@
+<div x-data="productFormset">
+	{{ product_form.management_form }}
+	<div id="forms-container" x-ref="formsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 
+      p-4">
+		{% for form in product_form %}
+		<div class="bg-white p-5 rounded-lg shadow flex flex-col gap-2">
+			<label for="{{ form.name.auto_id }}">{{ form.name.label }}</label>
+			<input
+			class="w-full border-2 border-gray-300 rounded-md p-2"
+			type="text"
+			name="{{ form.name.html_name }}"
+			id="{{ form.name.auto_id }}"
+			value="{{ form.name.value|default:'' }}"
+			/>
+			<label for="{{ form.price.auto_id }}">{{ form.price.label }}</label>
+			<input
+			class="w-full border-2 border-gray-300 rounded-md p-2"
+			type="number"
+			name="{{ form.price.html_name }}"
+			id="{{ form.price.auto_id }}"
+			value="{{ form.price.value|default:'' }}"
+			/>
+			<label for="{{ form.description.auto_id }}">{{ form.description.label }}</label>
+			<textarea
+			class="w-full border-2 border-gray-300 rounded-md p-2 resize-y"
+			name="{{ form.description.html_name }}"
+			id="{{ form.description.auto_id }}"
+			>{{ form.description.value|default:'' }}</textarea>
+			
+			<label for="{{ form.image.auto_id }}">產品圖片</label>
+			<input
+			class="w-full border-2 border-gray-300 rounded-md p-2"
+			type="file"
+			name="{{ form.image.html_name }}"
+			id="{{ form.image.auto_id}}"
+			/>
+		</div>
+		{% endfor %}
+	</div>
+
+	<template x-ref="emptyFormTemplate">
+		<div class="bg-white p-5 rounded-lg shadow flex flex-col gap-2">
+			<label for="{{ empty_form.name.auto_id }}">{{ empty_form.name.label }}</label>
+			<input
+			class="w-full border-2 border-gray-300 rounded-md p-2"
+			type="text"
+			name="{{ empty_form.name.html_name }}"
+			id="{{ empty_form.name.auto_id }}"
+			value="{{ empty_form.name.value|default:'' }}"
+			/>
+			<label for="{{ empty_form.price.auto_id }}">{{ empty_form.price.label }}</label>
+			<input
+			class="w-full border-2 border-gray-300 rounded-md p-2"
+			type="number"
+			name="{{ empty_form.price.html_name }}"
+			id="{{ empty_form.price.auto_id }}"
+			value="{{ empty_form.price.value|default:'' }}"
+			/>
+			<label for="{{ empty_form.description.auto_id }}">{{ empty_form.description.label }}</label>
+			<textarea
+			class="w-full border-2 border-gray-300 rounded-md p-2 resize-y"
+			name="{{ empty_form.description.html_name }}"
+			id="{{ empty_form.description.auto_id }}"
+			>{{ empty_form.description.value|default:'' }}</textarea>
+			
+			<label for="{{ empty_form.image.auto_id }}">產品圖片</label>
+			<input
+			class="w-full border-2 border-gray-300 rounded-md p-2"
+			type="file"
+			name="{{ empty_form.image.html_name }}"
+			id="{{ empty_form.image.auto_id}}"
+			/>
+		</div>
+	</template>
+
+	<button
+		type="button"
+		@click="addForm"
+		class="fixed bottom-10 right-10 bg-green-500 hover:bg-green-600 text-white rounded-full w-16 h-16 flex
+		items-center justify-center shadow-lg transition-transform transform hover:scale-110">
+		<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+		</svg>
+		<span class="sr-only">新增產品</span>
+	</button>
+</div>
+
