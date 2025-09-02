@@ -34,10 +34,22 @@ def new(request):
 			return redirect("groups:owned")
 		else:
 			messages.warning(request, "欄位填寫有誤，請檢查後再試")
+			context = {
+                "group_form": group_form,
+                "product_form": product_formset,
+                "empty_form": product_formset.empty_form,
+            }
+			return render(request, "groups/new.html", context)
+			
 	else:
 		group_form = GroupForm(prefix="group")
-		product_formset = ProductFormSet(prefix="product")
-	return render(request, "groups/new.html", {"product_form": product_formset, "group_form": group_form})
+		product_formset = ProductFormSet(prefix="product", queryset=Product.objects.none())
+		context = {
+			"product_form": product_formset, 
+			"group_form": group_form,
+			"empty_form": product_formset.empty_form
+			}
+		return render(request, "groups/new.html", context)
 
 
 @login_required
@@ -142,12 +154,4 @@ def manage_edit(request, id):
 	return render(request, "groups/manage_edit.html", {"product_form": product_formset, "group_form": group_form})
 	
 
-def add_product_form(request):
-	if request.method == "POST":
-		total_forms = int(request.POST.get('product-TOTAL_FORMS', 0))
-		new_total = total_forms + 1
-		data = request.POST.copy()
-		data['product-TOTAL_FORMS'] = str(new_total)
-		formset = ProductFormSet(data=data, prefix="product")
-		return render(request, "groups/product_form.html", {"product_form": formset})
 
