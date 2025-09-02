@@ -21,11 +21,7 @@
 			value="{{ form.price.value|default:'' }}"
 			/>
 			<label for="{{ form.description.auto_id }}">{{ form.description.label }}</label>
-			<textarea
-			class="w-full border-2 border-gray-300 rounded-md p-2 resize-y"
-			name="{{ form.description.html_name }}"
-			id="{{ form.description.auto_id }}"
-			>{{ form.description.value|default:'' }}</textarea>
+			{{ form.description }}
 			
 			<label for="{{ form.image.auto_id }}">產品圖片</label>
 			<input

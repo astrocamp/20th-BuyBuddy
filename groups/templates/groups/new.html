@@ -8,7 +8,8 @@
 	class="flex flex-col gap-2  mt-5"
 	method="POST"
 	enctype="multipart/form-data"
-	action="{% url 'groups:new' %}">
+	action="{% url 'groups:new' %}"
+	data-upload-url="{% url 'groups:upload_image' %}">
 		{% csrf_token %}
   		<div class="bg-white flex flex-col gap-2 w-full p-5">
     		<label for="{{ group_form.name.auto_id }}">{{ group_form.name.label }}</label>
@@ -24,11 +25,7 @@
     			name="{{ group_form.banner.html_name }}"
     			id="{{ group_form.banner.auto_id }}">
     		<label for="{{ group_form.description.auto_id }}">{{ group_form.description.label }}</label>
-    		<textarea
-    			class="w-full border-2 border-gray-300 rounded-md p-2 resize-y"
-    			name="{{ group_form.description.html_name }}"
-    			id="{{ group_form.description.auto_id }}">
-			</textarea>
+    		{{ group_form.description }}
     		<label for="{{ group_form.deadline.auto_id }}">{{ group_form.deadline.label }}</label>
     		<input
     			class="w-full border-2 border-gray-300 rounded-md p-2"
@@ -60,9 +57,11 @@
 		{% include 'groups/product_form.html' %}
 	
   		<div class="fixed bottom-2 right-2 flex justify-between gap-2">
-   			<a class="bg-blue-500 text-white px-4 py-2 rounded-md"  href="{% url 'groups:owned' %}">取消</a>
+   			<a class="bg-blue-500 text-white px-4 py-2 rounded-md"  href="{% url 'groups:index' %}">取消</a>
     		<button class="bg-blue-500 text-white px-4 py-2 rounded-md" type="submit">新增團購</button>
   		</div>
 	</form>
 </div>
 {% endblock %}
+
+

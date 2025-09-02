@@ -7,7 +7,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('groups', '0009_group_current_progress_group_total_alter_group_owner_and_more'),
+        ('groups', '0010_joinedgroup_updated_at'),
     ]
 
     operations = [

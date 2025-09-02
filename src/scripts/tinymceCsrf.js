@@ -5,19 +5,19 @@ function setupTinyMCECsrf() {
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
         
         let hasUploadCapability = false;
-        textareas.forEach(textarea => {
+        textareas.forEach((textarea, index) => {
             try {
                 const mceConf = JSON.parse(textarea.getAttribute('data-mce-conf') || '{}');
                 if (mceConf.images_upload_url) {
                     hasUploadCapability = true;
                 }
-            } catch (e) {}
+            } catch (e) {
+			}
         });
 
 		 if (!hasUploadCapability || !csrfToken) {
             return; 
         }
-
         interceptXHRForCsrf(csrfToken);
         
     }, 500);
@@ -26,7 +26,6 @@ function setupTinyMCECsrf() {
 function interceptXHRForCsrf(csrfToken) {    
     const originalXHR = window.XMLHttpRequest;
     const uploadUrl = document.querySelector('form[data-upload-url]')?.dataset.uploadUrl;
-
 	if (!uploadUrl) return;
 
     window.XMLHttpRequest = function() {

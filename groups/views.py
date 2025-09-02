@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Group, JoinedGroup
 from .forms import GroupForm, ProductFormSet
-from products.models import ProductImage
+from products.models import Product
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import transaction
@@ -13,7 +13,6 @@ from django.core.files.storage import default_storage
 from django.http import JsonResponse
 import os
 import uuid
-
 from django.core.paginator import Paginator
 from django.urls import reverse
 from django.http import HttpResponse
@@ -103,30 +102,6 @@ def new(request):
 			}
 		return render(request, "groups/new.html", context)
 
-
-				product = product_form.save(commit=False)
-				product.group = group
-				product.save()
-
-				messages.success(request, "團購已建立")
-			return redirect('groups:index_filtered', filter_type="owned")
-		else:
-			messages.warning(request, "欄位填寫有誤，請檢查後再試")
-	else:
-		product_form = ProductForm()
-		group_form = GroupForm()
-		productImage_form = ProductImageForm()
-	return render(
-		request,
-		'groups/new.html',
-		{
-			'product_form': product_form,
-			'group_form': group_form,
-			'productImage_form': productImage_form,
-		},
-	)
-
-
 def detail(request, id):
 	group = get_object_or_404(Group, pk=id)
 	if request.user.is_authenticated:
@@ -141,15 +116,6 @@ def detail(request, id):
 			return redirect("groups:update_quantity", id=id)
 		except JoinedGroup.DoesNotExist:
 			return render(request, "groups/detail.html", {"group": group})
-
-		try:
-			joined_group = JoinedGroup.objects.get(
-				group=group,
-				buyer=request.user,
-			)
-			return redirect("groups:update_quantity", id=id)
-		except JoinedGroup.DoesNotExist:
-			pass
 
 	if request.user.is_authenticated and request.method == "POST":
 		user = request.user
@@ -185,10 +151,8 @@ def manage(request, id):
 def manage_edit(request, id):
 	group = get_object_or_404(Group, id=id)
 	product = get_object_or_404(Product, group=group)
-	productImage = get_object_or_404(ProductImage, product=product)
 	group_form = GroupForm(instance=group, prefix='group')
 	product_form = ProductForm(instance=product, prefix='product')
-	productImage_form = ProductImageForm(instance=productImage, prefix='product_image')
 	if request.method == 'POST':
 		if request.user == group.owner:
 			group_form = GroupForm(request.POST, request.FILES, instance=group, prefix='group')
@@ -227,31 +191,3 @@ def upload_image(request):
 	return JsonResponse({"error": "無效請求"}, status=400)
 
 
-			if "group-min_goal" in request.POST:
-				min_goal_str = request.POST.get("group-min_goal")
-				if not min_goal_str:
-					raise ValueError("請選擇最小目標")
-
-				min_goal = int(min_goal_str)
-				if min_goal < 1:
-					raise ValueError("最小目標不能小於1")
-				group.min_goal = min_goal
-				update.append("min_goal")
-
-			if update:
-				group.save(update_fields=update)
-
-			messages.success(request, "團購已更新")
-			return redirect("groups:owned")
-		except (ValueError, TypeError) as error:
-			messages.warning(request, f"欄位填寫有誤，{str(error)}")
-			return render(
-				request,
-				"groups/manage_edit.html",
-				{"product_form": product_formset, "group_form": group_form},
-			)
-	return render(
-		request,
-		"groups/manage_edit.html",
-		{"product_form": product_formset, "group_form": group_form},
-	)
