@@ -18,6 +18,11 @@ class User(AbstractUser):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
 
+    def save(self, *args, **kwargs):
+        if not self.pk:  # 只有新用戶才給預設頭像
+            self.avatar_url = "avatars/avatar_default.png"
+        super().save(*args, **kwargs)
+
 
 class UserAddress(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="addresses")

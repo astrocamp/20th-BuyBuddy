@@ -71,6 +71,10 @@ html {
   background-color: var(--tertiary-color);
 }
 
+.red-color-700 {
+  color: var(--red-color-700);
+}
+
 /* main-btn */
 .main-btn {
   background-color: var(--primary-color);

@@ -14,10 +14,10 @@
                     <input type="text" 
                            placeholder="請輸入用戶名" 
                            name="username" 
-                           class="w-full h-15 pl-8 pr-1 py-2 border-b-[1.2px] border-brand-black focus:outline-none transition-colors"
+                           class="w-full h-15 pl-8 pr-1 py-2 border-b-[1.2px] border-secondary-color focus:outline-none transition-colors"
                            value="{{form.username.value|default:''}}">
                     {% if form.username.errors %}
-                        <div class="text-[var(--brand-red)] text-sm ml-8 mt-2">
+                        <div class="red-color-700 text-sm ml-8 mt-2">
                             {{ form.username.errors.0 }}
                         </div>
                     {% endif %}
@@ -29,10 +29,10 @@
                     <input type="email" 
                            placeholder="請輸入信箱" 
                            name="email" 
-                           class="w-full h-15 pl-8 pr-1 py-2 border-b-[1.2px] border-brand-black focus:outline-none transition-colors"
+                           class="w-full h-15 pl-8 pr-1 py-2 border-b-[1.2px] border-secondary-color focus:outline-none transition-colors"
                            value="{{form.email.value|default:''}}">
                     {% if form.email.errors %}
-                        <div class="text-[var(--brand-red)] text-sm ml-8 mt-2">
+                        <div class="red-color-700 text-sm ml-8 mt-2">
                             {{ form.email.errors.0 }}
                         </div>
                     {% endif %}
@@ -43,18 +43,33 @@
                     <svg class="absolute left-0 top-1/2 -translate-y-1/2" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#221b18" viewBox="0 0 256 256"><path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Z"></path></svg>
                     <input type="password" 
                            placeholder="請輸入密碼" 
-                           name="password" 
-                           class="w-full h-15  pl-8 pr-1 py-2 border-b-[1.2px] border-brand-black focus:outline-none transition-colors"
-                           value="{{form.password.value|default:''}}">
-                    {% if form.password.errors %}
-                        <div class="text-[var(--brand-red)] text-sm ml-8 mt-2">
-                            {{ form.password.errors.0 }}
+                           name="password1" 
+                           class="w-full h-15  pl-8 pr-1 py-2 border-b-[1.2px] border-secondary-color focus:outline-none transition-colors"
+                           value="{{form.password1.value|default:''}}">
+                    {% if form.password1.errors %}
+                        <div class="red-color-700 text-sm ml-8 mt-2">
+                            {{ form.password1.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="space-y-2">
+                <div class="relative h-15">
+                    <svg class="absolute left-0 top-1/2 -translate-y-1/2" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#221b18" viewBox="0 0 256 256"><path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Z"></path></svg>
+                    <input type="password" 
+                           placeholder="請再次輸入密碼" 
+                           name="password2" 
+                           class="w-full h-15  pl-8 pr-1 py-2 border-b-[1.2px] border-secondary-color focus:outline-none transition-colors"
+                           value="{{form.password2.value|default:''}}">
+                    {% if form.password2.errors %}
+                        <div class="red-color-700 text-sm ml-8 mt-2">
+                            {{ form.password2.errors.0 }}
                         </div>
                     {% endif %}
                 </div>
             </div>
             <div class="flex justify-center mt-12">
-                <button class="text-brand-black px-12 py-3 rounded-full border-[1.2px]  hover:bg-[var(--main-color)] [&:hover]:border-[var(--main-color)] transition-all ease-in-out cursor-pointer">
+                <button class="px-12 py-3 rounded-full border-[1.2px]  hover:bg-[var(--main-color)] [&:hover]:border-[var(--main-color)] transition-all ease-in-out cursor-pointer">
                 註冊
                 </button>
             </div>

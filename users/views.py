@@ -58,16 +58,12 @@ def new(request):
 
 @require_POST
 def create(request):
-    form = RegistrationForm(request.POST)
-    if not form.is_valid():
-        return render(request, "users/new.html", {"form": form})
+    new_user_form = RegistrationForm(request.POST)
+    if not new_user_form.is_valid():
+        return render(request, "users/new.html", {"form": new_user_form})
 
     try:
-        # 先建立用戶資料
-        new_user = form.save(commit=False)
-        new_user.avatar_url = "avatars/avatar_default.png"
-        new_user.set_password(form.cleaned_data["password"])  # 手動雜湊密碼
-        new_user.save()
+        new_user = new_user_form.save()
 
         # 寄信
         success = send_verification_mail(request, new_user, new_user.email)
@@ -90,7 +86,7 @@ def create(request):
     except Exception as e:
         print(f"註冊時發生錯誤: {e}")
         messages.error(request, "註冊失敗，請稍後再試")
-        return render(request, "users/new.html", {"form": form})
+        return render(request, "users/new.html", {"form": new_user_form})
 
 
 def sessions_new(request):
