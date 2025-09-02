@@ -8,19 +8,11 @@ class Product(models.Model):
     name = models.CharField(max_length=255)
     price = models.IntegerField()
     description = HTMLField()
+    banner = models.ImageField(null=True, upload_to='products/banners/')
 
     @property
     def formatted_price(self):
         return f"${self.price:,.0f}"
-
-
-class ProductImage(models.Model):
-    product = models.ForeignKey(
-        Product, on_delete=models.CASCADE, related_name="images"
-    )
-    url = models.ImageField(upload_to='groups/products')
-    order = models.IntegerField()
-
 
 class JoinedGroupProduct(models.Model):
     joined_group = models.ForeignKey(

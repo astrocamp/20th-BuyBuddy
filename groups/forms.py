@@ -27,8 +27,21 @@ class GroupForm(ModelForm):
         'min_goal': '成團目標'
     }
 
-class ProductForm(BaseInlineFormSet):
+class ProductForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = ["name", "price", "description"]  
+        labels = {
+            "name": "產品名稱",
+            "price": "產品價格",
+            "description": "產品描述",
+        }
+        widgets = {
+            "description": TinyMCE(mce_attrs=settings.TINYMCE_LIMITED_CONFIG),
+        }
 
+
+class ProductBaseForm(BaseInlineFormSet):
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
     instance = kwargs.get('instance', None)
@@ -38,6 +51,7 @@ class ProductForm(BaseInlineFormSet):
 ProductFormSet = inlineformset_factory(
     Group,
     Product,
+    form=ProductForm,
     fields=['name', 'price', 'description'],
     extra=2,
     can_delete=False,
@@ -46,16 +60,11 @@ ProductFormSet = inlineformset_factory(
       'price': '產品價格',
       'description': '產品描述'
     },
-    
-    widgets = {
-      'description': TinyMCE(mce_attrs=settings.TINYMCE_LIMITED_CONFIG),
-    }
-  def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # 只有在編輯現有物件時才鎖定欄位
-        if self.instance and self.instance.pk:
-            exclude_fields = ['deadline', 'min_goal']
-            for field_name, field in self.fields.items():
-                if field_name not in exclude_fields:
-                    field.widget.attrs['readonly'] = True
-                    field.widget.attrs['class'] += ' cursor-not-allowed'  
+    formset = ProductBaseForm) 
+                    
+
+ 
+
+
+
+
