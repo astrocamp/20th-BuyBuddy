@@ -1,32 +1,111 @@
+{% load widget_tweaks %}
+{% load static %}
+
+<!-- 收件者姓名 -->
 <div class="flex justify-between">
-            <span class="font-semibold">{{ user_address_form.recipient_name.label_tag }}</span>
-            <span>{{ user_address_form.recipient_name }}</span>
+    <label for="{{ user_address_form.recipient_name.id_for_label }}"
+    class="font-semibold">
+        {{ user_address_form.recipient_name.label }}
+    </label>
+    {{ user_address_form.recipient_name|add_class:"border-b-2"|attr:"placeholder:請輸入收件者姓名"  }}
+</div>
+{% if user_address_form.recipient_name.errors %}
+    <div class="red-color-700 text-sm mt-2">
+        {{ user_address_form.recipient_name.errors.0 }}
     </div>
-    <div class="flex justify-between">
-        <span class="font-semibold">{{ user_address_form.is_default.label_tag }}</span>
-        <span>{{ user_address_form.is_default }}</span>
+{% endif %}
+
+
+<!-- 是否預設 -->
+<div class="flex justify-between items-center gap-3 mt-4">
+    <label for="{{ user_address_form.is_default.id_for_label }}" class="font-semibold">
+        {{ user_address_form.is_default.label }}
+    </label>
+    {{ user_address_form.is_default|add_class:"border-b-2"}}
+</div>
+{% if user_address_form.is_default.errors %}
+    <div class="red-color-700 text-sm mt-2">
+        {{ user_address_form.is_default.errors.0 }}
     </div>
-    <div class="flex justify-between">
-        <span class="font-semibold">{{ user_address_form.phone.label_tag }}</span>
-        <span>{{ user_address_form.phone }}</span>
+{% endif %}
+
+
+
+<!-- 手機 -->
+<div class="flex justify-between items-center gap-3 mt-4">
+    <label for="{{ user_address_form.phone.id_for_label }}" class="font-semibold">
+        {{ user_address_form.phone.label }}
+    </label>
+    {{ user_address_form.phone|add_class:"border-b-2"}}
+</div>
+{% if user_address_form.phone.errors %}
+    <div class="red-color-700 text-sm mt-2">
+        {{ user_address_form.phone.errors.0 }}
     </div>
-    <div class="flex justify-between">
-        <span class="font-semibold">{{ user_address_form.postal_code.label_tag }}</span>
-        <span>{{ user_address_form.postal_code }}</span>
+{% endif %}
+
+<!-- 縣市 -->
+<div class="flex justify-between items-center gap-3 mt-4">
+    <label for="{{ user_address_form.county.id_for_label }}" class="font-semibold">
+        {{ user_address_form.county.label }}
+    </label>
+    {{ user_address_form.county|add_class:"border-b-2"|attr:"x-ref=county"|attr:"@change:applyDistrict"}}
+</div>
+{% if user_address_form.county.errors %}
+    <div class="red-color-700 text-sm mt-2">
+        {{ user_address_form.county.errors.0 }}
     </div>
-    <div class="flex justify-between">
-        <span class="font-semibold">{{ user_address_form.county.label_tag }}</span>
-        <span>{{ user_address_form.county }}</span>
+{% endif %}
+
+<!-- 區域 -->
+<div class="flex justify-between items-center gap-3 mt-4">
+    <label for="{{ user_address_form.district.id_for_label }}" class="font-semibold">
+        {{ user_address_form.district.label }}
+    </label>
+    {{ user_address_form.district|add_class:"border-b-2"|attr:"x-ref=district"|attr:"@change:updateZip"}}
+</div>
+{% if user_address_form.district.errors %}
+     <div class="red-color-700 text-sm mt-2">
+        {{ user_address_form.district.errors.0 }}
     </div>
-    <div class="flex justify-between">
-        <span class="font-semibold">{{ user_address_form.district.label_tag }}</span>
-        <span>{{ user_address_form.district }}</span>
+{% endif %}
+
+
+<!-- 郵遞區號 -->
+<div class="flex justify-between items-center gap-3 mt-4">
+    <label for="{{ user_address_form.postal_code.id_for_label }}" class="font-semibold">
+        {{ user_address_form.postal_code.label }}
+    </label>
+    {{ user_address_form.postal_code|add_class:"border-b-2"|attr:"x-ref=zip"}}
+</div>
+{% if user_address_form.postal_code.errors %}
+    <div class="red-color-700 text-sm mt-2">
+        {{ user_address_form.postal_code.errors.0 }}
     </div>
-    <div class="flex justify-between">
-        <span class="font-semibold">{{ user_address_form.road.label_tag }}</span>
-        <span>{{ user_address_form.road }}</span>
-    </div>
-    <div class="flex justify-between">
-        <span class="font-semibold">{{ user_address_form.detail.label_tag }}</span>
-        <span>{{ user_address_form.detail }}</span>
-    </div>
+{% endif %}
+
+
+<!-- 路名/街道 -->
+<div class="flex justify-between items-center gap-3 mt-4">
+    <label for="{{ user_address_form.road.id_for_label }}" class="font-semibold">
+        {{ user_address_form.road.label }}
+    </label>
+    {{ user_address_form.road|add_class:"border-b-2"}}
+</div>
+{% if user_address_form.road.errors %}
+  <div class="red-color-700 text-sm mt-2">
+    {{ user_address_form.road.errors.0 }}
+  </div>
+{% endif %}
+
+
+<!-- 地址 -->
+<div class="flex justify-between items-center gap-3 mt-4">
+    <label for="{{ user_address_form.detail.id_for_label }}" class="font-semibold">
+        {{ user_address_form.detail.label }}
+    </label>
+    {{ user_address_form.detail|add_class:"border-b-2"}}
+</div>
+{% if user_address_form.detail.errors %}
+  <div class="red-color-700 text-sm mt-2">{{ user_address_form.detail.errors.0 }}</div>
+{% endif %}

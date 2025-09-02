@@ -3,9 +3,19 @@
 {% endif %}
 
 
-<form action="{% url 'users:address_create' %}"
-      method="post">
+<form hx-post="{% url 'users:address_create' %}"
+  hx-target="#user_address_create"
+  hx-swap="outerHTML"
+  method="post" 
+      x-data="addressFormControl"
+      id="user_address_create"
+      novalidate>
     {% csrf_token %}
     {% include "users/shared/address_form_fields.html" %}
     <button class="border-b-2 cursor-pointer">新增</button>
+    <button hx-post="{% url 'users:address_cancel' 0 %}"
+            hx-target="#user_address_create"
+            hx-swap="outerHTML"
+            class="border-b-2 cursor-pointer"
+            type="button">取消</button>
 </form>
