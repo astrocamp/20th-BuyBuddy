@@ -10,6 +10,7 @@ import hashlib
 import base64
 import requests
 from users.models import UserAddress
+from users.forms import UserAddressForm
 from .models import Order, Payment
 from groups.models import JoinedGroup, Group
 from django.contrib.auth.decorators import login_required
@@ -27,22 +28,106 @@ REQUIRED_ADDR_FIELDS = (
 )
 
 
-# TODO
 @login_required
-def go_to_payment(request, order_id):
-    order = get_object_or_404(Order, pk=order_id, user=request.user)
-    address_id = request.POST.get("address_id")
-    addr = get_object_or_404(UserAddress, pk=address_id, user=request.user)
+def ship_address(request, order_id):
+    addresses = UserAddress.objects.filter(user=request.user).order_by("-is_default")
+    default_address = addresses.filter(is_default=True).first()
+
+    # 如果預設地址裡有 None，跳轉到個人頁面請他修改
+    default_is_complete = (
+        any(getattr(default_address, field)) in (None, "")
+        for field in REQUIRED_ADDR_FIELDS
+    )
+
+    if not default_is_complete:
+        messages.warning(request, "請先更新預設地址，再至訂單結帳")
+        return redirect("users:profile")
+
+    order = get_object_or_404(Order, pk=order_id)
+    blank_address_form = UserAddressForm()
+
+    # 如果是取消按鈕被點擊
+    if request.GET.get("clear_modal") == '1':
+        request.session["show_create_modal"] = False
+        request.session.modified = True
+        return redirect("orders:ship_address", order_id=order_id)
+
+    # 直接設定或獲取彈窗狀態，預設為 False
+    show_create_modal = request.session.get("show_create_modal", False)
+
+    return render(
+        request,
+        "orders/ship_address.html",
+        {
+            "addresses": addresses,
+            "order": order,
+            "user_address_form": blank_address_form,
+            "show_create_modal": show_create_modal,
+        },
+    )
+
+
+@login_required
+def check_order(request, order_id):
+    user = request.user
+    order = get_object_or_404(Order, pk=order_id, user=user)
+
+    # 代表使用剛剛新增的地址
+    if request.POST.get("create_new_address") == "1":
+        new_address_form = UserAddressForm(request.POST)
+        if new_address_form.is_valid():
+            address = new_address_form.save(commit=False)
+            address.user = user
+            address.save()
+            # 刪除 session 的 show_create_modal 狀態
+            if "show_create_modal" in request.session:
+                del request.session["show_create_modal"]
+        else:
+            # 新增地址欄位出錯，將彈窗顯示
+            request.session["show_create_modal"] = True
+            addresses = UserAddress.objects.filter(user=request.user).order_by(
+                "-is_default"
+            )
+            return render(
+                request,
+                "orders/ship_address.html",
+                {
+                    "addresses": addresses,
+                    "order": order,
+                    "user_address_form": new_address_form,
+                    "show_create_modal": request.session["show_create_modal"],
+                },
+            )
+
+    else:
+        address_id = request.POST.get("ship-address").replace("address-", "")
+        address = get_object_or_404(UserAddress, pk=address_id, user=user)
 
     # 檢查這筆地址是否完整
-    missing = [f for f in REQUIRED_ADDR_FIELDS if not getattr(addr, f)]
+    missing = [field for field in REQUIRED_ADDR_FIELDS if not getattr(address, field)]
     if missing:
         messages.error(request, "這個地址資料不完整，請先進行編輯")
         return redirect("users:profile")
 
-    # 存地址快照，建立 payment
-    order.apply_address(addr)
-    return redirect("orders:request", order.id)
+    # 存地址快照
+    order.apply_address(address)
+
+    joined_group = (
+        JoinedGroup.objects.filter(order=order)
+        .prefetch_related("joined_group_products__product")
+        .first()
+    )
+    joined_group_products = joined_group.joined_group_products.all()
+
+    return render(
+        request,
+        "orders/check_order.html",
+        {
+            "order": order,
+            "joined_group": joined_group,
+            "joined_group_products": joined_group_products,
+        },
+    )
 
 
 def create_headers(body, uri):
@@ -71,10 +156,8 @@ def create_headers(body, uri):
 @require_POST
 @login_required
 def request(request, order_id):
-    user = request.user
     order = get_object_or_404(Order, pk=order_id)
-
-    if not order.user == user:
+    if not order.user == request.user:
         messages.error(request, "訂單發生錯誤，請稍後再試")
         return redirect(f"{reverse('orders:my_orders')}?auto_tab=pending")
 
@@ -83,7 +166,6 @@ def request(request, order_id):
         return redirect(f"{reverse('orders:my_orders')}?auto_tab=processing")
 
     payment = Payment.objects.create(order=order)
-
     package_id = f"pkg_{order.order_number}_{str(uuid.uuid4())[:8]}"
 
     payload = {

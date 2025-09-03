@@ -1,0 +1,72 @@
+{% extends "layouts/default.html" %}
+{% block content %}
+<section class="max-w-[1440px] mx-auto px-16 sm:px-24 mt-12 lg:mt-16"
+         x-data="{show_create_modal : {{show_create_modal|yesno:"true,false"|default:'false'}}}">
+    <div class="flex gap-4">
+        <p>1.選擇地址</p>
+        <p>2.確認訂單資訊</p>
+        <p>3.付款</p>
+    </div>
+       
+    <form action="{% url 'orders:check_order' order.id %}" method="post">
+        {% csrf_token %}
+            <button @click="show_create_modal = true" type="button" class="border-b-2">新增其他地址</button>
+            <button class="border-b-2">下一步</button>
+
+
+        <ul class="flex flex-col gap-4">
+            {% for address in addresses %}
+                    <li class="flex justify-between hover:bg-white">
+                    <label for="address-{{address.id}}" class="w-full cursor-pointer">
+                            <div class="flex">
+                                <p>{{address.recipient_name}}</p>
+                            </div>
+
+                            <div class="flex">
+                                <p>{{address.phone}}</p>
+                            </div>
+                        
+                            <div class="flex">
+                                <p>{{address.postal_code}} {{address.county}}{{address.district}}{{address.road}}{{address.detail}}</p>
+                            </div>
+                    </label>
+
+                    <div>
+                            {% if address.is_default %}
+                                <input type="radio" id="address-{{address.id}}" name="ship-address" value="address-{{address.id}}" class="cursor-pointer" checked />
+                            {% else %}
+                                <input type="radio" id="address-{{address.id}}" name="ship-address" value="address-{{address.id}}" class="cursor-pointer"/>
+                            {% endif %}
+                    </div>
+                    
+                    </li>
+                
+        {% endfor %}
+        </ul>
+    </form>
+
+    <!-- 新增收貨地址彈窗-->
+    <div x-show="show_create_modal" x-cloak>
+        <div action="#"
+              x-data="addressFormControl"
+              class="fixed inset-0 bg-black/60 flex items-center justify-center z-100 text-center"
+              >
+            <form action="{% url 'orders:check_order' order.id %}" method="post" class="bg-[var(--bg-color)] p-20 rounded-2xl" novalidate>
+                 <input type="hidden" name="create_new_address" value="1">
+
+                {% csrf_token %}
+                {% include "users/shared/address_form_fields.html" %}
+
+                <div class="flex gap-4">
+                    <button>下一步</button>
+                    <button type="button" @click="show_create_modal=false; window.location.href='{% url 'orders:ship_address' order.id %}?clear_modal=1'">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+
+
+
+{% endblock %}

@@ -137,7 +137,7 @@
 						<div class="flex justify-end items-center gap-2 pt-2">
 							<div class="flex items-center gap-2">
 								{% if order.order_status == order.OrderStatus.PENDING %}
-								<form action="{% url 'orders:payment_request' order.id %}" method="post" class="inline">
+								<form action="{% url 'orders:ship_address' order.id %}" method="post" class="inline">
 									{% csrf_token %}
 									<button class="w-[80px] flex items-center justify-center px-2 py-2 rounded-full bg-gray-900 text-white text-sm font-semibold hover:opacity-90 whitespace-nowrap">去付款</button>
 								</form>
