@@ -129,7 +129,7 @@
 									<div class="flex flex-row flex-wrap items-start justify-start gap-2">
 										<a href="#" class="px-2 py-1 rounded-full border border-gray-300 text-sm text-gray-800 whitespace-nowrap">檢視</a>
 										{% if order.order_status == order.OrderStatus.PENDING %}
-											<form action="{% url 'orders:payment_request' order.id %}" method="post" class="inline">
+											<form action="{% url 'orders:ship_address' order.id %}" method="post" class="inline">
 												{% csrf_token %}
 												<button class="px-2 py-1 rounded-full bg-gray-900 text-white text-sm font-semibold hover:opacity-90 whitespace-nowrap">去付款</button>
 											</form>

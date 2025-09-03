@@ -27,6 +27,10 @@ html {
   list-style-type: none;
 }
 
+button {
+  cursor: pointer;
+}
+
 .primary-color {
   color: var(--primary-color);
 }
