@@ -34,14 +34,13 @@ def ship_address(request, order_id):
     default_address = addresses.filter(is_default=True).first()
 
     # 如果預設地址裡有 None，跳轉到個人頁面請他修改
-    default_is_complete = (
-        any(getattr(default_address, field)) in (None, "")
-        for field in REQUIRED_ADDR_FIELDS
+    default_is_not_complete = any(
+        getattr(default_address, field) in (None, "") for field in REQUIRED_ADDR_FIELDS
     )
 
-    if not default_is_complete:
+    if default_is_not_complete:
         messages.warning(request, "請先更新預設地址，再至訂單結帳")
-        return redirect("users:profile")
+        return redirect("users:profiles")
 
     order = get_object_or_404(Order, pk=order_id)
     blank_address_form = UserAddressForm()
@@ -100,7 +99,12 @@ def check_order(request, order_id):
             )
 
     else:
-        address_id = request.POST.get("ship-address").replace("address-", "")
+        ship_address_val = request.POST.get("ship-address")
+        if not ship_address_val:
+            messages.error(request, "請選擇一個收貨地址。")
+            return redirect("orders:ship_address", order_id=order_id)
+
+        address_id = ship_address_val.replace("address-", "")
         address = get_object_or_404(UserAddress, pk=address_id, user=user)
 
     # 檢查這筆地址是否完整
