@@ -156,7 +156,6 @@ class GroupService:
 	def join_group(user, group, products_data):
 		joined_group, is_new_member = GroupService.get_or_create_joined_group(user=user, group=group)
 		products = GroupService.add_products_to_joined_group(joined_group=joined_group, products_data=products_data)
-		
 		GroupService.update_total_and_progress(group)
 		
 		if group.total >= group.min_goal:
@@ -182,7 +181,6 @@ class GroupService:
 		
 		joined_group.deleted_at = timezone.now()
 		joined_group.save()
-
 		JoinedGroupProduct.objects.filter(joined_group=joined_group).update(deleted_at=timezone.now())
 
 		GroupService.update_total_and_progress(group)

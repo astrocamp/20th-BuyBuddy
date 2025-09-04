@@ -225,14 +225,16 @@ LINE_SANDBOX_URL = os.getenv("LINE_SANDBOX_URL")
 # 富文本設定
 TINYMCE_JS_URL = STATIC_URL + "tinymce/tinymce.min.js"
 TINYMCE_DEFAULT_CONFIG = {
-    "height": 500,
+    "height": 300,
     "menubar": False,
     "plugins": "advlist,autolink,lists,link,image,charmap,preview,searchreplace,visualblocks,fullscreen,insertdatetime,media,table,code,help,wordcount",
     "toolbar": "undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | link image",
     "images_upload_url": "/groups/upload/",
     "csrf_cookie_name": "csrftoken",
-    "csrf_token_header": "X-CSRFToken",
-}
+	"csrf_token_header": "X-CSRFToken",
+	"statusbar": False,
+	"resize": False,
+    }
 TINYMCE_LIMITED_CONFIG = {
     "height": 300,
     "menubar": False,
@@ -242,4 +244,7 @@ TINYMCE_LIMITED_CONFIG = {
     "images_upload_url": "",
     "csrf_cookie_name": "csrftoken",
     "csrf_token_header": "X-CSRFToken",
+	"statusbar": False,
+    "resize": False,
+    
 }
