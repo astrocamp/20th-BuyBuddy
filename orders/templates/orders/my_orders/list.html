@@ -1,157 +1,166 @@
-<div class="max-w-[1280px] mx-auto px-10 py-12">
-{% if joined_groups or orders%}
+{% load humanize %}
+<div class="mx-auto px-10 py-12">
+	{% if joined_groups or orders%}
 	{# 尚未成團：joined_groups #}
 	{% if joined_groups %}
-		<section class="mb-10">
-			<h2 class="text-center text-lg font-medium text-gray-800 mb-4">尚未成團</h2>
-			<div class="overflow-x-auto bg-transparent rounded-2xl border border-gray-300">
-				<table class="min-w-full border-collapse table-fixed text-sm" style="border-spacing:0">
-					<colgroup>
-						<col style="width:340px;" /> <!-- 團購/訂單(含圖) -->
-						<col style="width:373px;" /> <!-- 商品 -->
-						<col style="width:97px;" /> <!-- 價格 -->
-						<col style="width:65px;" /> <!-- 數量 -->
-						<col style="width:97px;" /> <!-- 小計 -->
-						<col style="width:97px;" /> <!-- 合計 -->
-						<col style="width:97px;" /> <!-- 狀態 -->
-						<col style="width:113px;" /> <!-- 操作 -->
-					</colgroup>
-					<thead class="bg-transparent">
-						<tr>
-							<th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[340px]">團購 / 訂單</th>
-							<th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[373px]">商品</th>
-							<th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[97px]">價格</th>
-							<th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[65px]">數量</th>
-							<th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[97px]">小計</th>
-							<th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[97px]">合計</th>
-							<th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[97px]">狀態</th>
-							<th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[113px]">操作</th>
-						</tr>
-					</thead>
-					<tbody class="bg-transparent">
-							{% for jg in joined_groups %}
-							<tr class="border-t border-gray-300 hover:bg-transparent transition">
-								<td class="px-4 py-8 align-top text-sm font-medium text-gray-900 w-[340px]">
-									<div class="flex items-center gap-3"> <!-- 團名與圖片水平對齊 -->
-										<div class="w-12 h-12 bg-transparent overflow-hidden rounded border border-gray-300 flex-shrink-0">
-											{% if jg.group.banner %}
-												<img src="{{ jg.group.banner.url }}" alt="{{ jg.group.name }}" class="w-full h-full object-cover object-center block">
-											{% else %}
-												<div class="w-full h-full bg-transparent"></div>
-											{% endif %}
-										</div>
-										<div class="text-base font-semibold text-gray-900 mt-1 truncate">{{ jg.group.name }}</div>
-									</div>
-								</td>
+	<section class="max-w-[1440px] mx-auto md:px-16 sm:px-24 mt-12 lg:mt-16">
+		<h2 class="text-center text-lg font-medium text-gray-800 mb-4">尚未成團</h2>
+			{% for jg in joined_groups %}
+			
+			<div class="bg-white rounded-2xl border border-gray-300 p-6 mb-4 shadow-sm hover:shadow-md transition-shadow">
+				
+				<div class="flex flex-col lg:flex-row gap-6">
 
+					<!-- 圖片區域 -->
+					<div class="flex-shrink-0">
+						<div class="w-full h-48 lg:h-64 lg:w-64 rounded-lg border border-gray-200 overflow-hidden">
+							{% if jg.group.banner %}
+							<img class="w-full h-full object-cover object-center" src="{{ jg.group.banner.url }}" alt="{{ jg.group.name }}">
+							{% else %}
+							<div class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
+								<span>無圖片</span>
+							</div>
+							{% endif %}
+						</div>
+					</div>
+					
+					<!-- 內容區域 -->
+					<div class="flex-1 flex flex-col gap-4">
+						<div class="flex-col sm:flex-row  flex justify-between items-start sm:items-center">
+							<h2 class="text-lg sm:text-2xl text-center md:text-left font-semibold text-gray-900">{{ jg.group.name }}</h2>
+							<p class="text-sm text-right text-red-500 mb-2">未成團</p>
+						</div>
+						
+						<div class="space-y-3" >
+							<ul class="min-h-[130px]">
+								<li class="grid grid-cols-1 md:grid-cols-2 gap-2 bg-gray-50 rounded-lg text-center p-2">
+									<p class="text-sm text-gray-600">商品</p>
+									<p class="hidden md:grid grid-cols-3 gap-4 text-sm text-gray-600">
+										<span>價格</span>
+										<span>數量</span>
+										<span>小計</span>
+									</p>
+								</li>
 								{% include 'orders/my_orders/list_columns.html' with items=jg.joined_group_products.all %}
-
-								<td class="px-4 py-8 align-top text-left text-lg font-semibold text-gray-900 w-[97px]">-</td>
-
-								<td class="px-4 py-8 align-top text-left text-sm text-yellow-700 w-[97px]">未成團</td>
-
-								<td class="px-4 py-8 align-top text-left w-[113px]">
-									<div class="flex flex-row flex-wrap items-start justify-start gap-2">
-										<a href="#" class="px-2 py-1 rounded-full border border-gray-300 text-sm text-gray-800 whitespace-nowrap">修改跟團</a>
-										{% comment %} #TODO 退團連結 {% endcomment %}
-										<form action="#" method="post" class="inline">
-											{% csrf_token %}
-											<input type="hidden" name="_method" value="delete" />
-											<input type="hidden" name="group-id" value="{{ jg.group.id }}" />
-											<button type="submit" class="px-2 py-1 rounded-full border border-red-300 text-sm text-red-700 hover:bg-red-50 whitespace-nowrap">退團</button>
-										</form>
-									</div>
-								</td>
-							</tr>
-						{% endfor %}
-					</tbody>
-				</table>
+								<li class="hidden md:grid grid-cols-2 gap-2 bg-gray-50 rounded-lg text-center my-2 p-2">
+									<p class="grid col-start-2 grid-cols-3 gap-4 text-base font-semibold text-gray-900">
+										<span class="col-start-2">合計</span>
+										<span>
+											${{ jg.total_amount | intcomma }}
+										</span>
+									</p>
+								</li>
+								<li class="grid md:hidden bg-gray-50 rounded-lg text-center my-2 p-2">
+									<p class="text-base font-semibold text-gray-900">
+										合計 ${{ jg.total_amount | intcomma }}
+									</p>
+								</li>
+							</ul>
+							
+								<div class="flex justify-end items-center gap-2 pt-2">
+									<a href="#" class="card-btn card-btn-white">修改跟團</a>
+									<form action="#" method="post" class="inline">
+										{% csrf_token %}
+										<input type="hidden" name="_method" value="delete" />
+										<input type="hidden" name="group-id" value="{{ jg.group.id }}" />
+										<button type="submit" class="card-btn card-btn-red">退團</button>
+									</form>
+								</div>
+							</div>
+					</div>
+				</div>
 			</div>
-		</section>
+			{% endfor %}
+		
+	</section>
 	{% endif %}
-
+	
 	{# 訂單紀錄：orders #}
 	{% if orders %}
-		<section>
-			<h2 class="text-center text-lg font-medium text-gray-800 mb-4">訂單紀錄</h2>
-			<div class="overflow-x-auto bg-transparent rounded-2xl border border-gray-300">
-				<table class="min-w-full border-collapse table-fixed text-sm" style="border-spacing:0">
-					<colgroup>
-						<col style="width:340px;" /> <!-- 團購/訂單(含圖) -->
-						<col style="width:373px;" /> <!-- 商品 -->
-						<col style="width:97px;" /> <!-- 價格 -->
-						<col style="width:65px;" /> <!-- 數量 -->
-						<col style="width:97px;" /> <!-- 小計 -->
-						<col style="width:97px;" /> <!-- 合計 -->
-						<col style="width:97px;" /> <!-- 狀態 -->
-						<col style="width:113px;" /> <!-- 操作 -->
-					</colgroup>
-					<thead class="bg-transparent">
-						<tr>
-							<th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[340px]">團購 / 訂單</th>
-							<th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[373px]">商品</th>
-							<th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[97px]">價格</th>
-							<th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[65px]">數量</th>
-							<th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[97px]">小計</th>
-							<th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[97px]">合計</th>
-							<th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[97px]">狀態</th>
-							<th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[113px]">操作</th>
-						</tr>
-					</thead>
-					<tbody class="bg-transparent">
-							{% for order in orders %}
-							<tr class="border-t border-gray-300 hover:bg-transparent transition">
-								<td class="px-4 py-8 align-top text-sm font-medium text-gray-900 w-[340px]">
-									<div class="flex items-center gap-3"> <!-- 團名與圖片水平對齊 -->
-										<div class="w-12 h-12 bg-transparent overflow-hidden rounded border border-gray-300 flex-shrink-0">
-											{% if order.group.banner %}
-												<img src="{{ order.group.banner.url }}" alt="{{ order.group.name }}" class="w-full h-full object-cover object-center block">
-											{% else %}
-												<div class="w-full h-full bg-transparent"></div>
-											{% endif %}
-										</div>
-										<div>
-											<div class="text-xs text-gray-500">#{{ order.order_number }}</div>
-											<div class="text-base font-semibold text-gray-900 mt-1 truncate">{{ order.group.name }}</div>
-										</div>
-									</div>
-								</td>
-
-								{% include 'orders/my_orders/list_columns.html' with items=order.joined_group.joined_group_products.all %}
-
-								<td class="px-4 py-8 align-top text-left text-lg font-semibold text-gray-900 w-[97px]">{% if order.formatted_amount %}${{ order.formatted_amount }}{% endif %}</td>
-
-								<td class="px-4 py-8 align-top text-left text-sm {% if order.order_status == order.OrderStatus.PENDING or order.order_status == order.OrderStatus.SHIPPED %}text-yellow-700{% else %}text-gray-700{% endif %} w-[97px]">
-									{{ order.get_order_status_display }}
-								</td>
-
-								<td class="px-4 py-8 align-top text-left w-[113px]">
-									<div class="flex flex-row flex-wrap items-start justify-start gap-2">
-										<a href="#" class="px-2 py-1 rounded-full border border-gray-300 text-sm text-gray-800 whitespace-nowrap">檢視</a>
-										{% if order.order_status == order.OrderStatus.PENDING %}
-											<form action="{% url 'orders:payment_request' order.id %}" method="post" class="inline">
-												{% csrf_token %}
-												<button class="px-2 py-1 rounded-full bg-gray-900 text-white text-sm font-semibold hover:opacity-90 whitespace-nowrap">去付款</button>
-											</form>
-										{% endif %}
-										{% if order.order_status == order.OrderStatus.SHIPPED %}
-											<form action="{% url 'orders:received' order.id %}" method="post" class="inline">
-												{% csrf_token %}
-												<button class="px-2 py-1 rounded-full bg-gray-900 text-white text-sm font-semibold hover:opacity-90 whitespace-nowrap">我收到貨了</button>
-											</form>
-										{% endif %}
-									</div>
-								</td>
-							</tr>
-						{% endfor %}
-					</tbody>
-				</table>
+	<section class="max-w-[1440px] mx-auto md:px-16 sm:px-24 mt-12 lg:mt-16">
+		<h2 class="text-center text-lg font-medium text-gray-800 mb-4">訂單紀錄</h2>
+		{% for order in orders %}
+		<div class="bg-white rounded-2xl border border-gray-300 p-6 mb-4 shadow-sm hover:shadow-md transition-shadow">
+			<!-- 訂單號碼 -->
+			<div class="flex justify-between items-center">
+				<div class="text-sm text-gray-500 mb-2">訂單號碼：#{{ order.order_number }}</div>
 			</div>
-		</section>
+			<div class="flex flex-col md:flex-row gap-6">
+				<!-- 圖片區域 -->
+				<div class="flex-shrink-0">
+					<div class="w-full h-48 lg:h-64 lg:w-64 rounded-lg border border-gray-200 overflow-hidden">
+						{% if order.group.banner %}
+						<img class="w-full h-full object-cover object-center" src="{{ order.group.banner.url }}" alt="{{ order.group.name }}">
+						{% else %}
+						<div class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
+							<span>無圖片</span>
+						</div>
+						{% endif %}
+					</div>
+				</div>
+				
+				<!-- 內容區域 -->
+				<div class="flex-1 flex flex-col gap-4">
+					<div class="flex-col sm:flex-row  flex justify-between items-start sm:items-center">
+						<h2 class=" text-lg sm:text-2xl text-center md:text-left font-semibold text-gray-900">{{ order.group.name }}</h2>
+						<p class="text-sm text-right mb-2 text-gray-700">
+							已成團
+						</p>
+					</div>
+					
+					<div class="space-y-3" >
+						<ul class="min-h-[130px]">
+							<li class="grid grid-cols-1 md:grid-cols-2 gap-2 bg-gray-50 rounded-lg text-center p-2">
+								<p class="text-sm text-gray-600">商品</p>
+								<p class="hidden md:grid grid-cols-3 gap-4 text-sm text-gray-600">
+									<span>價格</span>
+									<span>數量</span>
+									<span>小計</span>
+								</p>
+							</li>
+							{% include 'orders/my_orders/list_columns.html' with items=order.joined_group.joined_group_products.all %}
+							<li class="hidden md:grid grid-cols-2 gap-2 bg-gray-50 rounded-lg text-center my-2 p-2">
+								<p class="grid col-start-2 grid-cols-3 gap-4 text-base font-semibold text-gray-900">
+									<span class="col-start-2">合計</span>
+									<span>
+										${{ order.total_amount | intcomma }}
+									</span>
+								</p>
+							</li>
+							<li class="grid md:hidden bg-gray-50 rounded-lg text-center my-2 p-2">
+								<p class="text-base font-semibold text-gray-900">
+									合計 ${{ order.total_amount | intcomma }}
+								</p>
+							</li>
+						</ul>
+						
+						<div class="flex justify-end items-center gap-2 pt-2">
+							<div class="flex items-center gap-2">
+								{% if order.order_status == order.OrderStatus.PENDING %}
+								<form action="{% url 'orders:payment_request' order.id %}" method="post" class="inline">
+									{% csrf_token %}
+									<button class="w-[80px] flex items-center justify-center px-2 py-2 rounded-full bg-gray-900 text-white text-sm font-semibold hover:opacity-90 whitespace-nowrap">去付款</button>
+								</form>
+								{% endif %}
+								{% if order.order_status == order.OrderStatus.SHIPPED %}
+								<form action="{% url 'orders:received' order.id %}" method="post" class="inline">
+									{% csrf_token %}
+									<button class="card-btn card-btn-secondary">我收到貨了</button>
+								</form>
+								{% endif %}
+								<a href="#" class="card-btn card-btn-white">檢視</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		{% endfor %}
+	</section>
 	{% endif %}
-{% else %}
+	{% else %}
 	<section class="mb-10">
 		<h2 class="text-center text-lg font-medium text-gray-800 mb-4">尚未有此分類訂單</h2>
 	</section>
-{% endif %}
+	{% endif %}
 </div>

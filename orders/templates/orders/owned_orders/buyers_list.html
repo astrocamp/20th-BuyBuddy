@@ -1,0 +1,87 @@
+{% extends "layouts/default.html"%}
+{% load humanize %}
+{% block content %}
+
+<section class="max-w-[1440px] mx-auto px-16 sm:px-24 mt-12 lg:mt-16">
+  <h2 class="text-center">{{ group.name }} - 跟團者列表</h2>
+  {% if orders %}
+  {% for order in orders %}
+  <div class="box-border flex flex-col gap-2"> 
+    <div class="mt-5">
+      <div class="flex justify-between items-center mb-2">
+        <p>訂單號碼: 
+          {% if order.order_number %}
+          {{ order.order_number }}
+          {% else %}
+          尚未產生訂單
+          {% endif %}
+        </p>
+        {% if order.order_status == "pending" %}
+        <a href="#" class="px-5 rounded-full border text-sm text-gray-800 whitespace-nowrap bg-gray-900 text-white">出貨</a>
+        {% endif %}
+      </div>
+      <div class="grid grid-cols-3 text-center border">
+        <p>品項</p>
+        <p class="border-x">數量</p>
+        <p>單價</p>
+      </div>
+      {% for jqp in order.joined_group.joined_group_products.all %}
+      <div class="grid grid-cols-3 text-center border-x">
+        <p class="border-b">{{ jqp.product.name }}</p>
+        <p class="border-x border-b">{{ jqp.quantity }}</p>
+        <p class="border-b">${{ jqp.product.price }}</p>
+      </div>
+      {% endfor %}
+      <div class="grid grid-cols-3 border-x">
+        <p class="col-span-2 text-right border-r">合計：</p>
+        <p class="text-center">${{ order.total_amount | intcomma }}</p>
+      </div>
+      <div class="border">
+        <p>收件人: {{ order.ship_recipient_name }}</p>
+        <p>電話: {{ order.ship_phone }}</p>
+        <p>付款狀態: {{ order.get_order_status_display }}</p>
+        <p>寄件地址: {{ order.ship_postal_code }} {{ order.ship_county }} {{ order.ship_district }} {{ order.ship_road }} {{ order.ship_detail }}</p>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+  {% elif buyers %}
+  {% for buyer in buyers %}
+  <div class="box-border flex flex-col gap-2"> 
+    <div class="mt-5">
+      <div class="flex justify-between items-center mb-2">
+        <p>用戶ID: 
+          {% if buyer.buyer.username %}
+          {{ buyer.buyer.username }}
+          {% else %}
+          尚未產生訂單
+          {% endif %}
+        </p>
+      </div>
+      <div class="grid grid-cols-3 text-center border">
+        <p>品項</p>
+        <p class="border-x">數量</p>
+        <p>單價</p>
+      </div>
+      {% for jqp in buyer.joined_group_products.all %}
+      <div class="grid grid-cols-3 text-center border-x">
+        <p class="border-b">{{ jqp.product.name }}</p>
+        <p class="border-x border-b">{{ jqp.quantity }}</p>
+        <p class="border-b">${{ jqp.product.price }}</p>
+      </div>
+      {% endfor %}
+      <div class="grid grid-cols-3 border-x border-b">
+        <p class="col-span-2 text-right border-r">合計：</p>
+        <p class="text-center">${{ buyer.total_amount | intcomma }}</p>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+  {% endif %}
+</section>
+
+
+{% endblock %}
+
+
+

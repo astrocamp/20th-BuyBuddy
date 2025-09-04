@@ -1,3 +1,4 @@
+from tokenize import group
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 from django.contrib import messages
@@ -9,9 +10,10 @@ import hashlib
 import base64
 import requests
 from .models import Order, Payment
-from groups.models import JoinedGroup
+from groups.models import JoinedGroup, Group
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
+from django.db.models import Sum, F
 
 
 def create_headers(body, uri):
@@ -200,12 +202,12 @@ def success(request):
 def fail(request):
     return render(request, "orders/payment_fail.html")
 
-
+# 我跟團的訂單
 @login_required
 def my_orders(request):
     user = request.user
     tab = request.GET.get("tab", "all")
-    auto_tab = request.GET.get("auto_tab")
+    auto_tab = request.GET.get("auto_tab")    
 
     # 如果有 auto_tab，就用 auto_tab 作為初始內容
     display_tab = auto_tab if auto_tab else tab
@@ -248,6 +250,7 @@ def get_orders_by_tab(user, tab):
         .order_by("-updated_at")
         .select_related("group", "joined_group")
         .prefetch_related("joined_group__joined_group_products__product")
+        .annotate(total_amount=Sum(F('joined_group__joined_group_products__product__price') * F('joined_group__joined_group_products__quantity')))
     )
 
     # 找出所有跟團紀錄
@@ -256,6 +259,7 @@ def get_orders_by_tab(user, tab):
         .order_by("-updated_at")
         .select_related("group")
         .prefetch_related("joined_group_products__product")
+        .annotate(total_amount=Sum(F('joined_group_products__product__price') * F('joined_group_products__quantity')))
     )
 
     if tab == "all":
@@ -278,6 +282,133 @@ def get_orders_by_tab(user, tab):
         orders = base_orders_query.filter(order_status=Order.OrderStatus.COMPLETED)
 
     return orders, joined_groups
+
+# 我開團的訂單
+@login_required
+def owned_orders(request):
+    user = request.user
+    tab = request.GET.get("tab", "all")
+    auto_tab = request.GET.get("auto_tab")    
+
+    # 如果有 auto_tab，就用 auto_tab 作為初始內容
+    display_tab = auto_tab if auto_tab else tab
+
+    ongoing_groups, completed_groups, orders = get_data_by_tab(user, display_tab)
+
+    return render(
+        request,
+        "orders/owned_orders/section.html",
+        {
+            "ongoing_groups": ongoing_groups,
+            "completed_groups": completed_groups,
+            "orders": orders,
+            "current_tab": display_tab,
+            "auto_tab": auto_tab,
+        },
+    )
+
+@login_required
+def owned_orders_tab_content(request):
+    user = request.user
+    tab = request.GET.get("tab", "all")
+
+    ongoing_groups, completed_groups, orders = get_data_by_tab(user, tab)
+
+    return render(
+        request,
+        "orders/owned_orders/list.html",
+        {
+            "ongoing_groups": ongoing_groups,
+            "completed_groups": completed_groups,
+            "orders": orders,
+            "current_tab": tab,
+        },
+    )
+
+def get_data_by_tab(user, tab):
+    ongoing_groups = []
+    completed_groups = []
+    orders = []
+
+    base_groups_query = (
+        Group.objects.filter(owner=user)
+        .order_by("-created_at")
+        .select_related("owner")
+        .prefetch_related("products", "order_set")
+    )
+
+    base_orders_query = (
+        Order.objects.filter(group__status="completed", group__owner=user)
+        .order_by("updated_at")
+        .select_related("group", "user")
+        .prefetch_related("joined_group__joined_group_products__product")
+        .annotate(total_amount=Sum(F('joined_group__joined_group_products__product__price') * F('joined_group__joined_group_products__quantity')))
+    )
+
+    if tab == "all":
+        ongoing_groups = base_groups_query.filter(status="ongoing")
+        completed_groups = base_groups_query.filter(status="completed")
+    
+    if tab == "pending":
+        orders = base_orders_query.filter(order_status=Order.OrderStatus.PENDING)
+
+    if tab == "processing":
+        orders = base_orders_query.filter(order_status=Order.OrderStatus.PROCESSING)
+
+    if tab == "shipped":
+        orders = base_orders_query.filter(order_status=Order.OrderStatus.SHIPPED)
+
+    if tab == "completed":
+        orders = base_orders_query.filter(order_status=Order.OrderStatus.COMPLETED)
+
+
+    return ongoing_groups, completed_groups, orders
+
+# 跟團者列表
+@login_required
+def buyer_list(request, group_id):
+    group = get_object_or_404(Group, id=group_id)
+    
+    orders = []
+    buyers = []
+
+    completed_groups = (
+        Order.objects.filter(
+            group_id=group_id,
+            group__status="completed",
+        )
+        .prefetch_related(
+            "joined_group__joined_group_products__product", 
+        )
+        .annotate(total_amount=Sum(F('joined_group__joined_group_products__product__price') * F('joined_group__joined_group_products__quantity')))
+        # joined_group__joined_group_products__quantity | joined_group__joined_group_products.quantity
+        # joined_group__joined_group_products__product__price | joined_group__joined_group_products.product.price
+    )
+
+    ongoing_groups = (
+        JoinedGroup.objects.filter(
+            group_id=group_id, 
+            group__status="ongoing"
+        )
+        .select_related("buyer")
+        .prefetch_related(
+            "joined_group_products__product",
+        )
+        .annotate(total_amount=Sum(F('joined_group_products__product__price') * F('joined_group_products__quantity')))
+    )
+
+
+    if group.status == "ongoing":
+        buyers = ongoing_groups
+    
+    if group.status == "completed":
+        orders = completed_groups
+
+    return render(request, "orders/owned_orders/buyers_list.html", {
+        'group': group,
+        'orders': orders,
+        'buyers': buyers
+    })
 
 
 # 確認收貨

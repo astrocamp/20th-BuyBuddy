@@ -2,6 +2,7 @@ from django.db import models
 from users.models import User
 from tinymce.models import HTMLField
 from django_fsm import FSMField, transition
+from django.db.models import Sum, F
 
 
 class Group(models.Model):
@@ -77,3 +78,5 @@ class JoinedGroup(models.Model):
 
     def __str__(self) -> str:
         return f"{self.buyer.username} joined {self.group.name}"
+
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)

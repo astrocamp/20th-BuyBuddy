@@ -1,0 +1,8 @@
+{% load humanize %}
+
+{% for p in items %}
+<li class="grid grid-cols-4 gap-2 bg-gray-50 rounded-lg text-center my-2 p-2">
+    <p class="text-sm text-gray-600 col-span-3">{{ p.name }}</p>
+    <p class="text-sm text-gray-600">{{ p.formatted_price }}</p>
+</li>
+{% endfor %}
