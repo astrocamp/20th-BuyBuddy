@@ -1,16 +1,19 @@
 {% load static %}
- <!-- Navigation (1440 x 90) with shadow -->
-  <nav class="max-w-[1440px] mx-auto px-8 sm:px-12 h-[90px] flex items-center justify-between text-base"
-  x-data="{open:false}">
+  <nav 
+    class="max-w-[1440px] mx-auto px-8 sm:px-12 h-[90px] flex items-center justify-between text-base"
+    x-data="{open:false}">
     <ul class="flex items-center gap-4">
     <li>
         <a class="flex items-center justify-center"
         href="{% url 'pages:homepage' %}">
-            <img class="w-[150px] sm:w-[200px] aspect-square" src="{% static 'asset/logo.svg' %}" alt="logo">
+            <img class="w-[150px] sm:w-[200px]" src="{% static 'assets/logo.svg' %}" alt="logo">
         </a>
     </li>
     <li class="hidden lg:block">
         <a href="{% url 'groups:new' %}" class="nav-btn">我要開團</a>
+    </li>
+    <li class="hidden lg:block">
+        <a href="{% url 'groups:index' %}" class="nav-btn">團購一覽</a>
     </li>
     </ul>
       
@@ -22,24 +25,17 @@
                    class="nav-btn">我的訂單</a>
             </li>
 
+           
+
             <li>
                 <a href="{% url 'users:profiles'%}"
-                   class="nav-btn flex gap-2 items-center">
-                   <p id="navbar-username-desktop">
-                       {{user.username}}
-                   </p>
+                   class="nav-btn">
                    <div id="navbar-avatar-desktop" class="rounded-full overflow-hidden w-8 h-8">
                        <img src="{{ user.avatar_url.url }}" alt="User Avatar">
                    </div>
                 </a>
             </li>
 
-            <li>
-                <a href="{% url 'users:sessions_delete' %}?next={{request.path}}"
-                   class="nav-btn">登出</a>
-            </li>
-
-            
 
             <!-- 鈴鐺-->
             <li  class="relative cursor-pointer leading-8 flex items-center     
@@ -47,6 +43,12 @@
                 {% include "shared/bell.html" %}
                 {% include "shared/notifications_dropdown.html" %}
             </li>
+
+             <li>
+                <a href="{% url 'users:sessions_delete' %}?next={{request.path}}"
+                   class="py-[12px] px-[24px] rounded-full border-[1.5px] border-secondary-color">登出</a>
+            </li>
+            
         </ul>
     {% else %}
         <ul class="hidden lg:flex justify-center items-center gap-4">

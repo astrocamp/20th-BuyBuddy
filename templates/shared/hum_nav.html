@@ -14,8 +14,8 @@ x-transition:leave="transition ease-in duration-300"
 x-transition:leave-start="opacity-100 transform translate-x-0"
 x-transition:leave-end="opacity-0 transform translate-x-4"
 @click.outside="open=false"  
-class="pl-[100px] pb-12 bg-[#EDEDED]  fixed top-0 right-0 w-[80%] md:w-[500px] rounded-l-4xl h-screen flex flex-col overflow-hidden secondary-color">
-<div class="sticky top-0 bg-[#EDEDED] pt-[85px] pb-4 z-10 rounded-t-[50px]">
+class="pl-[80px] sm:pl-[100px] pb-12 bg-tertiary-color  fixed top-0 right-0 w-[80%] md:w-[500px] rounded-l-4xl h-screen flex flex-col overflow-hidden secondary-color">
+<div class="sticky top-0 bg-tertiary-color pt-[85px] pb-4 z-10 rounded-t-[50px]">
     <button class="absolute top-[35px] md:top-[40px] right-[25px] md:right-[50px] cursor-pointer 
     hover:outline-[var(--secondary-color)] hover:outline-[1.5px] hover:outline-offset-8 rounded-full transition-all" @click="open=false">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#1e1f24" viewBox="0 0 256 256"><path d="M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z"></path></svg>
@@ -30,13 +30,21 @@ class="pl-[100px] pb-12 bg-[#EDEDED]  fixed top-0 right-0 w-[80%] md:w-[500px] r
             </li>
 
             <li class="py-8">
+                <a href="{% url 'groups:index' %}" class="w-[128px] flex flex-col hover:scale-115 hover:py-2 transition-all duration-300 origin-left  text-center">
+                    團購一覽
+                </a>
+            </li>
+
+            <li class="mt-1 mb-10 w-full h-2 border-b-2 border-[var(--tertiary-color-300)]"></li>
+
+            <li class="py-8">
                 <a href="{% url 'users:profiles'%}"
                 class="flex hover:scale-115 hover:py-2 transition-all duration-300 origin-left items-center gap-4">
                     <div id="navbar-avatar-mobile" class="rounded-full overflow-hidden w-8 h-8">
                         <img src="{{ user.avatar_url.url }}" alt="User Avatar">
                     </div>
-                    <p id="navbar-username-mobile">
-                        {{user.username}}
+                    <p>
+                        個人頁面
                     </p>
                 </a>
             </li>
