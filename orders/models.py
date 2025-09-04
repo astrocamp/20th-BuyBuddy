@@ -55,10 +55,6 @@ class Order(models.Model):
     shipped_at = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
 
-    # shipping_address = models.ForeignKey(
-    #     UserAddress, on_delete=models.SET_NULL, null=True, blank=True
-    # )
-
     # ---- 地址快照 ----
     ship_recipient_name = models.CharField(max_length=50, null=True, blank=True)
     ship_phone = models.CharField(max_length=20, null=True, blank=True)

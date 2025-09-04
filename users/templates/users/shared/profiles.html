@@ -12,15 +12,6 @@
         src="{{ user_form.instance.avatar_url.url }}" 
         alt="User Avatar">
 
-    <p hx-swap-oob="outerHTML:#navbar-username-desktop"
-        hx-disinherit="oobErrorIgnore">
-        {{ user_form.instance.username }}
-    </p>
-
-    <p hx-swap-oob="outerHTML:#navbar-username-mobile"
-        hx-disinherit="oobErrorIgnore">
-        {{ user_form.instance.username }}
-    </p>
 {% endif %}
 
 
