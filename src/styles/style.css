@@ -17,6 +17,8 @@
   --tertiary-color-50: #f8f8f8;
   --tertiary-color-300: #bdbdbd;
   --tertiary-color-500: #7c7c7c;
+  --red-color-500: #fb2c36;
+  --red-color-700: #c10007;
 }
 
 html {
@@ -140,6 +142,50 @@ html {
 
 .nav-btn:hover::after {
   width: 60%;
+}
+
+
+/* card-btn */
+.card-btn{
+  
+  display: flex;
+  cursor: pointer;
+  border-radius: 50px;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  font-size: 14px;
+}
+.card-btn-white {
+  background-color: #ffffff;
+  border: 1px solid var(--secondary-color);
+  color: var(--secondary-color);
+}
+
+.card-btn-white:hover {
+  background-color: var(--secondary-color);
+  color: #ffffff;
+}
+
+.card-btn-red{
+  border: 1px solid var(--red-color-500);
+  color: var(--red-color-500);
+}
+
+.card-btn-red:hover {
+  background-color: var(--red-color-500);
+  color: #ffffff;
+}
+
+.card-btn-secondary{
+  background-color: var(--secondary-color);
+  border: 1px solid var(--secondary-color);
+  color: #ffffff;
+}
+
+.card-btn-secondary:hover {
+  background-color: #ffffff;
+  color: var(--secondary-color);
 }
 
 /* 響應式 */

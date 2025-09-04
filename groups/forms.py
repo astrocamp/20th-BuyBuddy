@@ -9,10 +9,7 @@ from django.conf import settings
 
 class GroupForm(ModelForm):
   goal_choice = forms.ChoiceField(
-    choices=[
-          ('1', '金額'),
-          ('2', '數量')
-      ],
+    choices=Group.GOAL_CHOICES,
       label='成團方式'
   )
   class Meta:

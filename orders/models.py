@@ -108,15 +108,6 @@ class Order(models.Model):
         """檢查訂單是否已完成"""
         return self.order_status == self.OrderStatus.COMPLETED
 
-    def save(self, *args, **kwargs):
-        if not self.pk or not self.order_number:
-            self.order_number = _generate_unique_number()
-        super().save(*args, **kwargs)
-
-    @property
-    def formatted_amount(self):
-        return f"{self.amount:,.0f}"
-
     def apply_address(self, address: UserAddress, *, save=True):
         if address.user_id != self.user_id:
             raise ValidationError("地址不屬於該訂單的使用者")

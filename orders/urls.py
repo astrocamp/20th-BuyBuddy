@@ -12,6 +12,17 @@ urlpatterns = [
         views.my_orders_tab_content,
         name="my_orders_tab_content",
     ),
+    # ========== 我開團的訂單相關 ==========
+    # 全部我的開團訂單
+    path("owned-orders/", views.owned_orders, name="owned_orders"),
+    path(
+        "owned-orders/tab-content/",
+        views.owned_orders_tab_content,
+        name="owned_orders_tab_content",
+    ),
+    # 跟團者列表
+    path("owned-orders/buyer_list/<int:group_id>/", views.buyer_list, name="buyer_list"),
+    
     # 確認收貨
     path("my-orders/received/<int:order_id>/", views.received, name="received"),
     # ========== 付款相關 ==========

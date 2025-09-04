@@ -1,35 +1,20 @@
 {% load humanize %}
 {# Partial moved: renders 商品 / 價格 / 數量 / 小計 columns for a given `items` iterable #}
-<td class="px-4 py-8 align-top w-[373px] min-w-0">
-    <ul class="list-none space-y-8">
-        {% for jgp in items %}
-            <li class="flex items-center gap-3 min-w-0">
-                <div class="text-sm text-gray-700 truncate">{{ jgp.product.name }}</div>
-            </li>
-        {% endfor %}
-    </ul>
-</td>
+{% for jqp in items %}
+<li class="hidden md:grid grid-cols-1 md:grid-cols-2 gap-2 bg-gray-50 rounded-lg my-2 p-2">
+    <p class="text-sm text-gray-600 text-left md:text-center">{{ jqp.product.name }}</p>
+    <p class="grid grid-cols-3 gap-4 text-sm text-gray-600">
+        <span class="text-left md:text-center">${{ jqp.product.price }}</span>
+        <span class="text-left md:text-center">x {{ jqp.quantity }}</span>
+        <span class="text-center">${{ jqp.subtotal }}</span>
+    </p>
+</li>
+<li class="grid md:hidden grid-cols-4 gap-2 bg-gray-50 rounded-lg my-2 p-2">
+    <p class="text-sm col-span-3 sm:col-span-2 text-gray-600 text-left md:text-center">{{ jqp.product.name }}</p>
+    <p class="text-center col-span-1 text-right sm:text-center">x {{ jqp.quantity }}</p>
+    <p class="text-center font-bold hidden sm:grid">${{ jqp.subtotal }}</p>
+    <p class="text-sm tertiary-color-500">${{ jqp.product.price }}</p>
+    <p class="text-right font-bold col-span-3 grid sm:hidden">${{ jqp.subtotal }}</p>
+</li>
 
-<td class="px-4 py-8 align-top text-left text-sm text-gray-700 w-[97px]">
-    <ul class="list-none flex flex-col items-start text-left space-y-8">
-        {% for jgp in items %}
-            <li class="text-sm text-gray-700">{{ jgp.product.formatted_price }}</li>
-        {% endfor %}
-    </ul>
-</td>
-
-<td class="px-4 py-8 align-top text-left text-sm text-gray-700 w-[65px]">
-    <ul class="list-none space-y-8">
-        {% for jgp in items %}
-            <li class="text-sm text-gray-700">{{ jgp.quantity }}</li>
-        {% endfor %}
-    </ul>
-</td>
-
-<td class="px-4 py-8 align-top text-left text-sm font-medium text-gray-900 w-[97px]">
-    <ul class="list-none flex flex-col items-start text-left space-y-8">
-        {% for jgp in items %}
-            <li class="text-sm text-gray-900">${{ jgp.subtotal|intcomma }}</li>
-        {% endfor %}
-    </ul>
-</td>
+{% endfor %}

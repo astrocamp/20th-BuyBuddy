@@ -25,3 +25,4 @@ public/scripts/*
 
 staticfiles
 celerybeat-schedule
+buybuddy_db.sql

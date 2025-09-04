@@ -1,0 +1,219 @@
+{% load humanize %}
+<div class="mx-auto px-10 py-12">
+  {% if ongoing_groups or completed_groups%}
+  {% comment %} 已成團 {% endcomment %}
+  {% if completed_groups %}
+  <section class="max-w-[1440px] mx-auto md:px-16 sm:px-24 mt-12 lg:mt-16">
+    <h2 class="text-center text-lg font-medium text-gray-800 mb-4">已成團</h2>
+    {% comment %} =========== {% endcomment %}
+    {% for g in completed_groups %}
+    <div class="bg-white rounded-2xl border border-gray-300 p-6 mb-4 shadow-sm hover:shadow-md transition-shadow">
+      <div class="flex flex-col lg:flex-row gap-6">
+        {% comment %} 圖片區 {% endcomment %}
+        <div class="flex-shrink-0">
+          <div class="w-full h-48 lg:h-64 lg:w-64 rounded-lg border border-gray-200 overflow-hidden">
+            {% if g.banner.url %}
+            <img class="w-full h-full object-cover object-center" src="{{ g.banner.url }}" alt="{{ g.name }}">
+            {% else %}
+            <div class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
+              <span>無圖片</span>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        {% comment %} 內容區 {% endcomment %}
+        <div class="flex-1 flex flex-col gap-4">
+          <div class="flex-col sm:flex-row  flex justify-between items-start sm:items-center">
+            <h2 class="text-lg sm:text-2xl text-center md:text-left font-semibold text-gray-900">{{ g.name }}</h2>
+            <p class="text-sm text-right text-gray-900 mb-2">已成團</p>
+          </div>
+          <div class="space-y-3" >
+            <ul class="min-h-[130px]">
+              <li class="grid grid-cols-4 gap-2 bg-gray-50 rounded-lg text-center p-2">
+                <p class="text-sm text-gray-600 col-span-3">商品</p>
+                <p class="text-sm text-gray-600">價格</p>
+              </li>
+              {% include 'orders/owned_orders/list_columns.html' with items=g.products.all %}
+              <li class="grid grid-cols-4 gap-2 bg-gray-50 rounded-lg text-center my-2 p-2">
+                <p class="col-span-3 text-base font-semibold text-gray-900">達標數目</p>
+                <p class="text-base font-semibold text-gray-900">
+                  {% if g.goal_choice == "quantity" %}
+                  {{ g.min_goal }}
+                  {% else %}
+                  {{ g.min_goal | intcomma }}
+                  {% endif %}
+                </p>
+              </li>
+            </ul>
+            <div class="flex lg:flex-row flex-col justify-between items-center gap-2 ">
+              <div>
+                <p class="text-base text-red-500">
+                  截止日期：{{ g.deadline|date:"Y-m-d" }}
+                </p>
+              </div>
+              <div class="flex items-center gap-2">
+                <a href="{% url 'groups:manage' g.id %}" class="card-btn card-btn-white">團購頁面</a>
+                <a href="{% url 'orders:buyer_list' g.id %} " class="card-btn card-btn-secondary">檢視跟團者</a>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    {% endfor %}
+  </section>
+  {% else %}
+  <section class="mb-20 pb-20 border-b border-gray-300">
+    <h2 class="text-center text-lg text-red-500 font-medium text-gray-800 mb-4">已成團</h2>
+    <p class="text-center text-gray-300 mb-4">還沒有任何成團的團購</p>
+  </section>
+  {% endif %}
+  
+  {% comment %} 未成團 {% endcomment %}
+  {% if ongoing_groups %}
+  <section class="max-w-[1440px] mx-auto md:px-16 sm:px-24 mt-12 lg:mt-16">
+    <h2 class="text-center text-lg font-medium text-gray-800 mb-4">尚未成團</h2>
+    {% for g in ongoing_groups %}
+    <div class="bg-white rounded-2xl border border-gray-300 p-6 mb-4 shadow-sm hover:shadow-md transition-shadow">
+      <div class="flex flex-col lg:flex-row gap-6">
+        {% comment %} 圖片區 {% endcomment %}
+        <div class="flex-shrink-0">
+          <div class="w-full h-48 lg:h-64 lg:w-64 rounded-lg border border-gray-200 overflow-hidden">
+            {% if g.banner.url %}
+            <img class="w-full h-full object-cover object-center" src="{{ g.banner.url }}" alt="{{ g.name }}">
+            {% else %}
+            <div class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
+              <span>無圖片</span>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        {% comment %} 內容區 {% endcomment %}
+        <div class="flex-1 flex flex-col gap-4">
+          <div class="flex-col sm:flex-row  flex justify-between items-start sm:items-center">
+            <h2 class="text-lg sm:text-2xl text-center md:text-left font-semibold text-gray-900">{{ g.name }}</h2>
+            <p class="text-sm text-right text-red-500 mb-2">未成團</p>
+          </div>
+          <div class="space-y-3" >
+            <ul class="min-h-[130px]">
+              <li class="grid grid-cols-4 gap-2 bg-gray-50 rounded-lg text-center p-2">
+                <p class="text-sm text-gray-600 col-span-3">商品</p>
+                <p class="text-sm text-gray-600">價格</p>
+              </li>
+              {% include 'orders/owned_orders/list_columns.html' with items=g.products.all %}
+              <li class="grid grid-cols-4 gap-2 bg-gray-50 rounded-lg text-center my-2 p-2">
+                <p class="col-span-3 text-base font-semibold text-gray-900">達標數目</p>
+                <p class="text-base font-semibold text-gray-900">
+                  {% if g.goal_choice == "quantity" %}
+                  {{ g.min_goal }}
+                  {% else %}
+                  {{ g.min_goal | intcomma }}
+                  {% endif %}
+                </p>
+              </li>
+            </ul>
+            <div class="flex lg:flex-row flex-col justify-between items-center gap-2 ">
+              <div>
+                <p class="text-base text-red-500">
+                  截止日期：{{ g.deadline|date:"Y-m-d" }}
+                </p>
+              </div>
+              <div class="flex items-center gap-2">
+                <a href="{% url 'groups:manage' g.id %}" class="card-btn card-btn-white">團購頁面</a>
+                <a href="{% url 'orders:buyer_list' g.id %}" class="card-btn card-btn-secondary">檢視跟團者</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+    {% endfor %}
+    {% else %}
+    <section class="mb-20 pb-20 border-b border-gray-300">
+      <h2 class="text-center text-lg font-medium text-gray-800 mb-4">尚未成團</h2>
+      <p class="text-center text-gray-300 mb-4">沒有任何尚未成團的團購</p>
+    </section>
+    {% endif %}
+  </section>
+  {% comment %} 訂單紀錄 {% endcomment %}
+  {% elif orders %}
+	<section class="max-w-[1440px] mx-auto md:px-16 sm:px-24 mt-12 lg:mt-16">
+		<h2 class="text-center text-lg font-medium text-gray-800 mb-4">訂單紀錄</h2>
+		{% for order in orders %}
+		<div class="bg-white rounded-2xl border border-gray-300 p-6 mb-4 shadow-sm hover:shadow-md transition-shadow">
+			<!-- 訂單號碼 -->
+			<div class="flex justify-between items-center">
+				<div class="text-sm text-gray-500 mb-2">訂單號碼：#{{ order.order_number }}</div>
+			</div>
+			<div class="flex flex-col md:flex-row gap-6">
+				<!-- 圖片區域 -->
+				<div class="flex-shrink-0">
+					<div class="w-full h-48 lg:h-64 lg:w-64 rounded-lg border border-gray-200 overflow-hidden">
+						{% if order.group.banner %}
+						<img class="w-full h-full object-cover object-center" src="{{ order.group.banner.url }}" alt="{{ order.group.name }}">
+						{% else %}
+						<div class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
+							<span>無圖片</span>
+						</div>
+						{% endif %}
+					</div>
+				</div>
+				
+				<!-- 內容區域 -->
+				<div class="flex-1 flex flex-col gap-4">
+					<div class="flex-col sm:flex-row  flex justify-between items-start sm:items-center">
+						<h2 class=" text-lg sm:text-2xl text-center md:text-left font-semibold text-gray-900">{{ order.group.name }}</h2>
+						<p class="text-sm text-right mb-2 {% if order.order_status == order.OrderStatus.PROCESSING %}text-red-500{% else %}text-gray-700{% endif %}">
+							{{ order.get_order_status_display }}
+						</p>
+					</div>
+					
+
+					<div class="space-y-3" >
+						<ul class="min-h-[130px]">
+							<li class="grid grid-cols-1 md:grid-cols-2 gap-2 bg-gray-50 rounded-lg text-center p-2">
+								<p class="text-sm text-gray-600">商品</p>
+								<p class="hidden md:grid grid-cols-3 gap-4 text-sm text-gray-600">
+									<span>價格</span>
+									<span>數量</span>
+									<span>小計</span>
+								</p>
+							</li>
+							{% include 'orders/my_orders/list_columns.html' with items=order.joined_group.joined_group_products.all %}
+							<li class="hidden md:grid grid-cols-2 gap-2 bg-gray-50 rounded-lg text-center my-2 p-2">
+								<p class="grid col-start-2 grid-cols-3 gap-4 text-base font-semibold text-gray-900">
+									<span class="col-start-2">合計</span>
+									<span>
+										${{ order.total_amount | intcomma }}
+									</span>
+								</p>
+							</li>
+							<li class="grid md:hidden bg-gray-50 rounded-lg text-center my-2 p-2">
+								<p class="text-base font-semibold text-gray-900">
+									合計 ${{ order.total_amount | intcomma }}
+								</p>
+							</li>
+						</ul>
+						
+						<div class="flex justify-end items-center gap-2 pt-2">
+							<div class="flex items-center gap-2">
+								{% if order.order_status == order.OrderStatus.PROCESSING %}
+								<a class="card-btn card-btn-secondary">去出貨</a>
+								{% endif %}
+								<a href="{% url 'groups:manage' order.group.id %}" class="card-btn card-btn-white">檢視</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		{% endfor %}
+	</section>
+	{% else %}
+	<section class="mb-10">
+		<h2 class="text-center text-lg font-medium text-gray-800 mb-4">尚未有此分類訂單</h2>
+	</section>
+	{% endif %}
