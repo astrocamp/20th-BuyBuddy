@@ -1,83 +1,145 @@
-<div x-data="productFormset">
-	{{ product_form.management_form }}
-	<div id="forms-container" x-ref="formsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 
-      p-4">
-		{% for form in product_form %}
-		<div class="bg-white p-5 rounded-lg shadow flex flex-col gap-2">
-			<label for="{{ form.name.auto_id }}">{{ form.name.label }}</label>
-			<input
-			class="w-full border-2 border-gray-300 rounded-md p-2"
-			type="text"
-			name="{{ form.name.html_name }}"
-			id="{{ form.name.auto_id }}"
-			value="{{ form.name.value|default:'' }}"
-			/>
-			<label for="{{ form.price.auto_id }}">{{ form.price.label }}</label>
-			<input
-			class="w-full border-2 border-gray-300 rounded-md p-2"
-			type="number"
-			name="{{ form.price.html_name }}"
-			id="{{ form.price.auto_id }}"
-			value="{{ form.price.value|default:'' }}"
-			/>
-			<label for="{{ form.description.auto_id }}">{{ form.description.label }}</label>
-			{{ form.description }}
-			
-			<label for="{{ form.image.auto_id }}">產品圖片</label>
-			<input
-			class="w-full border-2 border-gray-300 rounded-md p-2"
-			type="file"
-			name="{{ form.image.html_name }}"
-			id="{{ form.image.auto_id}}"
-			/>
-		</div>
-		{% endfor %}
-	</div>
+<div x-data="productFormset"
+data-limited-config='{{ limited_config_json|safe }}'>
+    {{ product_form.management_form }}
+    
+    <div id="forms-container" x-ref="formsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for form in product_form %}
+        <div class="bg-white p-6 border-2 border-[#EDEDED] rounded-lg flex flex-col gap-4">
+            <label for="{{ form.name.id_for_label }}" class="text-base">{{ form.name.label }}</label>
+            <input
+            class="w-full border-2 border-[#EDEDED] rounded-lg p-2 focus:border-[#1E1F24] focus:outline-none"
+            type="text"
+            name="{{ form.name.html_name }}"
+            id="{{ form.name.id_for_label }}"
+            value="{{ form.name.value|default:'' }}"
+            />
+			{% if form.name.errors %}
+             <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
+                {{ form.name.errors }}
+            </div>
+            {% endif %}
+            <label for="{{ form.price.auto_id }}" class="text-base">{{ form.price.label }}</label>
+            <input
+            class="w-full border-2 border-[#EDEDED] rounded-lg p-2 focus:border-[#1E1F24] focus:outline-none"
+            type="number"
+            name="{{ form.price.html_name }}"
+            id="{{ form.price.auto_id }}"
+            value="{{ form.price.value|default:'' }}"
+            />
+			{% if form.price.errors %}
+             <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
+                {{ form.price.errors }}
+            </div>
+            {% endif %}
+            <label for="{{ form.description.auto_id }}" class="text-base">{{ form.description.label }}</label>
+            {{ form.description }}
+			{% if form.description.errors %}
+             <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
+                {{ form.description.errors }}
+            </div>
+            {% endif %}
+            
+			<div x-data="imagePreview('')">
+            	<label for="{{ form.banner.id_for_label }}" class="text-base">產品圖片</label>
+				<div class="w-full h-40 border-2 border-dashed border-[#EDEDED] rounded-lg flex items-center justify-center cursor-pointer relative overflow-hidden group hover:bg-gray-50 transition-colors"
+        			  @click="$refs.fileInput.click()">
+					<img x-show="imageUrl" :src="imageUrl" class="object-cover w-full h-full" />
+					<svg x-show="!imageUrl" xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-[#BDBDBD] group-hover:text-gray-400 transition-colors" viewBox="0 0 24 24" fill="currentColor">
+    					<path d="M11 13H5c-.552 0-1-.448-1-1s.448-1 1-1h6V5c0-.552.448-1 1-1s1 .448 1 1v6h6c.552 0 1 .448 1 1s-.448 1-1 1h-6v6c0 .552-.448 1-1 1s-1-.448-1-1v-6z"/>
+					</svg>    
+				</div>    
+				<input
+				x-ref="fileInput"
+				class="hidden"
+				type="file"
+				name="{{ form.banner.html_name }}"
+				id="{{ form.banner.id_for_label}}"
+				accept="image/*"
+				@change="handleFile">
+				{% if form.banner.errors %}
+             	<div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
+                	{{ form.banner.errors }}
+            	</div>
+            {% endif %}
+			</div>
+            
+        </div>
+        {% endfor %}
 
-	<template x-ref="emptyFormTemplate">
-		<div class="bg-white p-5 rounded-lg shadow flex flex-col gap-2">
-			<label for="{{ empty_form.name.auto_id }}">{{ empty_form.name.label }}</label>
-			<input
-			class="w-full border-2 border-gray-300 rounded-md p-2"
-			type="text"
-			name="{{ empty_form.name.html_name }}"
-			id="{{ empty_form.name.auto_id }}"
-			value="{{ empty_form.name.value|default:'' }}"
-			/>
-			<label for="{{ empty_form.price.auto_id }}">{{ empty_form.price.label }}</label>
-			<input
-			class="w-full border-2 border-gray-300 rounded-md p-2"
-			type="number"
-			name="{{ empty_form.price.html_name }}"
-			id="{{ empty_form.price.auto_id }}"
-			value="{{ empty_form.price.value|default:'' }}"
-			/>
-			<label for="{{ empty_form.description.auto_id }}">{{ empty_form.description.label }}</label>
-			<textarea
-			class="w-full border-2 border-gray-300 rounded-md p-2 resize-y"
-			name="{{ empty_form.description.html_name }}"
-			id="{{ empty_form.description.auto_id }}"
-			>{{ empty_form.description.value|default:'' }}</textarea>
-			
-			<label for="{{ empty_form.image.auto_id }}">產品圖片</label>
-			<input
-			class="w-full border-2 border-gray-300 rounded-md p-2"
-			type="file"
-			name="{{ empty_form.image.html_name }}"
-			id="{{ empty_form.image.auto_id}}"
-			/>
-		</div>
-	</template>
+<button
+    x-ref="addButton"
+    type="button"
+    @click="addForm"
+    class="w-24 h-24 rounded-full bg-white mt-8 lg:mt-30 border-2 border-dashed border-[#EDEDED] 
+           flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors 
+           justify-self-center self-center">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-[#BDBDBD]" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M11 13H5c-.552 0-1-.448-1-1s.448-1 1-1h6V5c0-.552.448-1 1-1s1 .448 1 1v6h6c.552 0 1 .448 1 1s-.448 1-1 1h-6v6c0 .552-.448 1-1 1s-1-.448-1-1v-6z"/>
+    </svg>
+</button>
 
-	<button
-		type="button"
-		@click="addForm"
-		class="fixed bottom-10 right-10 bg-green-500 hover:bg-green-600 text-white rounded-full w-16 h-16 flex
-		items-center justify-center shadow-lg transition-transform transform hover:scale-110">
-		<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-		</svg>
-		<span class="sr-only">新增產品</span>
-	</button>
+    <template x-ref="emptyFormTemplate">
+        <div class="bg-white p-6 border-2 border-[#EDEDED] rounded-lg flex flex-col gap-4">
+            <label for="{{ empty_form.name.id_for_label }}" class="text-sm font-medium">{{ empty_form.name.label }}</label>
+            <input
+            class="w-full border-2 border-[#EDEDED] rounded-lg p-2 focus:border-[#1E1F24] focus:outline-none"
+            type="text"
+            name="{{ empty_form.name.html_name }}"
+            id="{{ empty_form.name.id_for_label }}"
+            value="{{ empty_form.name.value|default:'' }}"
+            />
+			{% if empty_form.name.errors %}
+             <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
+                {{ empty_form.name.errors }}
+            </div>
+            {% endif %}
+            <label for="{{ empty_form.price.auto_id }}" class="text-sm font-medium">{{ empty_form.price.label }}</label>
+            <input
+            class="w-full border-2 border-[#EDEDED] rounded-lg p-2 focus:border-[#1E1F24] focus:outline-none"
+            type="number"
+            name="{{ empty_form.price.html_name }}"
+            id="{{ empty_form.price.auto_id }}"
+            value="{{ empty_form.price.value|default:'' }}"
+            />
+			{% if empty_form.price.errors %}
+             <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
+                {{ empty_form.price.errors }}
+            </div>
+            {% endif %}
+            <label for="{{ empty_form.description.auto_id }}" class="text-sm font-medium">{{ empty_form.description.label }}</label>
+            <textarea
+            class="w-full border-2 border-[#EDEDED] rounded-lg p-2 focus:border-[#1E1F24] focus:outline-none resize-y"
+            name="{{ empty_form.description.html_name }}"
+            id="{{ empty_form.description.auto_id }}"
+            >{{ empty_form.description.value|default:'' }}</textarea>
+            {% if empty_form.description.errors %}
+             <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
+                {{ empty_form.description.errors }}
+            </div>
+            {% endif %}
+            <div x-data="imagePreview('')">
+                <label for="{{ empty_form.banner.auto_id }}" class="text-base">產品圖片</label>
+                <div class="w-full h-40 border-2 border-dashed border-[#EDEDED] rounded-lg flex items-center justify-center cursor-pointer relative overflow-hidden group hover:bg-gray-50 transition-colors"
+                      @click="$refs.fileInput.click()">
+                    <img x-show="imageUrl" :src="imageUrl" class="object-cover w-full h-full" />
+                    <svg x-show="!imageUrl" xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-[#BDBDBD] group-hover:text-gray-400 transition-colors" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M11 13H5c-.552 0-1-.448-1-1s.448-1 1-1h6V5c0-.552.448-1 1-1s1 .448 1 1v6h6c.552 0 1 .448 1 1s-.448 1-1 1h-6v6c0 .552-.448 1-1 1s-1-.448-1-1v-6z"/>
+                    </svg>    
+                </div>    
+                <input
+                x-ref="fileInput"
+                class="hidden"
+                type="file"
+                name="{{ empty_form.banner.html_name }}"
+                id="{{ empty_form.banner.auto_id}}"
+                accept="image/*"
+                @change="handleFile">
+				{% if empty_form.banner.errors %}
+            	 <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
+                	{{ empty_form.banner.errors }}
+            	</div>
+            {% endif %}
+            </div>
+        </div>
+    </template>
 </div>
-

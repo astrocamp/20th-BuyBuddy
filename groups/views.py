@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Group, JoinedGroup
-from .forms import GroupForm, ProductFormSet
+from .forms import GroupForm, ProductFormSet, ProductForm
 from products.models import Product
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -8,7 +8,7 @@ from django.db import transaction
 from .services.exceptions import *
 from .services.group_services import GroupService
 from django.utils import timezone
-from datetime import datetime
+from datetime import timedelta
 from django.core.files.storage import default_storage
 from django.http import JsonResponse
 import os
@@ -16,11 +16,11 @@ import uuid
 from django.core.paginator import Paginator
 from django.urls import reverse
 from django.http import HttpResponse
-
+from django.conf import settings
+import json
 
 def index(request, filter_type="ongoing"):
 	user = request.user
-
 	protected_filters = ["owned", "followed"]
 
 	if filter_type in protected_filters and not user.is_authenticated:
@@ -72,6 +72,7 @@ def new(request):
 	if request.method == "POST":
 		group_form = GroupForm(request.POST, request.FILES, prefix="group")
 		product_formset = ProductFormSet(request.POST, request.FILES, prefix="product")
+
 		if group_form.is_valid() and product_formset.is_valid():
 			with transaction.atomic():
 				group = group_form.save(commit=False)
@@ -82,96 +83,75 @@ def new(request):
 				product_formset.instance = group
 				product_formset.save()		
 			messages.success(request, "團購已建立")
-			return redirect("groups:owned")
-		else:
-			messages.warning(request, "欄位填寫有誤，請檢查後再試")
-			context = {
-				"group_form": group_form,
-				"product_form": product_formset,
-				"empty_form": product_formset.empty_form,
-			}
-			return render(request, "groups/new.html", context)
-			
+			return redirect("groups:index", filter_type="owned")
+	
+		if product_formset.non_form_errors():
+			messages.error(request, product_formset.non_form_errors()[0])
+
 	else:
 		group_form = GroupForm(prefix="group")
 		product_formset = ProductFormSet(prefix="product", queryset=Product.objects.none())
-		context = {
-			"product_form": product_formset, 
+	
+	one_week_later = timezone.now() + timedelta(days=7)
+	limited_config = settings.TINYMCE_LIMITED_CONFIG
+	limited_config_json = json.dumps(limited_config)
+	context = {
 			"group_form": group_form,
-			"empty_form": product_formset.empty_form
+			"product_form": product_formset,
+			"empty_form": product_formset.empty_form,
+			"one_week_later": one_week_later,
+          	"limited_config_json": limited_config_json,
 			}
-		return render(request, "groups/new.html", context)
+	return render(request, "groups/new.html", context)
 
 def detail(request, id):
-	group = get_object_or_404(Group, pk=id)
-	if request.user.is_authenticated:
-		if group.owner == request.user:
-			return redirect('groups:manage', id=id)
+	group = get_object_or_404(Group.objects.select_related("owner"), pk=id)
+	user = request.user
+	role = "guest"
 	
-		try:
-			joined_group = JoinedGroup.objects.get(
-				group=group,
-				buyer=request.user,
-			)
-			return redirect("groups:update_quantity", id=id)
-		except JoinedGroup.DoesNotExist:
-			return render(request, "groups/detail.html", {"group": group})
-
-	if request.user.is_authenticated and request.method == "POST":
-		user = request.user
-		products_data = GroupService.prepare_products_data(request.POST)
-		GroupService.join_group(user=user, group=group, products_data=products_data)
-		return redirect("groups:detail", id=id)
-
-	return render(request, "groups/detail.html", {"group": group})
-
-
-def update_quantity(request, id):
-	group = get_object_or_404(Group, pk=id)
-	return render(request, "groups/member_edit.html", {"group": group})
-
-
-@login_required
-def manage(request, id):
-	group = get_object_or_404(Group, pk=id)
-	if request.method == "POST":
-		if request.POST.get("_method") == "delete":
-			group_id = request.POST.get("group-id")
-			group = get_object_or_404(Group, pk=group_id)
-			if group.owner != request.user:
-				messages.warning(request, "您無權刪除此團購")
-				return redirect('groups:manage')
+	if request.method == "POST" and request.POST.get("_method") == "delete":
+		if request.POST.get("role") == "owner":
 			group.delete()
 			messages.success(request, "團購已刪除")
 			return redirect('groups:index_filtered', filter_type="owned")
-	return render(request, "groups/manage.html", {"group": group})
+		else:
+			GroupService.leave_group(user=user, group=group)
+			return redirect('groups:index_filtered', filter_type="followed")
 
+	if user.is_authenticated and request.method == "POST":
+		products_data = GroupService.prepare_products_data(request.POST)
+		GroupService.join_group(user=user, group=group, products_data=products_data)
+		role = "joiner"
+	
+	if user.is_authenticated:
+		if group.owner == user:
+			role = "owner"
+		elif JoinedGroup.objects.filter(group=group, buyer=user).exists():
+			role = "joiner"
+	return render(request, "groups/detail.html", {"group": group, "role": role})
 
 @login_required
 def manage_edit(request, id):
 	group = get_object_or_404(Group, id=id)
-	product = get_object_or_404(Product, group=group)
-	group_form = GroupForm(instance=group, prefix='group')
-	product_form = ProductForm(instance=product, prefix='product')
-	if request.method == 'POST':
-		if request.user == group.owner:
-			group_form = GroupForm(request.POST, request.FILES, instance=group, prefix='group')
-			product_form = ProductForm(request.POST, instance=product, prefix='product')
-			productImage_form = ProductImageForm(request.POST, request.FILES, instance=productImage, prefix='product_image')
-			if group_form.is_valid() and product_form.is_valid() and productImage_form.is_valid():
-				with transaction.atomic():
-					group = group_form.save()
-					product = product_form.save()
-					productImage = productImage_form.save()
+	if request.method == "POST" and request.user == group.owner:
+		group_form = GroupForm(instance=group, prefix='group')
+		product_formset = ProductFormSet(request.POST, request.FILES, queryset=Product.objects.filter(group=group), prefix="product")
+
+		if group_form.is_valid() and product_formset.is_valid():
+			with transaction.atomic():
+					group_form.save()
+					product_formset.save()
 					messages.success(request, "團購已更新")
-				return redirect('groups:owned')
-			else:
-				messages.warning(request, "欄位填寫有誤，請檢查後再試")
-				return redirect('groups:manage_edit', id=id)
+			return redirect("groups:detail", id=id)
 		else:
-			messages.warning(request, "您無權編輯此團購")
-			return redirect('groups:manage_edit', id=id)
-	return render(request, 'groups/manage_edit.html', {'group_form': group_form, 'group': group, 'product_form': product_form, 'productImage_form': productImage_form})
+			messages.warning(request, "欄位填寫有誤，請檢查後再試")
+			return redirect("groups:manage_edit", id=id)
+
+	else:
+		group_form = GroupForm(instance=group, prefix="group")
+		product_formset = ProductFormSet(queryset=Product.objects.filter(group=group), prefix="product")
+	
+	return render(request, "groups/manage_edit.html", {'group_form': group_form, 'product_formset': product_formset})
 
 @login_required
 def upload_image(request):

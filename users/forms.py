@@ -1,10 +1,4 @@
-from django.forms import (
-    ModelForm,
-    FileInput,
-    TextInput,
-    CheckboxInput,
-    modelformset_factory,
-)
+from django.forms import ModelForm, FileInput, TextInput, CheckboxInput, modelformset_factory
 from .models import User, UserAddress
 from django import forms
 from django.core.validators import MinLengthValidator
