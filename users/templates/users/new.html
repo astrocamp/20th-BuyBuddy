@@ -14,7 +14,7 @@
                     <input type="text" 
                            placeholder="請輸入用戶名" 
                            name="username" 
-                           class="text-sm w-full py-2 px-4 pl-14 border border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px]"
+                           class="text-sm w-full py-2 px-4 pl-14 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px]"
                            value="{{form.username.value|default:''}}">
                 </div>
                 {% if form.username.errors %}
@@ -32,7 +32,7 @@
                     <input type="email" 
                            placeholder="請輸入信箱" 
                            name="email" 
-                           class="text-sm w-full py-2 px-4 pl-14 border border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px]"
+                           class="text-sm w-full py-2 px-4 pl-14 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px]"
                            value="{{form.email.value|default:''}}">
                 </div>
                 {% if form.email.errors %}
@@ -50,7 +50,7 @@
                     <input :type="showPassword ? 'text' : 'password'" 
                            placeholder="請輸入密碼" 
                            name="password1" 
-                           class="text-sm w-full py-2 px-4 pl-14 pr-10 border border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px]"
+                           class="text-sm w-full py-2 px-4 pl-14 pr-10 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px]"
                            value="{{form.password1.value|default:''}}">
                     <button type="button" 
                            @click="showPassword = !showPassword"
@@ -77,7 +77,7 @@
                     <input :type="showPassword ? 'text' : 'password'" 
                            placeholder="請再次輸入密碼" 
                            name="password2" 
-                           class="text-sm w-full py-2 px-4 pl-14 pr-10 border border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px]"
+                           class="text-sm w-full py-2 px-4 pl-14 pr-10 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px]"
                            value="{{form.password2.value|default:''}}">
                     <button type="button" 
                            @click="showPassword = !showPassword"

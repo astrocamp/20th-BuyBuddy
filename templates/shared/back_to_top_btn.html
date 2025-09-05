@@ -1,5 +1,6 @@
 <button 
     x-data="navigationControl"
+    x-cloak
     @scroll.window="handleBackToTop"
     @click="window.scrollTo({top: 0, behavior: 'smooth'})"
     :class="showBackToTop ? 'bottom-6' : '-bottom-16'"

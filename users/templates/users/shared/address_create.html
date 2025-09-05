@@ -2,20 +2,26 @@
     {% include "users/shared/messages.html" %}
 {% endif %}
 
-
-<form hx-post="{% url 'users:address_create' %}"
-  hx-target="#user_address_create"
-  hx-swap="outerHTML"
-  method="post" 
-      x-data="addressFormControl"
-      id="user_address_create"
-      novalidate>
-    {% csrf_token %}
-    {% include "users/shared/address_form_fields.html" %}
-    <button class="border-b-2 cursor-pointer">新增</button>
-    <button hx-post="{% url 'users:address_cancel' 0 %}"
-            hx-target="#user_address_create"
-            hx-swap="outerHTML"
-            class="border-b-2 cursor-pointer"
-            type="button">取消</button>
-</form>
+<div class="fixed inset-0 bg-black/60 flex items-center justify-center z-100 text-center">
+    <form hx-post="{% url 'users:address_create' %}" 
+          hx-target="#modal-container"
+          hx-swap="innerHTML"
+          method="post" 
+          x-data="addressFormControl"
+          class="bg-[var(--bg-color)] p-10 sm:p-20 rounded-2xl h-[60%] sm:h-auto w-[80%] md:w-[60%] lg:w-50%] xl:w-[40%] overflow-y-auto" 
+          novalidate>
+        {% csrf_token %}
+        <div class="mb-4">
+            {% include "users/shared/address_form_fields.html" %}
+        </div>
+        <div class="flex gap-4 self-end justify-end">
+            <button hx-get="{% url 'users:address_cancel' address_id=0 %}" 
+                    hx-target="#modal-container"
+                    hx-swap="innerHTML"
+                    class="card-btn card-btn-red"
+                    type="button">取消</button>
+                    
+            <button class="card-btn card-btn-secondary">新增</button>
+        </div>
+    </form>
+</div>
