@@ -31,26 +31,30 @@ CSRF_TRUSTED_ORIGINS = [
 # Application definition
 
 INSTALLED_APPS = [
-    'storages',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django.contrib.humanize',
-    'pages',
-    'users',
-    'groups',
-    'status',
-    'notifications',
-    'sales',
-    'products',
-    'orders',
-    'django_fsm',
-    'widget_tweaks',
-    'anymail',
+    "storages",
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.sites",
+    "django.contrib.staticfiles",
+    "django.contrib.humanize",
+    "pages",
+    "users",
+    "groups",
+    "status",
+    "notifications",
+    "sales",
+    "products",
+    "anymail",
+    "orders",
+    "django_fsm",
     "tinymce",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
 ]
 
 MIDDLEWARE = [
@@ -61,6 +65,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "BuyBuddy.urls"
@@ -248,3 +253,34 @@ TINYMCE_LIMITED_CONFIG = {
     "resize": False,
     
 }
+
+# 第三方登入 - Django Allauth 設定
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "APP": {
+            "client_id": os.getenv("GOOGLE_CLIENT_ID"),
+            "secret": os.getenv("GOOGLE_CLIENT_SECRET"),
+        },
+        'EMAIL_AUTHENTICATION': True,
+        'AUTO_SIGNUP': True,
+    }
+}
+
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False  # 因為你用 email 登入
+ACCOUNT_EMAIL_VERIFICATION = "none"  # 暫時關閉，避免與你的驗證系統衝突
+ACCOUNT_AUTHENTICATION_METHOD = "email"  # 使用 email 認證
+
+ACCOUNT_ADAPTER = "users.adapters.CustomAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "users.adapters.CustomSocialAccountAdapter"
+
+# settings.py 末尾
+SITE_ID = 1
+
+LOGIN_REDIRECT_URL="/"
+LOGOUT_REDIRECT_URL = "/"
