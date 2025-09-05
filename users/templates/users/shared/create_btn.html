@@ -1,7 +1,9 @@
 <a hx-get="{% url 'users:address_create' %}"
-       hx-target="#address_create"
-       hx-swap="outerHTML"
-       id="address_create"
-       class="border-b-2">
+       hx-target="#modal-container"
+       hx-swap="innerHTML"
+       class="w-full sm:w-auto py-[12px] px-[24px] rounded-full flex justify-center items-center gap-2 h-12 bg-[var(--secondary-color)] text-white hover:bg-[var(--secondary-color-900)] transition-all duration-200 cursor-pointer">
+       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 -translate-y-[1px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+       </svg>
        新增地址
 </a>

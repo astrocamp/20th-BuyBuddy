@@ -11,13 +11,13 @@
       x-data="addressFormControl()"
       novalidate>
     {% csrf_token %}
-    {% include "users/shared/address_form_fields.html" %}
-    
-    <button class="border-b-2 cursor-pointer">儲存</button>
+    <div class="mb-4">
+        {% include "users/shared/address_form_fields.html" %}
+    </div>
 
-    <button hx-post="{% url 'users:address_cancel' user_address_form.instance.id %}"
-    hx-target="#user_address_{{user_address_form.instance.id}}"
-    hx-swap="outerHTML"
-    class="border-b-2 cursor-pointer"
-    type="button">取消</button>
+    {% if first_edit %}
+        {% include "users/shared/address_edit_btns.html" %}
+    {% endif %}
+    
+
 </form>
