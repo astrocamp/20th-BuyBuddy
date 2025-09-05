@@ -50,7 +50,7 @@
         <div x-data="addressFormControl"
               class="fixed inset-0 bg-black/60 flex items-center justify-center z-100 text-center"
               >
-            <form action="{% url 'orders:check_order' order.id %}" method="post" class="bg-[var(--bg-color)] p-20 rounded-2xl" novalidate>
+            <form action="{% url 'orders:check_order' order.id %}" method="post" class="bg-[var(--bg-color)] p-20 rounded-2xl w-[75%] md:w-[60%] lg:w-[50%] xl:w-[40%]" novalidate>
                  <input type="hidden" name="create_new_address" value="1">
 
                 {% csrf_token %}

@@ -31,6 +31,12 @@ button {
   cursor: pointer;
 }
 
+input:-webkit-autofill {
+  background: var(--tertiary-color) !important;
+  box-shadow: 0 0 0 100px var(--tertiary-color) inset !important;
+  -webkit-text-fill-color: #000 !important;
+}
+
 .primary-color {
   color: var(--primary-color);
 }
@@ -152,21 +158,19 @@ button {
   width: 60%;
 }
 
-
 /* card-btn */
-.card-btn{
-  
+.card-btn {
   display: flex;
   cursor: pointer;
   border-radius: 50px;
   align-items: center;
   justify-content: center;
-  padding: 5px 10px;
+  padding: 8px 16px;
   font-size: 14px;
 }
 .card-btn-white {
   background-color: #ffffff;
-  border: 1px solid var(--secondary-color);
+  border: 1.5px solid var(--secondary-color);
   color: var(--secondary-color);
 }
 
@@ -175,8 +179,8 @@ button {
   color: #ffffff;
 }
 
-.card-btn-red{
-  border: 1px solid var(--red-color-500);
+.card-btn-red {
+  border: 1.5px solid var(--red-color-500);
   color: var(--red-color-500);
 }
 
@@ -185,15 +189,16 @@ button {
   color: #ffffff;
 }
 
-.card-btn-secondary{
+.card-btn-secondary {
   background-color: var(--secondary-color);
-  border: 1px solid var(--secondary-color);
+  border: 1.5px solid var(--secondary-color);
   color: #ffffff;
 }
 
 .card-btn-secondary:hover {
-  background-color: #ffffff;
-  color: var(--secondary-color);
+  background: var(--secondary-color-900);
+  border: 1.5px solid var(--secondary-color-900);
+  color: white;
 }
 
 /* 響應式 */

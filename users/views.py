@@ -17,6 +17,7 @@ from .forms import (
 )
 from anymail.message import AnymailMessage
 from django.core.exceptions import ValidationError
+from django.http import HttpResponse
 
 
 def send_verification_mail(request, user, email):
@@ -240,16 +241,11 @@ def profiles_edit(request):
 
         else:
             # 有錯誤，返回編輯模式並顯示錯誤
-            context = {
-                "user_form": user_form,
-                "message": "更新發生錯誤，請稍後再試",
-                "type": "error",
-                "show": True,
-            }
+
             return render(
                 request,
-                "users/shared/profiles.html",
-                context,
+                "users/shared/profiles_edit.html",
+                {"user_form": user_form},
             )
 
     # GET 請求，顯示編輯表單
@@ -309,7 +305,6 @@ def address_edit(request, address_id):
                     "message": "地址更新成功！",
                     "type": "success",
                     "show": True,
-                    "include_address_list_oob": False,
                 }
                 return render(
                     request,
@@ -320,6 +315,7 @@ def address_edit(request, address_id):
             except ValidationError as e:
                 context = {
                     "user_address_form": user_address_form,
+                    "return_edit": True,
                     "message": "; ".join(e.messages),
                     "type": "error",
                     "show": True,
@@ -334,15 +330,9 @@ def address_edit(request, address_id):
             # 有錯誤，回到編輯模式並顯示錯誤
             context = {
                 "user_address_form": user_address_form,
-                # "message": "更新發生錯誤，請稍後再試",
-                # "type": "error",
-                # "show": True,
+                "return_edit": True,
             }
-            return render(
-                request,
-                "users/shared/address_edit.html",
-                {"user_address_form": user_address_form},
-            )
+            return render(request, "users/shared/address_edit.html", context)
 
     # GET 請求，顯示編輯頁面
     else:
@@ -350,7 +340,7 @@ def address_edit(request, address_id):
         return render(
             request,
             "users/shared/address_edit.html",
-            {"user_address_form": user_address_form},
+            {"user_address_form": user_address_form, "first_edit": True},
         )
 
 
@@ -397,7 +387,6 @@ def address_create(request):
             new_address_form = address_form.save(commit=False)
             new_address_form.user = user
             new_address_form.save()
-            messages.success(request, "新增地址成功")
 
             # 重新載入地址列表供 OOB 使用
             user_addresses = UserAddress.objects.filter(user=user).order_by(
@@ -412,16 +401,20 @@ def address_create(request):
                 "show": True,
                 "include_address_list_oob": True,
             }
+            # 成功時關閉彈窗並使用 OOB 更新地址列表
             return render(
                 request,
                 "users/shared/address_create_success.html",
                 context,
             )
         else:
+            # 表單驗證失敗時，需要回傳帶有錯誤訊息的彈窗
             return render(
                 request,
                 "users/shared/address_create.html",
-                {"user_address_form": address_form},
+                {
+                    "user_address_form": address_form,
+                },
             )
 
     # GET 請求，取得地址空表單
@@ -441,7 +434,7 @@ def address_cancel(request, address_id):
 
     # 代表是取消新增
     if address_id == 0:
-        return render(request, "users/shared/create_btn.html")
+        return HttpResponse("")
     address = get_object_or_404(UserAddress, pk=address_id, user=user)
     user_address_form = UserAddressForm(instance=address)
 

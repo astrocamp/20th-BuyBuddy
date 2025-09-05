@@ -1,111 +1,137 @@
 {% load widget_tweaks %}
 {% load static %}
 
-<!-- 收件者姓名 -->
-<div class="flex justify-between">
-    <label for="{{ user_address_form.recipient_name.id_for_label }}"
-    class="font-semibold">
-        {{ user_address_form.recipient_name.label }}
-    </label>
-    {{ user_address_form.recipient_name|add_class:"border-b-2"|attr:"placeholder:請輸入收件者姓名"  }}
-</div>
-{% if user_address_form.recipient_name.errors %}
-    <div class="red-color-700 text-sm mt-2">
-        {{ user_address_form.recipient_name.errors.0 }}
-    </div>
+{% if return_edit %}
+    <div class="rounded-lg p-5 border-2 {% if user_address_form.is_default.value %}
+border-secondary{% else %}border-[var(--tertiary-color)]{% endif %}">
 {% endif %}
-
-
-<!-- 是否預設 -->
- <div class="flex justify-between items-center gap-3 mt-4">
-    <label for="{{ user_address_form.is_default.id_for_label }}" class="font-semibold">
-        {{ user_address_form.is_default.label }}
-    </label>
-    {{ user_address_form.is_default|add_class:"border-b-2"}}
-</div>
-{% if user_address_form.is_default.errors %}
-    <div class="red-color-700 text-sm mt-2">
-        {{ user_address_form.is_default.errors.0 }}
+    <div class="mb-4">
+        <div class="flex flex-col gap-4">
+            <!-- 收件者姓名和預設地址 -->
+            <div class="flex items-center justify-between justify-center">
+    
+                <div class="flex flex-col gap-2 shrink-0 flex-1">
+                    <label class="text-xs tertiary-color-500 text-left">
+                        {{ user_address_form.recipient_name.label }}
+                    </label>
+                    
+                    <div class="flex gap-4">
+                        {{ user_address_form.recipient_name|add_class:"text-sm w-full py-2 px-4 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px]"|attr:"placeholder:請輸入收件者姓名" }}
+    
+    
+                        <div class="flex items-center gap-2 shrink-0 relative">
+                            <label for="{{ user_address_form.is_default.id_for_label }}" class="cursor-pointer tertiary-color-500 text-xs font-medium">設為預設</label>
+    
+                            <label for="{{ user_address_form.is_default.id_for_label }}" class="relative cursor-pointer">
+                                {{ user_address_form.is_default|add_class:"peer absolute opacity-0 w-full h-full cursor-pointer" }}
+                                <svg class="w-6 h-6 transition-opacity fill-[var(--tertiary-color-300)] peer-checked:fill-[var(--main-color)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+                                    <path d="M230,128A102,102,0,1,1,128,26,102.12,102.12,0,0,1,230,128Zm-12,0a90,90,0,1,0-90,90A90.1,90.1,0,0,0,218,128Z"></path>
+                                </svg>
+    
+                                <svg class="absolute top-0 left-0 w-6 h-6 opacity-0 peer-checked:opacity-100 transition-opacity fill-[var(--main-color)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+                                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"></path>
+                                </svg>
+                            </label>
+                            
+                            
+                        </div>
+                    </div>
+    
+                    {% if user_address_form.recipient_name.errors %}
+                        <div class="text-[var(--red-color-700)] text-sm mt-2 min-h-[20px]">
+                            {{ user_address_form.recipient_name.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+    
+    
+                
+            </div>
+    
+            <div class="flex flex-col gap-4">
+                <!-- 手機 -->
+                <div>
+                    <label class="text-xs tertiary-color-500 mb-1 block text-left">
+                        {{ user_address_form.phone.label }}
+                    </label>
+                    {{ user_address_form.phone|add_class:"text-sm w-full py-2 px-4 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px]" }}
+                    {% if user_address_form.phone.errors %}
+                        <div class="text-[var(--red-color-700)] text-sm mt-2 min-h-[20px]">{{ user_address_form.phone.errors.0 }}</div>
+                    {% endif %}
+                </div>
+    
+                <!-- 縣市、區域、郵遞區號 -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="relative">
+                        <label class="text-xs tertiary-color-500 mb-1 block text-left">
+                            {{ user_address_form.county.label }}
+                        </label>
+                        <div class="relative">
+                            {{ user_address_form.county|add_class:"text-sm w-full py-2 px-4 pr-8 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px] appearance-none"|attr:"x-ref=county"|attr:"@change:applyDistrict" }}
+                            <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        {% if user_address_form.county.errors %}
+                            <div class="text-[var(--red-color-700)] text-sm mt-2 min-h-[20px]">{{ user_address_form.county.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="relative">
+                        <label class="text-xs tertiary-color-500 mb-1 block text-left">
+                            {{ user_address_form.district.label }}
+                        </label>
+                        <div class="relative">
+                            {{ user_address_form.district|add_class:"text-sm w-full py-2 px-4 pr-8 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px] appearance-none"|attr:"x-ref=district"|attr:"@change:updateZip" }}
+                            <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        {% if user_address_form.district.errors %}
+                            <div class="text-[var(--red-color-700)] text-sm mt-2 min-h-[20px]">{{ user_address_form.district.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="text-xs tertiary-color-500 mb-1 block text-left">
+                            {{ user_address_form.postal_code.label }}
+                        </label>
+                        {{ user_address_form.postal_code|add_class:"text-sm w-full py-2 px-4 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px]"|attr:"placeholder=系統將自動填寫"|attr:"x-ref=zip" }}
+                        {% if user_address_form.postal_code.errors %}
+                            <div class="text-[var(--red-color-700)] text-sm mt-2 min-h-[20px]">{{ user_address_form.postal_code.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+    
+                <!-- 路名/街道 -->
+                <div>
+                    <label class="text-xs tertiary-color-500 mb-1 block text-left">
+                        {{ user_address_form.road.label }}
+                    </label>
+                    {{ user_address_form.road|add_class:"text-sm w-full py-2 px-4 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px]" }}
+                    {% if user_address_form.road.errors %}
+                        <div class="text-[var(--red-color-700)] text-sm mt-2 min-h-[20px]">{{ user_address_form.road.errors.0 }}</div>
+                    {% endif %}
+                </div>
+    
+                <!-- 地址 -->
+                <div>
+                    <label class="text-xs tertiary-color-500 mb-1 block text-left">
+                        {{ user_address_form.detail.label }}
+                    </label>
+                    {{ user_address_form.detail|add_class:"text-sm w-full py-2 px-4 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px]" }}
+                    {% if user_address_form.detail.errors %}
+                        <div class="text-[var(--red-color-700)] text-sm mt-2 min-h-[20px]">{{ user_address_form.detail.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
-{% endif %} 
 
+{% if return_edit %}
+    {% include "users/shared/address_edit_btns.html" %}
 
-
-<!-- 手機 -->
-<div class="flex justify-between items-center gap-3 mt-4">
-    <label for="{{ user_address_form.phone.id_for_label }}" class="font-semibold">
-        {{ user_address_form.phone.label }}
-    </label>
-    {{ user_address_form.phone|add_class:"border-b-2"}}
-</div>
-{% if user_address_form.phone.errors %}
-    <div class="red-color-700 text-sm mt-2">
-        {{ user_address_form.phone.errors.0 }}
     </div>
-{% endif %}
-
-<!-- 縣市 -->
-<div class="flex justify-between items-center gap-3 mt-4">
-    <label for="{{ user_address_form.county.id_for_label }}" class="font-semibold">
-        {{ user_address_form.county.label }}
-    </label>
-    {{ user_address_form.county|add_class:"border-b-2"|attr:"x-ref=county"|attr:"@change:applyDistrict"}}
-</div>
-{% if user_address_form.county.errors %}
-    <div class="red-color-700 text-sm mt-2">
-        {{ user_address_form.county.errors.0 }}
-    </div>
-{% endif %}
-
-<!-- 區域 -->
-<div class="flex justify-between items-center gap-3 mt-4">
-    <label for="{{ user_address_form.district.id_for_label }}" class="font-semibold">
-        {{ user_address_form.district.label }}
-    </label>
-    {{ user_address_form.district|add_class:"border-b-2"|attr:"x-ref=district"|attr:"@change:updateZip"}}
-</div>
-{% if user_address_form.district.errors %}
-     <div class="red-color-700 text-sm mt-2">
-        {{ user_address_form.district.errors.0 }}
-    </div>
-{% endif %}
-
-
-<!-- 郵遞區號 -->
-<div class="flex justify-between items-center gap-3 mt-4">
-    <label for="{{ user_address_form.postal_code.id_for_label }}" class="font-semibold">
-        {{ user_address_form.postal_code.label }}
-    </label>
-    {{ user_address_form.postal_code|add_class:"border-b-2"|attr:"x-ref=zip"}}
-</div>
-{% if user_address_form.postal_code.errors %}
-    <div class="red-color-700 text-sm mt-2">
-        {{ user_address_form.postal_code.errors.0 }}
-    </div>
-{% endif %}
-
-
-<!-- 路名/街道 -->
-<div class="flex justify-between items-center gap-3 mt-4">
-    <label for="{{ user_address_form.road.id_for_label }}" class="font-semibold">
-        {{ user_address_form.road.label }}
-    </label>
-    {{ user_address_form.road|add_class:"border-b-2"}}
-</div>
-{% if user_address_form.road.errors %}
-  <div class="red-color-700 text-sm mt-2">
-    {{ user_address_form.road.errors.0 }}
-  </div>
-{% endif %}
-
-
-<!-- 地址 -->
-<div class="flex justify-between items-center gap-3 mt-4">
-    <label for="{{ user_address_form.detail.id_for_label }}" class="font-semibold">
-        {{ user_address_form.detail.label }}
-    </label>
-    {{ user_address_form.detail|add_class:"border-b-2"}}
-</div>
-{% if user_address_form.detail.errors %}
-  <div class="red-color-700 text-sm mt-2">{{ user_address_form.detail.errors.0 }}</div>
 {% endif %}
