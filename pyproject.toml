@@ -19,6 +19,7 @@ dependencies = [
     "django-tinymce>=4.1.0",
     "celery[librabbitmq]>=5.5.3",
     "django-widget-tweaks>=1.5.0",
+    "django-allauth[socialaccount]>=65.11.1",
 ]
 
 [tool.black]
