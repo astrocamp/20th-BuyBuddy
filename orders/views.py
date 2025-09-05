@@ -45,15 +45,6 @@ def ship_address(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
     blank_address_form = UserAddressForm()
 
-    # 如果是取消按鈕被點擊
-    if request.GET.get("clear_modal") == '1':
-        request.session["show_create_modal"] = False
-        request.session.modified = True
-        return redirect("orders:ship_address", order_id=order_id)
-
-    # 直接設定或獲取彈窗狀態，預設為 False
-    show_create_modal = request.session.get("show_create_modal", False)
-
     return render(
         request,
         "orders/ship_address.html",
@@ -61,7 +52,7 @@ def ship_address(request, order_id):
             "addresses": addresses,
             "order": order,
             "user_address_form": blank_address_form,
-            "show_create_modal": show_create_modal,
+            "current_step": 1,
         },
     )
 
@@ -71,41 +62,23 @@ def check_order(request, order_id):
     user = request.user
     order = get_object_or_404(Order, pk=order_id, user=user)
 
-    # 代表使用剛剛新增的地址
-    if request.POST.get("create_new_address") == "1":
-        new_address_form = UserAddressForm(request.POST)
-        if new_address_form.is_valid():
-            address = new_address_form.save(commit=False)
-            address.user = user
-            address.save()
-            # 刪除 session 的 show_create_modal 狀態
-            if "show_create_modal" in request.session:
-                del request.session["show_create_modal"]
-        else:
-            # 新增地址欄位出錯，將彈窗顯示
-            request.session["show_create_modal"] = True
-            addresses = UserAddress.objects.filter(user=request.user).order_by(
-                "-is_default"
-            )
-            return render(
-                request,
-                "orders/ship_address.html",
-                {
-                    "addresses": addresses,
-                    "order": order,
-                    "user_address_form": new_address_form,
-                    "show_create_modal": request.session["show_create_modal"],
-                },
-            )
+    # 從新增地址路徑來的
+    # 是 GET 、有 address_id
+    if request.method == "GET" and request.GET.get("address_id"):
+        address_id = request.GET.get("address_id")
 
-    else:
+    # 從選擇地址路徑來的
+    # 是 POST 、有 name = ship-address 的 input
+    elif request.method == "POST" and request.POST.get("ship-address"):
         ship_address_val = request.POST.get("ship-address")
-        if not ship_address_val:
-            messages.error(request, "請選擇一個收貨地址。")
-            return redirect("orders:ship_address", order_id=order_id)
-
         address_id = ship_address_val.replace("address-", "")
-        address = get_object_or_404(UserAddress, pk=address_id, user=user)
+
+    # 都不是，代表沒選地址
+    else:
+        messages.error(request, "請選擇一個收貨地址")
+        return redirect("orders:ship_address", order_id=order_id)
+
+    address = get_object_or_404(UserAddress, pk=address_id, user=user)
 
     # 檢查這筆地址是否完整
     missing = [field for field in REQUIRED_ADDR_FIELDS if not getattr(address, field)]
@@ -130,6 +103,7 @@ def check_order(request, order_id):
             "order": order,
             "joined_group": joined_group,
             "joined_group_products": joined_group_products,
+            "current_step": 2,
         },
     )
 
@@ -317,12 +291,13 @@ def success(request):
 def fail(request):
     return render(request, "orders/payment_fail.html")
 
+
 # 我跟團的訂單
 @login_required
 def my_orders(request):
     user = request.user
     tab = request.GET.get("tab", "all")
-    auto_tab = request.GET.get("auto_tab")    
+    auto_tab = request.GET.get("auto_tab")
 
     # 如果有 auto_tab，就用 auto_tab 作為初始內容
     display_tab = auto_tab if auto_tab else tab
@@ -365,7 +340,12 @@ def get_orders_by_tab(user, tab):
         .order_by("-updated_at")
         .select_related("group", "joined_group")
         .prefetch_related("joined_group__joined_group_products__product")
-        .annotate(total_amount=Sum(F('joined_group__joined_group_products__product__price') * F('joined_group__joined_group_products__quantity')))
+        .annotate(
+            total_amount=Sum(
+                F('joined_group__joined_group_products__product__price')
+                * F('joined_group__joined_group_products__quantity')
+            )
+        )
     )
 
     # 找出所有跟團紀錄
@@ -374,7 +354,12 @@ def get_orders_by_tab(user, tab):
         .order_by("-updated_at")
         .select_related("group")
         .prefetch_related("joined_group_products__product")
-        .annotate(total_amount=Sum(F('joined_group_products__product__price') * F('joined_group_products__quantity')))
+        .annotate(
+            total_amount=Sum(
+                F('joined_group_products__product__price')
+                * F('joined_group_products__quantity')
+            )
+        )
     )
 
     if tab == "all":
@@ -398,12 +383,13 @@ def get_orders_by_tab(user, tab):
 
     return orders, joined_groups
 
+
 # 我開團的訂單
 @login_required
 def owned_orders(request):
     user = request.user
     tab = request.GET.get("tab", "all")
-    auto_tab = request.GET.get("auto_tab")    
+    auto_tab = request.GET.get("auto_tab")
 
     # 如果有 auto_tab，就用 auto_tab 作為初始內容
     display_tab = auto_tab if auto_tab else tab
@@ -421,6 +407,7 @@ def owned_orders(request):
             "auto_tab": auto_tab,
         },
     )
+
 
 @login_required
 def owned_orders_tab_content(request):
@@ -440,6 +427,7 @@ def owned_orders_tab_content(request):
         },
     )
 
+
 def get_data_by_tab(user, tab):
     ongoing_groups = []
     completed_groups = []
@@ -457,13 +445,18 @@ def get_data_by_tab(user, tab):
         .order_by("updated_at")
         .select_related("group", "user")
         .prefetch_related("joined_group__joined_group_products__product")
-        .annotate(total_amount=Sum(F('joined_group__joined_group_products__product__price') * F('joined_group__joined_group_products__quantity')))
+        .annotate(
+            total_amount=Sum(
+                F('joined_group__joined_group_products__product__price')
+                * F('joined_group__joined_group_products__quantity')
+            )
+        )
     )
 
     if tab == "all":
         ongoing_groups = base_groups_query.filter(status="ongoing")
         completed_groups = base_groups_query.filter(status="completed")
-    
+
     if tab == "pending":
         orders = base_orders_query.filter(order_status=Order.OrderStatus.PENDING)
 
@@ -476,14 +469,14 @@ def get_data_by_tab(user, tab):
     if tab == "completed":
         orders = base_orders_query.filter(order_status=Order.OrderStatus.COMPLETED)
 
-
     return ongoing_groups, completed_groups, orders
+
 
 # 跟團者列表
 @login_required
 def buyer_list(request, group_id):
     group = get_object_or_404(Group, id=group_id)
-    
+
     orders = []
     buyers = []
 
@@ -493,37 +486,43 @@ def buyer_list(request, group_id):
             group__status="completed",
         )
         .prefetch_related(
-            "joined_group__joined_group_products__product", 
+            "joined_group__joined_group_products__product",
         )
-        .annotate(total_amount=Sum(F('joined_group__joined_group_products__product__price') * F('joined_group__joined_group_products__quantity')))
+        .annotate(
+            total_amount=Sum(
+                F('joined_group__joined_group_products__product__price')
+                * F('joined_group__joined_group_products__quantity')
+            )
+        )
         # joined_group__joined_group_products__quantity | joined_group__joined_group_products.quantity
         # joined_group__joined_group_products__product__price | joined_group__joined_group_products.product.price
     )
 
     ongoing_groups = (
-        JoinedGroup.objects.filter(
-            group_id=group_id, 
-            group__status="ongoing"
-        )
+        JoinedGroup.objects.filter(group_id=group_id, group__status="ongoing")
         .select_related("buyer")
         .prefetch_related(
             "joined_group_products__product",
         )
-        .annotate(total_amount=Sum(F('joined_group_products__product__price') * F('joined_group_products__quantity')))
+        .annotate(
+            total_amount=Sum(
+                F('joined_group_products__product__price')
+                * F('joined_group_products__quantity')
+            )
+        )
     )
-
 
     if group.status == "ongoing":
         buyers = ongoing_groups
-    
+
     if group.status == "completed":
         orders = completed_groups
 
-    return render(request, "orders/owned_orders/buyers_list.html", {
-        'group': group,
-        'orders': orders,
-        'buyers': buyers
-    })
+    return render(
+        request,
+        "orders/owned_orders/buyers_list.html",
+        {'group': group, 'orders': orders, 'buyers': buyers},
+    )
 
 
 # 確認收貨

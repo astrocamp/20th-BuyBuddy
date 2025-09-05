@@ -3,12 +3,12 @@
 {% endif %}
 
 <div class="fixed inset-0 bg-black/60 flex items-center justify-center z-100 text-center">
-    <form hx-post="{% url 'users:address_create' %}" 
+    <form hx-post="{% url 'users:address_create' %}{% if order_id %}?order_id={{order_id}}{% endif %}" 
           hx-target="#modal-container"
           hx-swap="innerHTML"
           method="post" 
           x-data="addressFormControl"
-          class="bg-[var(--bg-color)] p-10 sm:p-20 rounded-2xl h-[60%] sm:h-auto w-[80%] md:w-[60%] lg:w-50%] xl:w-[40%] overflow-y-auto" 
+          class="bg-[var(--bg-color)] p-10 sm:p-20 rounded-2xl h-[60%] sm:h-auto sm:max-h-[80%] w-[80%] md:w-[60%] lg:w-50%] xl:w-[40%] overflow-y-auto" 
           novalidate>
         {% csrf_token %}
         <div class="mb-4">
@@ -23,5 +23,9 @@
                     
             <button class="card-btn card-btn-secondary">新增</button>
         </div>
+
+        {% if order_id %}
+            <input type="hidden" name="order_id" value="{{ order_id }}">
+        {% endif %}
     </form>
 </div>
