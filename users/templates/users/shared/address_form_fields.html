@@ -16,7 +16,7 @@ border-secondary{% else %}border-[var(--tertiary-color)]{% endif %}">
                     </label>
                     
                     <div class="flex gap-4">
-                        {{ user_address_form.recipient_name|add_class:"text-sm w-full py-2 px-4 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px]"|attr:"placeholder:請輸入收件者姓名" }}
+                        {{ user_address_form.recipient_name|add_class:"text-sm w-full py-2 px-4 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px]"|attr:"placeholder:收件者姓名"|attr:"sm:placeholder:請輸入收件者姓名" }}
     
     
                         <div class="flex items-center gap-2 shrink-0 relative">
@@ -38,7 +38,7 @@ border-secondary{% else %}border-[var(--tertiary-color)]{% endif %}">
                     </div>
     
                     {% if user_address_form.recipient_name.errors %}
-                        <div class="text-[var(--red-color-700)] text-sm mt-2 min-h-[20px]">
+                        <div class="text-start pl-4 text-[var(--red-color-700)] text-sm mt-2 min-h-[20px]">
                             {{ user_address_form.recipient_name.errors.0 }}
                         </div>
                     {% endif %}
@@ -56,7 +56,7 @@ border-secondary{% else %}border-[var(--tertiary-color)]{% endif %}">
                     </label>
                     {{ user_address_form.phone|add_class:"text-sm w-full py-2 px-4 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px]" }}
                     {% if user_address_form.phone.errors %}
-                        <div class="text-[var(--red-color-700)] text-sm mt-2 min-h-[20px]">{{ user_address_form.phone.errors.0 }}</div>
+                        <div class="text-start pl-4 text-[var(--red-color-700)] text-sm mt-2 min-h-[20px]">{{ user_address_form.phone.errors.0 }}</div>
                     {% endif %}
                 </div>
     
@@ -69,13 +69,13 @@ border-secondary{% else %}border-[var(--tertiary-color)]{% endif %}">
                         <div class="relative">
                             {{ user_address_form.county|add_class:"text-sm w-full py-2 px-4 pr-8 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px] appearance-none"|attr:"x-ref=county"|attr:"@change:applyDistrict" }}
                             <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 tertiary-color-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </div>
                         </div>
                         {% if user_address_form.county.errors %}
-                            <div class="text-[var(--red-color-700)] text-sm mt-2 min-h-[20px]">{{ user_address_form.county.errors.0 }}</div>
+                            <div class="text-start pl-4 text-[var(--red-color-700)] text-sm mt-2 min-h-[20px]">{{ user_address_form.county.errors.0 }}</div>
                         {% endif %}
                     </div>
                     <div class="relative">
@@ -85,13 +85,13 @@ border-secondary{% else %}border-[var(--tertiary-color)]{% endif %}">
                         <div class="relative">
                             {{ user_address_form.district|add_class:"text-sm w-full py-2 px-4 pr-8 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px] appearance-none"|attr:"x-ref=district"|attr:"@change:updateZip" }}
                             <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 tertiary-color-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </div>
                         </div>
                         {% if user_address_form.district.errors %}
-                            <div class="text-[var(--red-color-700)] text-sm mt-2 min-h-[20px]">{{ user_address_form.district.errors.0 }}</div>
+                            <div class="text-start pl-4 text-[var(--red-color-700)] text-sm mt-2 min-h-[20px]">{{ user_address_form.district.errors.0 }}</div>
                         {% endif %}
                     </div>
                     <div>
@@ -100,7 +100,7 @@ border-secondary{% else %}border-[var(--tertiary-color)]{% endif %}">
                         </label>
                         {{ user_address_form.postal_code|add_class:"text-sm w-full py-2 px-4 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px]"|attr:"placeholder=系統將自動填寫"|attr:"x-ref=zip" }}
                         {% if user_address_form.postal_code.errors %}
-                            <div class="text-[var(--red-color-700)] text-sm mt-2 min-h-[20px]">{{ user_address_form.postal_code.errors.0 }}</div>
+                            <div class="text-start pl-4 text-[var(--red-color-700)] text-sm mt-2 min-h-[20px]">{{ user_address_form.postal_code.errors.0 }}</div>
                         {% endif %}
                     </div>
                 </div>
@@ -112,7 +112,7 @@ border-secondary{% else %}border-[var(--tertiary-color)]{% endif %}">
                     </label>
                     {{ user_address_form.road|add_class:"text-sm w-full py-2 px-4 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px]" }}
                     {% if user_address_form.road.errors %}
-                        <div class="text-[var(--red-color-700)] text-sm mt-2 min-h-[20px]">{{ user_address_form.road.errors.0 }}</div>
+                        <div class="text-start pl-4 text-[var(--red-color-700)] text-sm mt-2 min-h-[20px]">{{ user_address_form.road.errors.0 }}</div>
                     {% endif %}
                 </div>
     
@@ -123,7 +123,7 @@ border-secondary{% else %}border-[var(--tertiary-color)]{% endif %}">
                     </label>
                     {{ user_address_form.detail|add_class:"text-sm w-full py-2 px-4 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px]" }}
                     {% if user_address_form.detail.errors %}
-                        <div class="text-[var(--red-color-700)] text-sm mt-2 min-h-[20px]">{{ user_address_form.detail.errors.0 }}</div>
+                        <div class="text-start pl-4 text-[var(--red-color-700)] text-sm mt-2 min-h-[20px]">{{ user_address_form.detail.errors.0 }}</div>
                     {% endif %}
                 </div>
             </div>

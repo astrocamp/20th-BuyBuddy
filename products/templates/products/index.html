@@ -15,19 +15,19 @@
         />
         {% else %}
         <div
-          class="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-500"
+          class="w-full h-40 bg-gray-200 flex items-center justify-center tertiary-color-500"
         >
           No image
         </div>
         {% endif %}
         <div class="p-3">
           <h2 class="text-xl font-semibold mb-2">{{ product.name }}</h2>
-          <p class="text-gray-700">價格: ${{ product.price }}</p>
+          <p class="tertiary-color-500">價格: ${{ product.price }}</p>
         </div>
       </div>
     </a>
     {% empty %}
-    <p class="col-span-full text-center text-gray-500">沒有找到任何商品。</p>
+    <p class="col-span-full text-center tertiary-color-500">沒有找到任何商品。</p>
     {% endfor %}
   </div>
 </div>
