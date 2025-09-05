@@ -379,34 +379,56 @@ def address_delete(request, address_id):
 def address_create(request):
     user = request.user
 
+    # 從 GET 或 POST 讀 order_id
+    # GET 表示從選擇地址頁面要求新增地址空表單
+    # POST 表示從選擇地址頁面要求新增地址並導向訂單確認頁
+    order_id = (
+        request.GET.get("order_id")
+        if request.method == "GET"
+        else request.POST.get("order_id")
+    )
+
     # POST 請求，新增地址
     if request.method == "POST":
         address_form = UserAddressForm(request.POST)
+
         if address_form.is_valid():
             # 創建新地址
             new_address_form = address_form.save(commit=False)
             new_address_form.user = user
             new_address_form.save()
 
-            # 重新載入地址列表供 OOB 使用
-            user_addresses = UserAddress.objects.filter(user=user).order_by(
-                "-is_default", "-created_at"
-            )
-            user_address_forms = UserAddressFormSet(queryset=user_addresses)
+            # 代表是從選擇地址來的
+            if order_id:
 
-            context = {
-                "user_address_forms": user_address_forms,
-                "message": "地址新增成功！",
-                "type": "success",
-                "show": True,
-                "include_address_list_oob": True,
-            }
-            # 成功時關閉彈窗並使用 OOB 更新地址列表
-            return render(
-                request,
-                "users/shared/address_create_success.html",
-                context,
-            )
+                # 轉址把 order 和 address 帶過去
+                url = f"{reverse('orders:check_order', args=[order_id])}?address_id={new_address_form.id}"
+
+                # 回覆帶 HX-Redirect
+                response = HttpResponse("")
+                response["HX-Redirect"] = url
+                return response
+
+            else:
+                # 重新載入地址列表供 OOB 使用
+                user_addresses = UserAddress.objects.filter(user=user).order_by(
+                    "-is_default", "-created_at"
+                )
+                user_address_forms = UserAddressFormSet(queryset=user_addresses)
+
+                context = {
+                    "user_address_forms": user_address_forms,
+                    "message": "地址新增成功！",
+                    "type": "success",
+                    "show": True,
+                    "include_address_list_oob": True,
+                }
+                # 成功時關閉彈窗並使用 OOB 更新地址列表
+                return render(
+                    request,
+                    "users/shared/address_create_success.html",
+                    context,
+                )
         else:
             # 表單驗證失敗時，需要回傳帶有錯誤訊息的彈窗
             return render(
@@ -423,7 +445,10 @@ def address_create(request):
         return render(
             request,
             "users/shared/address_create.html",
-            {"user_address_form": blank_address_form},
+            {
+                "user_address_form": blank_address_form,
+                "order_id": order_id,
+            },
         )
 
 

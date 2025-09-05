@@ -45,4 +45,4 @@ def ensure_default_before_save(sender, instance: UserAddress, **kwargs):
 @receiver(pre_delete, sender=UserAddress)
 def ensure_default_on_delete(sender, instance: UserAddress, **kwargs):
     if not _has_other_default(instance.user, exclude_pk=instance.pk):
-        raise DefaultAddressRequiredError("刪除失敗，無法刪除最後一個預設地址")
+        raise DefaultAddressRequiredError("無法刪除預設地址")

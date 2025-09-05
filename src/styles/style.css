@@ -19,6 +19,7 @@
   --tertiary-color-500: #7c7c7c;
   --red-color-500: #fb2c36;
   --red-color-700: #c10007;
+  --green-color: #06890aff;
 }
 
 html {
@@ -83,6 +84,10 @@ input:-webkit-autofill {
 
 .red-color-700 {
   color: var(--red-color-700);
+}
+
+.green-color {
+  color: var(--green-color);
 }
 
 /* main-btn */
@@ -232,4 +237,19 @@ input:-webkit-autofill {
   .nav-btn {
     padding: 15px 34px;
   }
+}
+
+/* 進度條動畫 */
+@keyframes progress-fill-half {
+  from {
+    width: 0;
+  }
+  to {
+    width: 50%;
+  }
+}
+
+.progress-line-half {
+  width: 0;
+  animation: progress-fill-half 0.8s ease-in-out forwards;
 }

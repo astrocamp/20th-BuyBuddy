@@ -1,71 +1,73 @@
 {% extends "layouts/default.html" %}
 {% block content %}
-<section class="max-w-[1440px] mx-auto px-16 sm:px-24 mt-12 lg:mt-16"
-         x-data="{show_create_modal : {{show_create_modal|yesno:"true,false"|default:'false'}}}">
-    <div class="flex gap-4">
-        <p>1.選擇地址</p>
-        <p>2.確認訂單資訊</p>
-        <p>3.付款</p>
-    </div>
+<section class="max-w-[1440px] mx-auto px-16 sm:px-24 mt-12 lg:mt-16">
+    {% include "orders/shared/payment_progress_bar.html"%}
+
+    <h1 class="text-center text-xl md:text-2xl mb-4 font-semibold text-primary-700">請選擇地址</h1>
        
-    <form action="{% url 'orders:check_order' order.id %}" method="post">
+    <form action="{% url 'orders:check_order' order.id %}" method="post" class="mt-8">
         {% csrf_token %}
-            <button @click="show_create_modal = true" type="button" class="border-b-2">新增其他地址</button>
-            <button class="border-b-2">下一步</button>
+        <div class="flex flex-col gap-3 sm:gap-0 sm:flex-row justify-between items-center mb-6">
+
+            <a  hx-get="{% url 'users:address_create' %}?order_id={{ order.id }}"
+                hx-target="#modal-container"
+                hx-swap="innerHTML"
+                class="main-btn main-btn-black flex gap-2 items-center w-full justify-center sm:w-auto sm:justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 -translate-y-[1px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                新增其他地址
+            </a>
 
 
-        <ul class="flex flex-col gap-4">
+            <button class="main-btn w-full sm:w-auto">下一步</button>
+        </div>
+
+        <div class="flex flex-col gap-6">
             {% for address in addresses %}
-                    <li class="flex justify-between hover:bg-white">
-                    <label for="address-{{address.id}}" class="w-full cursor-pointer">
-                            <div class="flex">
-                                <p>{{address.recipient_name}}</p>
-                            </div>
-
-                            <div class="flex">
-                                <p>{{address.phone}}</p>
-                            </div>
-                        
-                            <div class="flex">
-                                <p>{{address.postal_code}} {{address.county}}{{address.district}}{{address.road}}{{address.detail}}</p>
-                            </div>
-                    </label>
-
-                    <div>
-                            {% if address.is_default %}
-                                <input type="radio" id="address-{{address.id}}" name="ship-address" value="address-{{address.id}}" class="cursor-pointer" checked />
-                            {% else %}
-                                <input type="radio" id="address-{{address.id}}" name="ship-address" value="address-{{address.id}}" class="cursor-pointer"/>
-                            {% endif %}
-                    </div>
+            
+            <label for="address-{{address.id}}" class="block cursor-pointer group">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center rounded-lg p-6 transition-all duration-200 border-2 border-[var(--tertiary-color)] group-has-[:checked]:border-[#1e1f24]">
                     
-                    </li>
-                
-        {% endfor %}
-        </ul>
+                    <div class="relative mb-3 sm:mb-0 sm:mr-6 flex-shrink-0 self-start sm:self-center">
+                        <input type="radio" id="address-{{address.id}}" name="ship-address" value="address-{{address.id}}" class="appearance-none w-6 h-6 peer" {% if address.is_default %}checked{% endif %} />
+                        
+                        <svg class="absolute inset-0 w-6 h-6 transition-opacity fill-[var(--tertiary-color-300)] peer-checked:opacity-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+                            <path d="M230,128A102,102,0,1,1,128,26,102.12,102.12,0,0,1,230,128Zm-12,0a90,90,0,1,0-90,90A90.1,90.1,0,0,0,218,128Z"></path>
+                        </svg>
+                        <svg class="absolute inset-0 w-6 h-6 opacity-0 peer-checked:opacity-100 transition-opacity fill-[var(--main-color)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+                            <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"></path>
+                        </svg>
+                    </div>
+
+
+                    <div class="flex-1 w-full">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-lg font-bold text-primary-700">{{address.recipient_name}}</span>
+                            {% if address.is_default %}
+                                <span class="ml-2 px-2 py-0.5 text-xs rounded bg-secondary text-white">預設地址</span>
+                            {% endif %}
+                        </div>
+                        <div class="flex flex-col sm:flex-row flex-wrap gap-x-4 gap-y-1 mb-1 items-left">
+                            <span class="text-sm tertiary-color-500">電話：</span>
+                            <span class="font-medium">{{address.phone}}</span>
+                        </div>
+                        <div class="flex flex-col sm:flex-row flex-wrap gap-x-4 gap-y-1 mb-1 items-left">
+                            <span class="text-sm tertiary-color-500">地址：</span>
+                            <span class="font-medium">{{address.postal_code}} {{address.county}}{{address.district}}{{address.road}}{{address.detail}}</span>
+                        </div>
+                    </div>
+                </div>
+            </label>
+            {% endfor %}
+        </div>
     </form>
 
-    <!-- 新增收貨地址彈窗-->
-    <div x-show="show_create_modal" x-cloak>
-        <div x-data="addressFormControl"
-              class="fixed inset-0 bg-black/60 flex items-center justify-center z-100 text-center"
-              >
-            <form action="{% url 'orders:check_order' order.id %}" method="post" class="bg-[var(--bg-color)] p-20 rounded-2xl w-[75%] md:w-[60%] lg:w-[50%] xl:w-[40%]" novalidate>
-                 <input type="hidden" name="create_new_address" value="1">
 
-                {% csrf_token %}
-                {% include "users/shared/address_form_fields.html" %}
+<!-- 彈窗新增地址區塊 -->
+<div id="modal-container">
+</div>
 
-                <div class="flex gap-4">
-                    <button>下一步</button>
-                    <button type="button" @click="show_create_modal=false; window.location.href='{% url 'orders:ship_address' order.id %}?clear_modal=1'">取消</button>
-                </div>
-            </form>
-        </div>
-    </div>
 </section>
-
-
-
 
 {% endblock %}
