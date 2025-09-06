@@ -1,6 +1,6 @@
-{% if show %}
-    {% include "users/shared/messages.html" %}
-
+{% if partial_msg_show %}
+    {% include "shared/flash_messages_content.html" with messages=messages only %}
+    
     <!-- 使用 hx-swap-oob 同時更新導航欄頭像 -->
     <img hx-swap-oob="outerHTML:#navbar-avatar-desktop img" 
         hx-disinherit="oobErrorIgnore"
@@ -19,14 +19,16 @@
 <div id="user_profile" class="text-center md:text-left flex flex-col items-center">
 
     <div class="mb-6 flex flex-col justify-center text-center gap-4 mt-6 sm:mt-0 sm:flex-row md:py-2 sm:py-3 sm:justify-between items-center">
-        <p class="text-xl font-bold">您好！{{user.username}}</p>
+        <p class="flex flex-col lg:flex-row text-xl font-bold break-keep">您好
+            <span>{{user.username}}</span>
+        </p>
     </div>
     
-    <div class="mb-6">
+    <div class="mb-6 h-40 aspect-square">
         <img 
             src="{{ user_form.instance.avatar_url.url }}" 
             alt="User Avatar" 
-            class="w-40 h-40 rounded-full object-contain"
+            class=" rounded-full object-contain"
         >
     </div>
 
@@ -41,11 +43,14 @@
                     </svg>
                  {% endif %}
             </div>
-            <p class="font-medium text-primary-800 break-all">{{user.email}}</p>
+            <p class="font-medium text-primary-800 break-keep">{{user.email}}</p>
             {% if not user.is_verified %}
-                <button class="text-xs bg-[var(--primary-color)] rounded-full px-4 py-2 mt-2 hover:bg-[var(--primary-color-400)]">
-                    驗證信箱
-                </button>
+                <form action="{% url 'users:check_email' %}" method="post" @submit="loading = true">
+                    {% csrf_token %}
+                    <button class="text-xs bg-[var(--primary-color)] rounded-full px-4 py-2 mt-2 hover:bg-[var(--primary-color-400)]">
+                        驗證信箱
+                    </button>
+                </form>
             {% endif %}
         </div>
 
@@ -53,7 +58,7 @@
         
         <div class="rounded-lg p-4">
             <p class="text-xs tertiary-color-500 mb-1">{{ user_form.username.label }}</p>
-            <p class="font-medium text-primary-800 break-all">{{ user_form.username.value }}</p>
+            <p class="font-medium text-primary-800 break-keep">{{ user_form.username.value }}</p>
         </div>
         
         <button 

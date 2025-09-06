@@ -4,4 +4,12 @@ from groups.models import Group
 
 def homepage(request):
     groups = Group.objects.filter(status="ongoing")[:9]
-    return render(request, "pages/home.html", {"groups": groups})
+
+    # 取出寄信 modal 狀態
+    verify_email_modal = request.session.pop("verify_email_modal", None)
+
+    return render(
+        request,
+        "pages/home.html",
+        {"groups": groups, "verify_email_modal": verify_email_modal},
+    )

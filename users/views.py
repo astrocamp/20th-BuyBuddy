@@ -67,21 +67,21 @@ def create(request):
 
         # 寄信
         success = send_verification_mail(request, new_user, new_user.email)
-        if success:
-            messages.success(
-                request,
-                "驗證信已發送，請至您的信箱點擊驗證連結",
-                extra_tags="verify register",
-            )
-        else:
-            messages.warning(
-                request,
-                "但驗證信發送失敗，請稍後至個人頁面驗證",
-                extra_tags="verify register",
-            )
+        modal_content = (
+            "驗證信已發送，請至您的信箱點擊驗證連結"
+            if success
+            else "驗證信發送失敗，請稍後至個人頁面再次驗證"
+        )
+
+        request.session["verify_email_modal"] = {
+            "modalShow": True,
+            "title": "註冊成功",
+            "content": modal_content,
+            "img": "assets/register.svg",
+        }
 
         login(request, new_user)
-        return redirect("groups:index")
+        return redirect("pages:homepage")
 
     except Exception as e:
         print(f"註冊時發生錯誤: {e}")
@@ -140,6 +140,7 @@ def sessions_delete(request):
     return redirect("groups:index")
 
 
+@require_POST
 @login_required
 def check_email(request):
     # TODO: 個人頁面需要二次驗證
@@ -150,18 +151,19 @@ def check_email(request):
         return redirect("users:profiles")
 
     success = send_verification_mail(request, user, user.email)
-    if success:
-        messages.success(
-            request,
-            "請至您的信箱點擊驗證連結",
-            extra_tags="verify profile",
-        )
-    else:
-        messages.warning(
-            request,
-            "請稍後再試",
-            extra_tags="verify profile",
-        )
+
+    modal_title = (
+        "已寄送驗證信，請至您的信箱點擊驗證連結"
+        if success
+        else "寄送驗證信失敗，請稍後嘗試"
+    )
+    modal_img = "assets/send_success.svg" if success else "assets/fail.svg"
+
+    request.session["verify_email_modal"] = {
+        "modalShow": True,
+        "title": modal_title,
+        "img": modal_img,
+    }
 
     return redirect("users:profiles")
 
@@ -207,10 +209,17 @@ def profiles(request):
 
     user_address_forms = UserAddressFormSet(queryset=user_addresses)
 
+    # 取出寄信 modal 狀態
+    verify_email_modal = request.session.pop("verify_email_modal", None)
+    context = {
+        "user_form": user_form,
+        "user_address_forms": user_address_forms,
+        "verify_email_modal": verify_email_modal,
+    }
     return render(
         request,
         "users/profiles_section.html",
-        {"user_form": user_form, "user_address_forms": user_address_forms},
+        context,
     )
 
 
@@ -227,11 +236,10 @@ def profiles_edit(request):
             updated_form = UserForm(instance=user)
 
             # 儲存成功，返回顯示模式
+            messages.success(request, "用戶資訊更新成功")
             context = {
                 "user_form": updated_form,
-                "message": "用戶資訊更新成功！",
-                "type": "success",
-                "show": True,
+                "partial_msg_show": True,
             }
             return render(
                 request,
@@ -284,27 +292,27 @@ def address_edit(request, address_id):
                     )
                     all_address_forms = UserAddressFormSet(queryset=user_addresses)
 
+                    # 使用 Django 內置消息系統
+                    messages.success(request, "地址更新成功！")
+
                     # render 包含 OOB
                     return render(
                         request,
                         "users/shared/address_with_oob.html",
                         {
-                            # "user_address_form": user_address_form,
                             "all_address_forms": all_address_forms,
                             "include_address_list_oob": True,
-                            "message": "地址更新成功！",
-                            "type": "success",
-                            "show": True,
+                            "partial_msg_show": True,
                         },
                     )
 
                 # 預設沒動，只回更新的地址
                 # 不包含 OOB 更新
+                messages.success(request, "地址更新成功")
+
                 context = {
                     "user_address_form": user_address_form,
-                    "message": "地址更新成功！",
-                    "type": "success",
-                    "show": True,
+                    "partial_msg_show": True,
                 }
                 return render(
                     request,
@@ -313,12 +321,12 @@ def address_edit(request, address_id):
                 )
 
             except ValidationError as e:
+                messages.error(request, "; ".join(e.messages))
+
                 context = {
                     "user_address_form": user_address_form,
                     "return_edit": True,
-                    "message": "; ".join(e.messages),
-                    "type": "error",
-                    "show": True,
+                    "partial_msg_show": True,
                 }
                 return render(
                     request,
@@ -353,23 +361,23 @@ def address_delete(request, address_id):
 
     try:
         target_address.delete()
+        messages.success(request, "地址刪除成功！")
+
         user_address_form = UserAddressForm(instance=target_address)
         context = {
             "user_address_form": user_address_form,
             "delete": True,
-            "message": "地址刪除成功！",
-            "type": "success",
-            "show": True,
+            "partial_msg_show": True,
         }
         return render(request, "users/shared/address.html", context)
 
     except ValidationError as e:
+        messages.error(request, "; ".join(e.messages))
+
         user_address_form = UserAddressForm(instance=target_address)
         context = {
             "user_address_form": user_address_form,
-            "message": "; ".join(e.messages),
-            "type": "error",
-            "show": True,
+            "partial_msg_show": True,
         }
         return render(request, "users/shared/address.html", context)
 
@@ -416,11 +424,11 @@ def address_create(request):
                 )
                 user_address_forms = UserAddressFormSet(queryset=user_addresses)
 
+                messages.success(request, "地址新增成功！")
+
                 context = {
                     "user_address_forms": user_address_forms,
-                    "message": "地址新增成功！",
-                    "type": "success",
-                    "show": True,
+                    "partial_msg_show": True,
                     "include_address_list_oob": True,
                 }
                 # 成功時關閉彈窗並使用 OOB 更新地址列表

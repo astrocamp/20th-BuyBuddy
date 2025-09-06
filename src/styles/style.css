@@ -206,6 +206,35 @@ input:-webkit-autofill {
   color: white;
 }
 
+/* flash-messages */
+.flash-messages-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 16px;
+}
+
+.flash-messages-text {
+  flex-grow: 1;
+  font-weight: 500;
+  margin-left: 10px;
+}
+
+.flash-messages-close-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: white;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.flash-messages-close-btn:hover svg {
+  opacity: 0.8;
+}
+
 /* 響應式 */
 @media (min-width: 640px) {
   .main-btn {

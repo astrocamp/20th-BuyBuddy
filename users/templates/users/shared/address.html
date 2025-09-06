@@ -1,5 +1,5 @@
-{% if show and not include_address_list_oob %}
-    {% include "users/shared/messages.html" %}
+{% if partial_msg_show and not include_address_list_oob %}
+    {% include "shared/flash_messages_content.html" with messages=messages only %}
 {% endif %}
 
 {% if not delete %}
@@ -34,12 +34,12 @@
         </div>
         <div class="break-words">
             <p class="text-xs tertiary-color-500">{{ user_address_form.road.label }}</p>
-            <p class="font-medium">{{ user_address_form.road.value }}</p>
+            <p class="font-medium break-all">{{ user_address_form.road.value }}</p>
         </div>
         {% if user_address_form.detail.value %}
         <div class="break-words">
             <p class="text-xs tertiary-color-500">{{ user_address_form.detail.label }}</p>
-            <p class="font-medium">{{ user_address_form.detail.value }}</p>
+            <p class="font-medium break-all">{{ user_address_form.detail.value }}</p>
         </div>
         {% endif %}
     </div>

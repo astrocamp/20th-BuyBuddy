@@ -1,4 +1,5 @@
 {% extends 'layouts/default.html'%}
+{% load static %}
 
 {% block content%}
 
@@ -25,8 +26,11 @@
     </div>
 </section>
 
-<!-- 彈窗新增地址區塊 -->
+<!-- 新增地址彈窗 -->
 <div id="modal-container" class="modal">
 </div>
+
+<!-- 寄驗證信結果彈窗 -->
+{% include "shared/verify_email_result_modal.html" %}
 
 {% endblock %}
