@@ -1,5 +1,5 @@
 <!-- 使用 OOB 更新地址列表 -->
 <div id="address-list" hx-swap-oob="true" class="flex flex-col gap-6">
-  {% include "users/shared/messages.html" %}
+   {% include "shared/flash_messages_content.html" with messages=messages only %}
   {% include "users/shared/address_list.html" %}
 </div>
