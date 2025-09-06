@@ -13,7 +13,7 @@ const imagePreview = (initialUrl) => {
             : file.name;
 
         const reader = new FileReader();
-        reader.onload = (e) => (this.avatarUrl = e.target.result);
+        reader.onload = (e) => (this.imageUrl = e.target.result);
         reader.readAsDataURL(file);
       }
     },
