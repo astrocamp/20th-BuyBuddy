@@ -20,11 +20,38 @@ class Notification(models.Model):
 
 class UserNotification(models.Model):
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="notifications"
+        User,
+        on_delete=models.CASCADE,
+        related_name="user_notifications",
     )
     notification = models.ForeignKey(Notification, on_delete=models.CASCADE)
     is_read = models.BooleanField(default=False)
     read_at = models.DateTimeField(null=True, blank=True)
 
+    class Meta:
+        unique_together = ("user", "notification")
+
     def __str__(self):
         return f"{self.user} - {self.notification.title}"
+
+
+class GroupStatus(models.Model):
+    STATUS_CHOICES = [
+        ("reached", "已達標"),
+        ("failed", "已失敗"),
+        ("ongoing", "進行中"),
+        ("deleted", "已取消"),
+    ]
+
+    group = models.ForeignKey(
+        Group,
+        on_delete=models.CASCADE,
+        related_name="status_history",
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+    changed_at = models.DateTimeField(auto_now_add=True)
+    changed_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    note = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-changed_at"]
