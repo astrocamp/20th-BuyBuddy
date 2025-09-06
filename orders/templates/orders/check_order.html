@@ -96,17 +96,17 @@
                 {% endfor %}
                 <div class="flex justify-between font-bold text-base mt-2">
                     <span>總計</span>
-                    <span class="text-primary-700">${{ order.amount|floatformat:0 }}</span>
+                    <span class="green-color">${{ order.amount|floatformat:0 }}</span>
                 </div>
             </div>
         </div>
     </div>
 
 
-    <form action="{% url 'orders:payment_request' order.id %}" method="post" class="flex flex-col sm:flex-row justify-between gap-3 text-center">
-        {% csrf_token %}
-        <a href="{% url 'orders:ship_address' order.id %}" class="main-btn main-btn-black w-full sm:w-auto">回上一步</a>
-        <button class="main-btn w-full sm:w-auto">去付款</button>
-    </form>
+                <form action="{% url 'orders:payment_request' order.id %}" method="post" class="flex flex-col sm:flex-row justify-between gap-3 text-center"  @submit="loading = true">
+                        {% csrf_token %}
+                        <a href="{% url 'orders:ship_address' order.id %}" class="main-btn main-btn-black w-full sm:w-auto">回上一步</a>
+                        <button class="main-btn w-full sm:w-auto" id="pay-btn">去付款</button>
+                </form>
 </section>
 {% endblock %}

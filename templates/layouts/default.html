@@ -10,8 +10,7 @@
 	{% block extra_head %}
     {% endblock %}
 </head>
-<body class="min-h-screen flex flex-col"
-        hx-headers='{"X-CSRFToken": "{{csrf_token}}"}'>
+<body class="min-h-screen flex flex-col" hx-headers='{"X-CSRFToken": "{{csrf_token}}"}' x-data="{ loading: false }">
     <header 
         x-data="navigationControl"
         @scroll.window="handleNavbar"
@@ -29,5 +28,7 @@
     {% include "shared/footer.html" %}
 
     {% include "shared/back_to_top_btn.html" %}
+
+    {% include "shared/loading.html" %}
 </body>
 </html>
