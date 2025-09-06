@@ -55,7 +55,7 @@ class="pl-[80px] sm:pl-[100px] pb-12 bg-tertiary-color  fixed top-0 right-0 w-[8
                 </a>
             </li>
             <li class="py-8 transition-all duration-300">
-                <a href="{% url 'users:sessions_delete' %}" class="flex flex-col hover:scale-115 hover:py-2 transition-all duration-300 origin-left">
+                <a href="{% url 'users:sessions_delete' %}?next={{request.path}}" class="flex flex-col hover:scale-115 hover:py-2 transition-all duration-300 origin-left">
                     登出
                 </a>
             </li>

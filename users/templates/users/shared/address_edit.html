@@ -1,6 +1,6 @@
 {% load static %}
-{% if show %}
-    {% include "users/shared/messages.html" %}
+{% if partial_msg_show %}
+    {% include "shared/flash_messages_content.html" with messages=messages only %}
 {% endif %}
 
 

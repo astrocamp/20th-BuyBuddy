@@ -1,11 +1,11 @@
 {% if include_address_list_oob %}
   <div id="address-list" hx-swap-oob="true" class="flex flex-col gap-8">
-    {% if show %}
-        {% include "users/shared/messages.html" %}
+    {% if partial_msg_show %}
+        {% include "shared/flash_messages_content.html" with messages=messages only %}
     {% endif %} 
     
     {% for form in all_address_forms %}
       {% include "users/shared/address.html" with user_address_form=form %}
-{% endfor %}
+    {% endfor %}
   </div>
 {% endif %}
