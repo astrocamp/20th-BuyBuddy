@@ -1,4 +1,3 @@
-from tokenize import group
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 from django.contrib import messages
@@ -16,6 +15,7 @@ from groups.models import JoinedGroup, Group
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.db.models import Sum, F
+
 
 REQUIRED_ADDR_FIELDS = (
     "recipient_name",
@@ -42,7 +42,9 @@ def ship_address(request, order_id):
         messages.warning(request, "請先更新預設地址，再至訂單結帳")
         return redirect("users:profiles")
 
-    order = get_object_or_404(Order, pk=order_id)
+    order = get_object_or_404(
+        Order, pk=order_id, order_status=Order.OrderStatus.PENDING
+    )
     blank_address_form = UserAddressForm()
 
     return render(
@@ -60,7 +62,9 @@ def ship_address(request, order_id):
 @login_required
 def check_order(request, order_id):
     user = request.user
-    order = get_object_or_404(Order, pk=order_id, user=user)
+    order = get_object_or_404(
+        Order, pk=order_id, user=user, order_status=Order.OrderStatus.PENDING
+    )
 
     # 從新增地址路徑來的
     # 是 GET 、有 address_id
@@ -310,7 +314,7 @@ def my_orders(request):
         {
             "orders": orders,
             "joined_groups": joined_groups,
-            "current_tab": display_tab,
+            "current_sub_tab": display_tab,
             "auto_tab": auto_tab,
         },
     )
@@ -326,7 +330,11 @@ def my_orders_tab_content(request):
     return render(
         request,
         "orders/my_orders/list.html",
-        {"orders": orders, "joined_groups": joined_groups},
+        {
+            "orders": orders,
+            "joined_groups": joined_groups,
+            "current_sub_tab": tab,
+        },
     )
 
 
@@ -394,16 +402,16 @@ def owned_orders(request):
     # 如果有 auto_tab，就用 auto_tab 作為初始內容
     display_tab = auto_tab if auto_tab else tab
 
-    ongoing_groups, completed_groups, orders = get_data_by_tab(user, display_tab)
+    ongoing_groups, reached_groups, orders = get_data_by_tab(user, display_tab)
 
     return render(
         request,
         "orders/owned_orders/section.html",
         {
             "ongoing_groups": ongoing_groups,
-            "completed_groups": completed_groups,
+            "reached_groups": reached_groups,
             "orders": orders,
-            "current_tab": display_tab,
+            "current_sub_tab": display_tab,
             "auto_tab": auto_tab,
         },
     )
@@ -414,23 +422,23 @@ def owned_orders_tab_content(request):
     user = request.user
     tab = request.GET.get("tab", "all")
 
-    ongoing_groups, completed_groups, orders = get_data_by_tab(user, tab)
+    ongoing_groups, reached_groups, orders = get_data_by_tab(user, tab)
 
     return render(
         request,
         "orders/owned_orders/list.html",
         {
             "ongoing_groups": ongoing_groups,
-            "completed_groups": completed_groups,
+            "reached_groups": reached_groups,
             "orders": orders,
-            "current_tab": tab,
+            "current_sub_tab": tab,
         },
     )
 
 
 def get_data_by_tab(user, tab):
     ongoing_groups = []
-    completed_groups = []
+    reached_groups = []
     orders = []
 
     base_groups_query = (
@@ -441,8 +449,8 @@ def get_data_by_tab(user, tab):
     )
 
     base_orders_query = (
-        Order.objects.filter(group__status="completed", group__owner=user)
-        .order_by("updated_at")
+        Order.objects.filter(group__owner=user)  # 僅篩選出開團者的訂單，不限制團購狀態
+        .order_by("-updated_at")
         .select_related("group", "user")
         .prefetch_related("joined_group__joined_group_products__product")
         .annotate(
@@ -455,35 +463,34 @@ def get_data_by_tab(user, tab):
 
     if tab == "all":
         ongoing_groups = base_groups_query.filter(status="ongoing")
-        completed_groups = base_groups_query.filter(status="completed")
-
-    if tab == "pending":
+        reached_groups = base_groups_query.filter(status="reached")
+        orders = base_orders_query.all()
+    elif tab == "ongoing":
+        ongoing_groups = base_groups_query.filter(status="ongoing")
+    elif tab == "pending":
         orders = base_orders_query.filter(order_status=Order.OrderStatus.PENDING)
-
-    if tab == "processing":
+    elif tab == "processing":
         orders = base_orders_query.filter(order_status=Order.OrderStatus.PROCESSING)
-
-    if tab == "shipped":
+    elif tab == "shipped":
         orders = base_orders_query.filter(order_status=Order.OrderStatus.SHIPPED)
-
-    if tab == "completed":
+    elif tab == "completed":
         orders = base_orders_query.filter(order_status=Order.OrderStatus.COMPLETED)
 
-    return ongoing_groups, completed_groups, orders
+    return ongoing_groups, reached_groups, orders
 
 
 # 跟團者列表
 @login_required
 def buyer_list(request, group_id):
-    group = get_object_or_404(Group, id=group_id)
+    group = get_object_or_404(Group, id=group_id, owner=request.user)
 
     orders = []
     buyers = []
 
-    completed_groups = (
+    all_orders = (
         Order.objects.filter(
             group_id=group_id,
-            group__status="completed",
+            # 不限制團購狀態，顯示該團所有訂單
         )
         .prefetch_related(
             "joined_group__joined_group_products__product",
@@ -513,10 +520,11 @@ def buyer_list(request, group_id):
     )
 
     if group.status == "ongoing":
+        # 團購進行中，顯示跟團者
         buyers = ongoing_groups
-
-    if group.status == "completed":
-        orders = completed_groups
+    else:
+        # 團購已達標或其他狀態，顯示訂單
+        orders = all_orders
 
     return render(
         request,
@@ -531,6 +539,10 @@ def buyer_list(request, group_id):
 def received(request, order_id):
     user = request.user
     order = get_object_or_404(Order, user=user, pk=order_id)
+
+    if order.order_status == Order.OrderStatus.COMPLETED:
+        messages.info(request, "此訂單已完成，無需重複確認收貨")
+        return redirect(f"{reverse('orders:my_orders')}?auto_tab=completed")
 
     if not order.is_shipped():
         messages.error(request, "此訂單無法確認收貨")

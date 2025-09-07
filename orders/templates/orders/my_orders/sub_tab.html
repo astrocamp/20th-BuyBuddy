@@ -1,0 +1,9 @@
+<li >
+    <a hx-get="{% url 'orders:my_orders_tab_content' %}?tab={{tab}}"
+        hx-target="#my-order-list"
+        hx-swap="innerHTML"
+        hx-trigger="click"
+        class="sub-tab-btn min-w-[110px] {% if tab == current_sub_tab %}active{% endif %}">
+    {{ content }}
+    </a>
+</li>
