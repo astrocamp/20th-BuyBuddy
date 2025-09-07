@@ -231,10 +231,10 @@ TINYMCE_DEFAULT_CONFIG = {
     "toolbar": "undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | link image",
     "images_upload_url": "/groups/upload/",
     "csrf_cookie_name": "csrftoken",
-	"csrf_token_header": "X-CSRFToken",
-	"statusbar": False,
-	"resize": False,
-    }
+    "csrf_token_header": "X-CSRFToken",
+    "statusbar": False,
+    "resize": False,
+}
 TINYMCE_LIMITED_CONFIG = {
     "height": 300,
     "menubar": False,
@@ -244,7 +244,6 @@ TINYMCE_LIMITED_CONFIG = {
     "images_upload_url": "",
     "csrf_cookie_name": "csrftoken",
     "csrf_token_header": "X-CSRFToken",
-	"statusbar": False,
+    "statusbar": False,
     "resize": False,
-    
 }

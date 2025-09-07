@@ -1,8 +1,7 @@
 {% extends "layouts/default.html"%}
 {% block content %}
 
-{% include "orders/shared/navbar.html" %}
-{% include 'orders/owned_orders/navbar.html' %}
+{% include "orders/shared/tab.html" with tab="owned_orders" only %}
 
 <div id="my-order-list">
     {% include 'orders/owned_orders/list.html' %}

@@ -1,0 +1,15 @@
+<nav aria-label="我跟團的訂單分頁" class="my-6 overflow-hidden px-8">
+    <ul class="flex flex-nowrap overflow-x-scroll pb-3 justify-center items-center gap-4 bg-transparent rounded-full px-2 py-1">
+            {% include "orders/my_orders/sub_tab.html" with tab="all" current_sub_tab=current_sub_tab content="全部訂單" only %}
+
+        {% include "orders/my_orders/sub_tab.html" with tab="ongoing" current_sub_tab=current_sub_tab content="未成團訂單" only %}
+
+        {% include "orders/my_orders/sub_tab.html" with tab="pending" current_sub_tab=current_sub_tab content="待付款訂單" only %}
+
+        {% include "orders/my_orders/sub_tab.html" with tab="processing" current_sub_tab=current_sub_tab content="待出貨訂單" only %}
+        
+        {% include "orders/my_orders/sub_tab.html" with tab="shipped" current_sub_tab=current_sub_tab content="已出貨訂單" only %}
+        
+        {% include "orders/my_orders/sub_tab.html" with tab="completed" current_sub_tab=current_sub_tab content="已完成訂單" only %}
+    </ul>
+</nav>
