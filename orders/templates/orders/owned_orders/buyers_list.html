@@ -16,7 +16,7 @@
           尚未產生訂單
           {% endif %}
         </p>
-        {% if order.order_status == "pending" %}
+        {% if order.order_status == order.OrderStatus.PROCESSING %}
         <a href="#" class="px-5 rounded-full border text-sm text-gray-800 whitespace-nowrap bg-gray-900 text-white">出貨</a>
         {% endif %}
       </div>
