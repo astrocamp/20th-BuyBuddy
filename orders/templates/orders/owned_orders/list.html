@@ -52,7 +52,7 @@
                 </p>
               </div>
               <div class="flex items-center gap-2">
-                <a href="{% url 'groups:manage' g.id %}" class="card-btn card-btn-white">團購頁面</a>
+                <a href="{% url 'groups:manage_edit' g.id %}" class="card-btn card-btn-white">團購頁面</a>
                 <a href="{% url 'orders:buyer_list' g.id %} " class="card-btn card-btn-secondary">檢視跟團者</a>
               </div>
             </div>
@@ -121,7 +121,7 @@
                 </p>
               </div>
               <div class="flex items-center gap-2">
-                <a href="{% url 'groups:manage' g.id %}" class="card-btn card-btn-white">團購頁面</a>
+                <a href="{% url 'groups:manage_edit' g.id %}" class="card-btn card-btn-white">團購頁面</a>
                 <a href="{% url 'orders:buyer_list' g.id %}" class="card-btn card-btn-secondary">檢視跟團者</a>
               </div>
             </div>
