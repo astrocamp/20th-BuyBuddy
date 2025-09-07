@@ -4,10 +4,10 @@ from users.models import User, UserAddress
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.urls import reverse
+from .tokens import email_verification_token_generator
 from .forms import (
     UserForm,
     UserAddressForm,
@@ -22,8 +22,8 @@ from django.http import HttpResponse
 
 def send_verification_mail(request, user, email):
     try:
-        # 製作 token
-        token = default_token_generator.make_token(user)
+        # 製作 token - 使用自定義的 token 生成器
+        token = email_verification_token_generator.make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
 
         # 製作驗證連結
@@ -175,7 +175,7 @@ def verify_email(request, uid, token):
         user = User.objects.get(pk=user_id)
 
         # 檢查 token 是否有效
-        if default_token_generator.check_token(user, token):
+        if email_verification_token_generator.check_token(user, token):
             user.is_verified = True
             user.save()
             login(request, user)
