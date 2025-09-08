@@ -175,7 +175,6 @@ input:-webkit-autofill {
   font-size: 14px;
 }
 .card-btn-white {
-  background-color: #ffffff;
   border: 1.5px solid var(--secondary-color);
   color: var(--secondary-color);
 }
@@ -205,6 +204,17 @@ input:-webkit-autofill {
   background: var(--secondary-color-900);
   border: 1.5px solid var(--secondary-color-900);
   color: white;
+}
+
+.card-btn-yellow {
+  background-color: var(--primary-color);
+  border: 1.5px solid var(--primary-color);
+  color: var(--secondary-color);
+}
+
+.card-btn-yellow:hover {
+  background-color: var(--primary-color-400);
+  border: 1.5px solid var(--primary-color-400);
 }
 
 /* sub-tab-btn */

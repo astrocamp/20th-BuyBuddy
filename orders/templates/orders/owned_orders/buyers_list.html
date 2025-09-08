@@ -3,8 +3,9 @@
 {% block content %}
 
 <section class="max-w-[1440px] mx-auto px-16 sm:px-24 mt-12 lg:mt-16">
-  <h2 class="text-center">{{ group.name }} - 跟團者列表</h2>
+  <h2 class="text-center text-md sm:text-xl font-medium">{{ group.name }} - 跟團者列表</h2>
   {% if orders %}
+  <button class="block mx-auto mt-4 card-btn card-btn-yellow"><a href="{% url 'orders:buyer_list_export' group.id %}" class="">匯出 Excel 檔</a></button>
   {% for order in orders %}
   <div class="box-border flex flex-col gap-2"> 
     <div class="mt-5">

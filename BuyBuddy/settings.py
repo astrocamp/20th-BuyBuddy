@@ -141,7 +141,7 @@ else:
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Taipei"
 
 USE_I18N = True
 
@@ -281,5 +281,5 @@ SOCIALACCOUNT_ADAPTER = "users.adapters.CustomSocialAccountAdapter"
 # settings.py 末尾
 SITE_ID = 1
 
-LOGIN_REDIRECT_URL="/"
+LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
