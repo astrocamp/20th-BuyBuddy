@@ -12,9 +12,10 @@ from users.models import UserAddress
 from users.forms import UserAddressForm
 from .models import Order, Payment
 from groups.models import JoinedGroup, Group
+from products.models import JoinedGroupProduct
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
-from django.db.models import Sum, F
+from django.db.models import Sum, F, Q, Prefetch
 
 
 REQUIRED_ADDR_FIELDS = (
@@ -351,21 +352,33 @@ def get_orders_by_tab(user, tab):
         .annotate(
             total_amount=Sum(
                 F('joined_group__joined_group_products__product__price')
-                * F('joined_group__joined_group_products__quantity')
+                * F('joined_group__joined_group_products__quantity'),
             )
         )
     )
 
     # 找出所有跟團紀錄
     base_joined_groups = (
-        JoinedGroup.objects.filter(buyer=user, group__status="ongoing", deleted_at=None)
+        JoinedGroup.objects.filter(
+            buyer=user,
+            group__status="ongoing",
+            deleted_at=None,
+        )
         .order_by("-updated_at")
         .select_related("group")
-        .prefetch_related("joined_group_products__product")
+        .prefetch_related(
+            Prefetch(
+                "joined_group_products",
+                queryset=JoinedGroupProduct.objects.filter(
+                    deleted_at=None
+                ).select_related("product"),
+            )
+        )
         .annotate(
             total_amount=Sum(
                 F('joined_group_products__product__price')
-                * F('joined_group_products__quantity')
+                * F('joined_group_products__quantity'),
+                filter=Q(joined_group_products__deleted_at=None),
             )
         )
     )
