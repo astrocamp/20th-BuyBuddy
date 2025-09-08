@@ -402,7 +402,7 @@ def owned_orders(request):
     # 如果有 auto_tab，就用 auto_tab 作為初始內容
     display_tab = auto_tab if auto_tab else tab
 
-    ongoing_groups, reached_groups, orders = get_data_by_tab(user, display_tab)
+    ongoing_groups, reached_groups = get_data_by_tab(user, display_tab)
 
     return render(
         request,
@@ -410,7 +410,6 @@ def owned_orders(request):
         {
             "ongoing_groups": ongoing_groups,
             "reached_groups": reached_groups,
-            "orders": orders,
             "current_sub_tab": display_tab,
             "auto_tab": auto_tab,
         },
@@ -422,7 +421,7 @@ def owned_orders_tab_content(request):
     user = request.user
     tab = request.GET.get("tab", "all")
 
-    ongoing_groups, reached_groups, orders = get_data_by_tab(user, tab)
+    ongoing_groups, reached_groups = get_data_by_tab(user, tab)
 
     return render(
         request,
@@ -430,7 +429,6 @@ def owned_orders_tab_content(request):
         {
             "ongoing_groups": ongoing_groups,
             "reached_groups": reached_groups,
-            "orders": orders,
             "current_sub_tab": tab,
         },
     )
@@ -439,7 +437,6 @@ def owned_orders_tab_content(request):
 def get_data_by_tab(user, tab):
     ongoing_groups = []
     reached_groups = []
-    orders = []
 
     base_groups_query = (
         Group.objects.filter(owner=user)
@@ -448,35 +445,14 @@ def get_data_by_tab(user, tab):
         .prefetch_related("products", "order_set")
     )
 
-    base_orders_query = (
-        Order.objects.filter(group__owner=user)  # 僅篩選出開團者的訂單，不限制團購狀態
-        .order_by("-updated_at")
-        .select_related("group", "user")
-        .prefetch_related("joined_group__joined_group_products__product")
-        .annotate(
-            total_amount=Sum(
-                F('joined_group__joined_group_products__product__price')
-                * F('joined_group__joined_group_products__quantity')
-            )
-        )
-    )
-
     if tab == "all":
         ongoing_groups = base_groups_query.filter(status="ongoing")
         reached_groups = base_groups_query.filter(status="reached")
-        orders = base_orders_query.all()
     elif tab == "ongoing":
         ongoing_groups = base_groups_query.filter(status="ongoing")
-    elif tab == "pending":
-        orders = base_orders_query.filter(order_status=Order.OrderStatus.PENDING)
-    elif tab == "processing":
-        orders = base_orders_query.filter(order_status=Order.OrderStatus.PROCESSING)
-    elif tab == "shipped":
-        orders = base_orders_query.filter(order_status=Order.OrderStatus.SHIPPED)
-    elif tab == "completed":
-        orders = base_orders_query.filter(order_status=Order.OrderStatus.COMPLETED)
-
-    return ongoing_groups, reached_groups, orders
+    elif tab == "reached":
+        reached_groups = base_groups_query.filter(status="reached")
+    return ongoing_groups, reached_groups
 
 
 # 跟團者列表
@@ -489,8 +465,7 @@ def buyer_list(request, group_id):
 
     all_orders = (
         Order.objects.filter(
-            group_id=group_id,
-            # 不限制團購狀態，顯示該團所有訂單
+            group_id=group_id, group__status="reached"
         )
         .prefetch_related(
             "joined_group__joined_group_products__product",
@@ -501,8 +476,6 @@ def buyer_list(request, group_id):
                 * F('joined_group__joined_group_products__quantity')
             )
         )
-        # joined_group__joined_group_products__quantity | joined_group__joined_group_products.quantity
-        # joined_group__joined_group_products__product__price | joined_group__joined_group_products.product.price
     )
 
     ongoing_groups = (
@@ -519,12 +492,15 @@ def buyer_list(request, group_id):
         )
     )
 
+    
+
     if group.status == "ongoing":
         # 團購進行中，顯示跟團者
         buyers = ongoing_groups
     else:
         # 團購已達標或其他狀態，顯示訂單
         orders = all_orders
+
 
     return render(
         request,
@@ -553,3 +529,24 @@ def received(request, order_id):
 
     messages.success(request, "訂單已確認收貨")
     return redirect(f"{reverse('orders:my_orders')}?auto_tab=completed")
+
+
+# 確認出貨
+@login_required
+@require_POST
+def shipped(request, order_id):
+    order = get_object_or_404(Order, pk=order_id, group__owner=request.user)
+
+    if order.order_status == Order.OrderStatus.SHIPPED:
+        messages.info(request, "此訂單已出貨，無需重複確認出貨")
+        return redirect('orders:buyer_list', group_id=order.group.id)
+
+    if not order.is_processing():
+        messages.error(request, "此訂單無法確認出貨")
+        return redirect('orders:buyer_list', group_id=order.group.id)
+
+    order.mark_as_shipped()
+    order.save()
+
+    messages.success(request, "訂單已確認出貨")
+    return redirect('orders:buyer_list', group_id=order.group.id)
