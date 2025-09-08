@@ -25,6 +25,10 @@ urlpatterns = [
     
     # 確認收貨
     path("my-orders/<int:order_id>/received/", views.received, name="received"),
+
+    # 確認出貨
+    path("owned-orders/<int:order_id>/shipped", views.shipped, name="shipped"),
+
     # ========== 選擇收貨地址相關 ==========
     # 選擇地址
     path(
