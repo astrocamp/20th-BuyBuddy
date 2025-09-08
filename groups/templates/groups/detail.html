@@ -5,7 +5,7 @@
 {% if role == "owner" %}
 <section class="max-w-[1440px] mx-auto px-8 sm:px-12 mt-[40px]">
 	<div class="flex justify-center gap-4">
-		<a href="#" class="main-btn">
+		<a href="{% url 'orders:buyer_list' group.id %}" class="main-btn">
 			查看跟團者資訊
 		</a>
 		<a href="{% url 'groups:manage_edit' group.id %}" class="main-btn">

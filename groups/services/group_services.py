@@ -186,5 +186,23 @@ class GroupService:
 		GroupService.update_total_and_progress(group)
 
 		return True
+	
+	@staticmethod
+	@transaction.atomic
+	def leave_group_batch(group):
+		now = timezone.now()
+		group.deleted_at = now
+		group.cancel_group()
+		group.save()
+		
+		joiners_qs = JoinedGroup.objects.filter(group=group, deleted_at__isnull=True)
+		joiner_ids = list(joiners_qs.values_list('id', flat=True))
+		joiners_qs.update(deleted_at=now)
+
+		JoinedGroupProduct.objects.filter(joined_group_id__in=joiner_ids).update(deleted_at=now)
+
+		GroupService.update_total_and_progress(group)
+
+		return True
 		
 

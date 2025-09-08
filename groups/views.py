@@ -41,7 +41,7 @@ def index(request, filter_type="ongoing"):
 		if status_filter in ["ongoing", "reached"]:
 			all_groups = all_groups.filter(status=status_filter)
 	elif filter_type == "followed" and user.is_authenticated:
-		all_groups = Group.objects.filter(joinedgroup__buyer=user)
+		all_groups = Group.objects.filter(joinedgroup__buyer=user, joinedgroup__deleted_at=None)
 		if status_filter in ["ongoing", "reached"]:
 			all_groups = all_groups.filter(status=status_filter)
 	else:
@@ -111,7 +111,7 @@ def detail(request, id):
 	
 	if request.method == "POST" and request.POST.get("_method") == "delete":
 		if request.POST.get("role") == "owner":
-			group.delete()
+			GroupService.leave_group_batch(group=group)
 			messages.success(request, "團購已刪除")
 			return redirect('groups:index_filtered', filter_type="owned")
 		else:

@@ -388,6 +388,9 @@ def get_orders_by_tab(user, tab):
 
     elif tab == "completed":
         orders = base_orders_query.filter(order_status=Order.OrderStatus.COMPLETED)
+    
+    elif tab == "deleted":
+        joined_groups = base_joined_groups.filter(group__deleted_at__isnull=False)
 
     return orders, joined_groups
 
@@ -475,6 +478,8 @@ def get_data_by_tab(user, tab):
         orders = base_orders_query.filter(order_status=Order.OrderStatus.SHIPPED)
     elif tab == "completed":
         orders = base_orders_query.filter(order_status=Order.OrderStatus.COMPLETED)
+    elif tab == "deleted":
+        orders = base_groups_query.filter(deleted_at__isnull=False)
 
     return ongoing_groups, reached_groups, orders
 
