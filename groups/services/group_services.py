@@ -4,6 +4,8 @@ from django.utils import timezone
 from groups.models import JoinedGroup
 from products.models import  JoinedGroupProduct
 from .exceptions import *
+from products.models import Product
+from ..models import Group
 
 class GroupService:
 
@@ -156,14 +158,14 @@ class GroupService:
 	@staticmethod
 	@transaction.atomic
 	def join_group(user, group, products_data):
+		GroupService.check_amount_limit(group, products_data)
 		joined_group, is_new_member = GroupService.get_or_create_joined_group(user=user, group=group)
 		products = GroupService.add_products_to_joined_group(joined_group=joined_group, products_data=products_data)
 		GroupService.update_total_and_progress(group)
 		
-		if group.total >= group.min_goal:
-			group.status = "reached"
-			group.save(update_fields=["status"])
-
+		if GroupService.is_reached(group=group):
+			group.reached()
+			group.save()
 
 		return {
 			"joined_group_id":joined_group.id,
@@ -188,5 +190,41 @@ class GroupService:
 		GroupService.update_total_and_progress(group)
 
 		return True
+	
+	@staticmethod
+	@transaction.atomic
+	def leave_group_batch(group):
+		now = timezone.now()
+		group.deleted_at = now
+		group.cancel_group()
+		group.save()
 		
+		joiners_qs = JoinedGroup.objects.filter(group=group, deleted_at__isnull=True)
+		joiner_ids = list(joiners_qs.values_list('id', flat=True))
+		joiners_qs.update(deleted_at=now)
+
+		JoinedGroupProduct.objects.filter(joined_group_id__in=joiner_ids).update(deleted_at=now)
+
+		GroupService.update_total_and_progress(group)
+
+		return True
+	
+	@staticmethod
+	def check_amount_limit(group, products_data):
+		current_total = GroupService.get_total(group=group)
+		product_data_map = { item["id"]: item["quantity"] for item in products_data}
+		if group.goal_choice == "quantity":
+			total_quantity = sum(product_data_map.values())
+			if current_total + total_quantity > group.min_goal*1.2:
+				raise ExceedsLimitException("超過可購買上限")
+		if group.goal_choice == "amount":
+			product_ids = list(product_data_map.keys())
+			products = Product.objects.filter(id__in=product_ids).values("id", "price")
+			total_amount = sum(product_data_map[product["id"]] * product["price"] for product in products)
+			if current_total + total_amount > group.min_goal:
+				raise ExceedsLimitException("超過可購買上限")
+			
+		
+	
+	
 

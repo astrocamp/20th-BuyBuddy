@@ -5,6 +5,7 @@ from django_fsm import FSMField, transition
 from django.db.models import Sum, F
 
 
+
 class Group(models.Model):
     GOAL_CHOICES = [
         ("quantity", "數量目標"),
@@ -47,12 +48,13 @@ class Group(models.Model):
         pass
 
     @transition(field=status, source="ongoing", target="reached")
-    def reach(self):
-        """團購達標成功"""
-        pass
+    def reached(self):
+        from orders.services import create_orders 
+        create_orders(self)
+
 
     @transition(field=status, source="ongoing", target="failed")
-    def expire(self):
+    def expired(self):
         """團購逾期失敗"""
         pass
 
