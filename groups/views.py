@@ -19,6 +19,7 @@ from django.http import HttpResponse
 from django.conf import settings
 import json
 
+
 def index(request, filter_type="ongoing"):
 	user = request.user
 	protected_filters = ["owned", "followed"]
@@ -119,8 +120,13 @@ def detail(request, id):
 			return redirect('groups:index_filtered', filter_type="followed")
 
 	if user.is_authenticated and request.method == "POST":
-		products_data = GroupService.prepare_products_data(request.POST)
-		GroupService.join_group(user=user, group=group, products_data=products_data)
+		try:
+			products_data = GroupService.prepare_products_data(request.POST)
+			GroupService.join_group(user=user, group=group, products_data=products_data)
+		except InsufficientQuantityException as e:
+			messages.error(request, str(e))
+			return redirect("groups:detail", id=id)
+
 		role = "joiner"
 	
 	if user.is_authenticated:
@@ -169,5 +175,4 @@ def upload_image(request):
 		except Exception as e:
 			return JsonResponse({"error": "上傳失敗，請稍後再試"}, status=500)
 	return JsonResponse({"error": "無效請求"}, status=400)
-
 
