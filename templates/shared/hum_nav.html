@@ -1,3 +1,4 @@
+{% load static %}
 <!-- 漢堡選單 -->
 <button class="flex flex-col gap-[6px] sm:gap-2 h-6 sm:h-8 aspect-square justify-center cursor-pointer " @click="open = !open">
     <span class="w-6 sm:w-8 h-[2px] bg-secondary-color transition-all rounded-full" :class="open ? 'rotate-45 translate-y-[7px]' : ''"></span>
@@ -41,7 +42,7 @@ class="pl-[80px] sm:pl-[100px] pb-12 bg-tertiary-color  fixed top-0 right-0 w-[8
                 <a href="{% url 'users:profiles'%}"
                 class="flex hover:scale-115 hover:py-2 transition-all duration-300 origin-left items-center gap-4">
                     <div id="navbar-avatar-mobile" class="rounded-full overflow-hidden w-8 h-8">
-                        <img src="{{ user.avatar_url.url }}" alt="User Avatar">
+                        <img src="{% if user.avatar_url %}{{ user.avatar_url.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" alt="User Avatar">
                     </div>
                     <p>
                         個人頁面
