@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Group, JoinedGroup
-from .forms import GroupForm, ProductFormSet, ProductForm
+from products.models import JoinedGroupProduct
+from .forms import GroupForm, ProductFormSet
 from products.models import Product
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -18,6 +19,8 @@ from django.urls import reverse
 from django.http import HttpResponse
 from django.conf import settings
 import json
+from django.db.models import F, Subquery, OuterRef
+from django.db.models.functions import Coalesce
 
 
 def index(request, filter_type="ongoing"):
@@ -42,7 +45,7 @@ def index(request, filter_type="ongoing"):
 		if status_filter in ["ongoing", "reached"]:
 			all_groups = all_groups.filter(status=status_filter)
 	elif filter_type == "followed" and user.is_authenticated:
-		all_groups = Group.objects.filter(joinedgroup__buyer=user)
+		all_groups = Group.objects.filter(joinedgroup__buyer=user, joinedgroup__deleted_at=None)
 		if status_filter in ["ongoing", "reached"]:
 			all_groups = all_groups.filter(status=status_filter)
 	else:
@@ -52,7 +55,7 @@ def index(request, filter_type="ongoing"):
 
 	all_groups = all_groups.order_by("-id")
 
-	paginator = Paginator(all_groups, 3)
+	paginator = Paginator(all_groups, 9)
 	page_number = request.GET.get("page")
 	page_groups = paginator.get_page(page_number)
 
@@ -111,36 +114,60 @@ def detail(request, id):
 	user = request.user
 	role = "guest"
 	
-	if request.method == "POST" and request.POST.get("_method") == "delete":
-		if request.POST.get("role") == "owner":
-			group.delete()
-			messages.success(request, "團購已刪除")
-			return redirect('groups:index_filtered', filter_type="owned")
-		else:
-			GroupService.leave_group(user=user, group=group)
-			return redirect('groups:index_filtered', filter_type="followed")
-
-	if user.is_authenticated and request.method == "POST":
-		try:
-			products_data = GroupService.prepare_products_data(request.POST)
-			GroupService.join_group(user=user, group=group, products_data=products_data)
-		except InsufficientQuantityException as e:
-			messages.error(request, str(e))
-			return redirect("groups:detail", id=id)
-
-		role = "joiner"
-	
 	if user.is_authenticated:
+		if group.status == "ongoing":
+			if request.method == "POST" and request.POST.get("_method") == "delete":
+				if request.POST.get("role") == "owner" and group.owner == user:
+					GroupService.leave_group_batch(group=group)
+					messages.success(request, "團購已刪除")
+					return redirect('groups:index_filtered', filter_type="owned")
+				else:
+					GroupService.leave_group(user=user, group=group)
+					next_url = request.POST.get('next') 
+					if next_url:
+						return redirect(next_url)
+					return redirect('groups:index_filtered', filter_type="followed")
+
+			if request.method == "POST":
+				try:
+					products_data = GroupService.prepare_products_data(request.POST)
+					GroupService.join_group(user=user, group=group, products_data=products_data)
+					messages.success(request, "成功更新數量")
+				except InsufficientQuantityException as e:
+					messages.error(request, str(e))
+					return redirect("groups:detail", id=id)
+				except ExceedsLimitException as e:
+					messages.error(request, str(e))
+					return redirect("groups:detail", id=id)
+				role = "joiner"
+	
 		if group.owner == user:
 			role = "owner"
-		elif JoinedGroup.objects.filter(group=group, buyer=user).exists():
+		elif JoinedGroup.objects.filter(group=group, buyer=user, deleted_at__isnull=True).exists():
+			joined_group = JoinedGroup.objects.filter(group=group, buyer=user, deleted_at__isnull=True).first()
+			integrated_products = Product.objects.filter(group=group).annotate(
+				user_quantity=Coalesce(
+					Subquery(
+						JoinedGroupProduct.objects.filter(
+							joined_group=joined_group,
+							product_id=OuterRef("id"),
+							deleted_at__isnull=True
+						).values("quantity")
+					),
+					0
+				)
+			).annotate(
+				subtotal_amount=F("user_quantity") * F("price")
+			)
+			group.integrated_products = integrated_products
+			
 			role = "joiner"
 	return render(request, "groups/detail.html", {"group": group, "role": role})
 
 @login_required
 def manage_edit(request, id):
 	group = get_object_or_404(Group, id=id)
-	if request.method == "POST" and request.user == group.owner:
+	if request.method == "POST" and request.user == group.owner and group.status == "ongoing":
 		group_form = GroupForm(instance=group, prefix='group')
 		product_formset = ProductFormSet(request.POST, request.FILES, queryset=Product.objects.filter(group=group), prefix="product")
 

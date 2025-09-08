@@ -5,11 +5,23 @@
 {% if role == "owner" %}
 <section class="max-w-[1440px] mx-auto px-8 sm:px-12 mt-[40px]">
 	<div class="flex justify-center gap-4">
-		<a href="#" class="main-btn">
+		<a href="{% url 'orders:my_orders' %}" class="main-btn">
 			查看跟團者資訊
 		</a>
+		{% if group.status == 'ongoing'%}
 		<a href="{% url 'groups:manage_edit' group.id %}" class="main-btn">
-			編輯團購
+		編輯團購
+		</a>
+		{% endif %}
+	</div>
+</section>
+{% endif %}
+
+{% if role != "owner" and group.status == "reached" %}
+<section class="max-w-[1440px] mx-auto px-8 sm:px-12 mt-[40px]">
+	<div class="flex justify-center gap-4">
+		<a href="{% url 'orders:my_orders' %}" class="main-btn">
+			去付款
 		</a>
 	</div>
 </section>
@@ -60,6 +72,7 @@
 	</div>
 </section>
 
+{% if not role == "joiner" %}
 <section class="max-w-[1440px] mx-auto px-16 sm:px-24 mt-[80px]">
 	<form action="{% url 'groups:detail' group.id %}" method="post">
 		{% csrf_token %}
@@ -122,12 +135,80 @@
                 </div>
 				{% endfor %}
 			</div>
+{% else %}
+<section class="max-w-[1440px] mx-auto px-16 sm:px-24 mt-[80px]">
+	<form action="{% url 'groups:detail' group.id %}" method="post">
+		{% csrf_token %}
+		<input type="hidden" name="group-ird" value="{{ group.id }}">
+
+		<div class="w-full max-w-[1105px] mx-auto space-y-10">
+			<div class="text-center">
+			<h2 class="text-3xl font-semibold leading-[1.5]">更新團購商品數量</h2>
+			</div>
+			
+			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+				{% for product in group.integrated_products %}
+                <div class="relative" x-data="{ quantity: 0 }">
+                    <input type="hidden" id="product-{{ product.id }}" name="product-{{ product.id }}" x-model="quantity">
+                    <div class="absolute w-full h-40 sm:h-44 lg:h-48 z-10">
+                        {% if product.image%}
+                            <img class="object-cover h-full w-full rounded-t-lg" src="{{ product.banner.url }}" alt="{{ product.name }}">
+                        {% else %}
+                            <div class="h-full w-full bg-gray-300 rounded-t-lg flex items-center justify-center">
+                                <span class="text-gray-500">無圖片</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="h-[420px] sm:h-[450px] lg:h-[480px] border-2 border-[#EDEDED] rounded-lg flex flex-col pt-40 sm:pt-44 lg:pt-48">
+                        <div class="flex-1 flex flex-col justify-between p-4 sm:p-6 lg:p-8">
+                            <div>
+                                <h3 class="text-xl lg:text-lg font-semibold">{{ product.name }}</h3>
+                                <p class="tertiary-color-500 text-sm mt-2 line-clamp-2">{{ product.description|striptags }}</p>
+                            </div>
+                            
+                            <div class="flex flex-col gap-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-lg font-semibold text-[#FFC900]">${{ product.price }}</span>
+                                </div>
+								{% if group.goal_choice == 'amount' %}
+                                <div class="flex justify-between items-center space-x-2">
+									<div>已選購金額</div>
+									<div class=" flex items-center space-x-2">{{ product.subtotal_amount}}</div>
+								</div>
+								<div class="flex justify-between items-center">
+									<div>更改訂購數量</div>
+									<div><input type="number" id="product-{{ product.id }}" name="product-{{ product.id }}" class="text-right" min="0" value="{{ product.user_quantity}}"></div>
+								</div>
+								{% elif group.goal_choice == 'quantity' %}
+								<div class="flex justify-between items-center space-x-2">
+									<div>已選購數量</div>
+									<div class=" flex items-center space-x-2">{{ product.user_quantity}}</div>
+								</div>
+								<div class="flex justify-between items-center">
+									<div>更改訂數量</div>
+									<div><input type="number" id="product-{{ product.id }}" name="product-{{ product.id }}" class="text-right" min="0" value="{{ product.user_quantity}}"></div>
+								</div>
+								{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+				{% endfor %}
+			</div>
+{% endif %}
 
 			{% if not role == "owner" %}
 			<div class="w-full text-center mt-10">
-                <button type="submit" class="inline-flex items-center gap-[10px] rounded-[50px] bg-[#1E1F24] px-[34px] py-[15px] text-white text-base font-medium shadow-sm cursor-pointer hover:bg-[#373943] transition duration-300" style="box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);">
-                    {% if role == 'joiner' %}修改數量{% else %}一鍵跟團{% endif %}
+				{% if group.status == 'reached' %}
+                {% elif role == 'joiner' %}
+				<button type="submit" class="inline-flex items-center gap-[10px] rounded-[50px] bg-[#1E1F24] px-[34px] py-[15px] text-white text-base font-medium shadow-sm cursor-pointer hover:bg-[#373943] transition duration-300" style="box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);">
+                修改數量
                 </button>
+				{% else %}
+				<button type="submit" class="inline-flex items-center gap-[10px] rounded-[50px] bg-[#1E1F24] px-[34px] py-[15px] text-white text-base font-medium shadow-sm cursor-pointer hover:bg-[#373943] transition duration-300" style="box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);">
+                一鍵跟團
+                </button>
+				{% endif %}
             </div>
 			{% endif %}
 		</div>
@@ -150,33 +231,35 @@
 	</div>
 </section>
 
-{% if role == "owner" %}
-<section class="max-w-[1440px] mx-auto px-8 sm:px-12 mt-[80px] mb-[60px]">
-	<div class="flex justify-center">
-		<form action="{% url 'groups:detail' group.id %}" method="post" onsubmit="return confirm('確定要刪除這個團購嗎？此操作無法復原。');">
-			{% csrf_token %}
-			<input type="hidden" name="_method" value="delete">
-			<input type="hidden" name="role" value="owner">
-			<button type="submit" class="inline-flex items-center gap-[10px] rounded-[50px] border-2 border-red-500 bg-white px-[34px] py-[15px] text-red-500 text-base font-medium shadow-sm cursor-pointer hover:bg-red-500 hover:text-white transition duration-300" style="box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);">
-				刪除團購
-			</button>
-		</form>
-	</div>
-</section>
-{% endif %}
+{% if group.status == 'ongoing' %}
+	{% if role == "owner" %}
+	<section class="max-w-[1440px] mx-auto px-8 sm:px-12 mt-[80px] mb-[60px]">
+		<div class="flex justify-center">
+			<form action="{% url 'groups:detail' group.id %}" method="post" onsubmit="return confirm('確定要刪除這個團購嗎？此操作無法復原。');">
+				{% csrf_token %}
+				<input type="hidden" name="_method" value="delete">
+				<input type="hidden" name="role" value="owner">
+				<button type="submit" class="inline-flex items-center gap-[10px] rounded-[50px] border-2 border-red-500  px-[34px] py-[15px] text-red-500 text-base font-medium shadow-sm cursor-pointer hover:bg-red-500 hover:text-white transition duration-300" style="box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);">
+					刪除團購
+				</button>
+			</form>
+		</div>
+	</section>
+	{% endif %}
 
-{% if role == "joiner" %}
-<section class="max-w-[1440px] mx-auto px-8 sm:px-12 mt-[80px] mb-[60px]">
-	<div class="flex justify-center">
-		<form action="{% url 'groups:detail' group.id %}" method="post" onsubmit="return confirm('確定要刪除這個團購嗎？此操作無法復原。');">
-			{% csrf_token %}
-			<input type="hidden" name="_method" value="delete">
-			<button type="submit" class="inline-flex items-center gap-[10px] rounded-[50px] border-2 border-red-500 px-[34px] py-[15px] text-red-500 text-base cursor-pointer hover:bg-red-500 hover:text-white transition duration-300" style="box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);">
-				退出團購
-			</button>
-		</form>
-	</div>
-</section>
+	{% if role == "joiner" %}
+	<section class="max-w-[1440px] mx-auto px-8 sm:px-12 mt-[80px] mb-[60px]">
+		<div class="flex justify-center">
+			<form action="{% url 'groups:detail' group.id %}" method="post" onsubmit="return confirm('確定要推出嗎？');">
+				{% csrf_token %}
+				<input type="hidden" name="_method" value="delete">
+				<button type="submit" class="inline-flex items-center gap-[10px] rounded-[50px] border-2 border-red-500  px-[34px] py-[15px] text-red-500 text-base font-medium shadow-sm cursor-pointer hover:bg-red-500 hover:text-white transition duration-300" style="box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);">
+					退出團購
+				</button>
+			</form>
+		</div>
+	</section>
+	{% endif %}
 {% endif %}
 
 {% endblock %}

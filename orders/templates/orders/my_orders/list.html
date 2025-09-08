@@ -62,10 +62,9 @@
 							
 								<div class="flex justify-center sm:justify-end items-center gap-2 pt-2">
 									<a href="{% url 'groups:detail' jg.group.id %}" class="card-btn card-btn-white">修改跟團</a>
-									<form action="#" method="post" class="inline">
+									<form action="{% url 'groups:detail' jg.group.id %}?next={{ request.path }}" method="post" class="inline">
 										{% csrf_token %}
 										<input type="hidden" name="_method" value="delete" />
-										<input type="hidden" name="group-id" value="{{ jg.group.id }}" />
 										<button type="submit" class="card-btn card-btn-red">退團</button>
 									</form>
 								</div>

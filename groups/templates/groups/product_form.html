@@ -25,6 +25,7 @@ data-limited-config='{{ limited_config_json|safe }}'>
             name="{{ form.price.html_name }}"
             id="{{ form.price.auto_id }}"
             value="{{ form.price.value|default:'' }}"
+			min="0"
             />
 			{% if form.price.errors %}
              <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
@@ -100,6 +101,7 @@ data-limited-config='{{ limited_config_json|safe }}'>
             name="{{ empty_form.price.html_name }}"
             id="{{ empty_form.price.auto_id }}"
             value="{{ empty_form.price.value|default:'' }}"
+			min="0"
             />
 			{% if empty_form.price.errors %}
              <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
