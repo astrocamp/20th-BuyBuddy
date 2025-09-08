@@ -78,13 +78,14 @@ def new(request):
 			with transaction.atomic():
 				group = group_form.save(commit=False)
 				group.owner = request.user
-				group.status = "ongoing"
+				group.save()	
+				group.start_group()
 				group.save()	
 
 				product_formset.instance = group
 				product_formset.save()		
 			messages.success(request, "團購已建立")
-			return redirect("groups:index", filter_type="owned")
+			return redirect("groups:index_filtered", filter_type="owned")
 	
 		if product_formset.non_form_errors():
 			messages.error(request, product_formset.non_form_errors()[0])
