@@ -259,6 +259,18 @@ input:-webkit-autofill {
   opacity: 0.8;
 }
 
+/* 隱藏數字input調整箭頭 Chrome, Safari, Edge */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* 隱藏數字input調整箭頭 Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
 /* 響應式 */
 @media (min-width: 640px) {
   .main-btn {

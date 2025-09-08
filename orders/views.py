@@ -401,6 +401,9 @@ def get_orders_by_tab(user, tab):
 
     elif tab == "completed":
         orders = base_orders_query.filter(order_status=Order.OrderStatus.COMPLETED)
+    
+    elif tab == "deleted":
+        joined_groups = base_joined_groups.filter(group__deleted_at__isnull=False)
 
     return orders, joined_groups
 
