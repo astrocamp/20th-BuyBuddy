@@ -21,14 +21,17 @@ urlpatterns = [
         name="owned_orders_tab_content",
     ),
     # 跟團者列表
-    path("owned-orders/buyer_list/<int:group_id>/", views.buyer_list, name="buyer_list"),
-    
+    path(
+        "owned-orders/buyer_list/<int:group_id>/", views.buyer_list, name="buyer_list"
+    ),
     # 確認收貨
     path("my-orders/<int:order_id>/received/", views.received, name="received"),
-
-    # 確認出貨
-    path("owned-orders/<int:order_id>/shipped", views.shipped, name="shipped"),
-
+    # 匯出跟團者資訊 Excel
+    path(
+        "owned-orders/buyer_list_export/<int:group_id>/",
+        views.buyer_list_export,
+        name="buyer_list_export",
+    ),
     # ========== 選擇收貨地址相關 ==========
     # 選擇地址
     path(
@@ -57,4 +60,6 @@ urlpatterns = [
     path("my-orders/payment/success/", views.success, name="payment_success"),
     # 付款失敗
     path("my-orders/payment/fail/", views.fail, name="payment_fail"),
+    # 確認收貨
+    path("my-orders/<int:order_id>/received/", views.received, name="received"),
 ]

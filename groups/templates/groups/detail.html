@@ -25,7 +25,7 @@
 	<div class="flex justify-center">
 	  <div class="w-[231px] flex flex-col items-center gap-4">
 		<div class="inline-flex items-center gap-[10px] rounded-[50px] bg-[#FFC900] px-8 py-2 text-[#1E1F24] text-sm font-medium shadow-sm" style="box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);">
-		  進行中
+		  {{group.get_status_display}}
 		</div>
 		<div class="text-center">
 		  <h1 class="text-4xl font-semibold leading-[1.2]">{{ group.name }}</h1>
@@ -171,7 +171,7 @@
 		<form action="{% url 'groups:detail' group.id %}" method="post" onsubmit="return confirm('確定要刪除這個團購嗎？此操作無法復原。');">
 			{% csrf_token %}
 			<input type="hidden" name="_method" value="delete">
-			<button type="submit" class="inline-flex items-center gap-[10px] rounded-[50px] border-2 border-red-500 bg-white px-[34px] py-[15px] text-red-500 text-base font-medium shadow-sm cursor-pointer hover:bg-red-500 hover:text-white transition duration-300" style="box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);">
+			<button type="submit" class="inline-flex items-center gap-[10px] rounded-[50px] border-2 border-red-500 px-[34px] py-[15px] text-red-500 text-base cursor-pointer hover:bg-red-500 hover:text-white transition duration-300" style="box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);">
 				退出團購
 			</button>
 		</form>

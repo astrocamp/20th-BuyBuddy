@@ -16,6 +16,8 @@ from products.models import JoinedGroupProduct
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.db.models import Sum, F, Q, Prefetch
+from .utils import get_buyer_list_data
+from .exports import export_orders_to_excel
 
 
 REQUIRED_ADDR_FIELDS = (
@@ -471,55 +473,18 @@ def get_data_by_tab(user, tab):
 # 跟團者列表
 @login_required
 def buyer_list(request, group_id):
-    group = get_object_or_404(Group, id=group_id, owner=request.user)
-
-    orders = []
-    buyers = []
-
-    all_orders = (
-        Order.objects.filter(
-            group_id=group_id, group__status="reached"
-        )
-        .prefetch_related(
-            "joined_group__joined_group_products__product",
-        )
-        .annotate(
-            total_amount=Sum(
-                F('joined_group__joined_group_products__product__price')
-                * F('joined_group__joined_group_products__quantity')
-            )
-        )
-    )
-
-    ongoing_groups = (
-        JoinedGroup.objects.filter(group_id=group_id, group__status="ongoing")
-        .select_related("buyer")
-        .prefetch_related(
-            "joined_group_products__product",
-        )
-        .annotate(
-            total_amount=Sum(
-                F('joined_group_products__product__price')
-                * F('joined_group_products__quantity')
-            )
-        )
-    )
-
-    
-
-    if group.status == "ongoing":
-        # 團購進行中，顯示跟團者
-        buyers = ongoing_groups
-    else:
-        # 團購已達標或其他狀態，顯示訂單
-        orders = all_orders
-
+    group, orders, buyers = get_buyer_list_data(request.user, group_id)
 
     return render(
         request,
         "orders/owned_orders/buyers_list.html",
         {'group': group, 'orders': orders, 'buyers': buyers},
     )
+
+
+# 匯出跟團者列表 excel
+def buyer_list_export(request, group_id):
+    return export_orders_to_excel(request, group_id)
 
 
 # 確認收貨
