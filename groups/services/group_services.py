@@ -79,6 +79,8 @@ class GroupService:
 	@staticmethod
 	def add_products_to_joined_group(joined_group, products_data):
 		product_data_map = { item["id"]: item["quantity"] for item in products_data}
+		if not product_data_map:
+			raise InsufficientQuantityException("商品數量不能全部為0")
 		product_ids = list(product_data_map.keys())
 
 		existing_active_products = JoinedGroupProduct.objects.filter(
