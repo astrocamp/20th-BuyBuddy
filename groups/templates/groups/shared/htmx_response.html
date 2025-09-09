@@ -1,6 +1,8 @@
-<div id="tab-group-container" hx-swap-oob="innerHTML" class="tab-transition">
-	 {% include "shared/tab_group.html" with active_tab=active_tab only %}
-</div>
+{% if not request.GET.status %}
+	<div id="tab-group-container" hx-swap-oob="innerHTML" class="tab-transition">
+		{% include "shared/tab_group.html" with active_tab=active_tab only %}
+	</div>
+{% endif %}
 
 <div id="sub-tabs-container" hx-swap-oob="innerHTML" class="tab-transition">
 	{% if active_tab == 'owned' or active_tab == 'followed' %}

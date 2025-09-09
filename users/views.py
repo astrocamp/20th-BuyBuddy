@@ -80,6 +80,7 @@ def create(request):
             "img": "assets/register.svg",
         }
 
+        new_user.backend = 'django.contrib.auth.backends.ModelBackend'
         login(request, new_user)
         return redirect("pages:homepage")
 

@@ -5,7 +5,7 @@
     {% for product in products %}
     <a href="{% url 'products:product_detail' product.id %}" class="block">
       <div
-        class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+        class="bg-white rounded-lg overflow-hidden duration-300"
       >
         {% if product.images.first %}
         <img
