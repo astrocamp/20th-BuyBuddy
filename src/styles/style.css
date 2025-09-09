@@ -104,20 +104,32 @@ input:-webkit-autofill {
   font-size: 16px;
 }
 
+.main-btn:hover {
+  background-color: var(--primary-color-400);
+}
+
 .main-btn.main-btn-black {
   background-color: var(--secondary-color);
   color: white;
-}
-
-.main-btn:hover {
-  background-color: var(--primary-color-400);
 }
 
 .main-btn.main-btn-black:hover {
   background-color: var(--secondary-color-900);
 }
 
-/* Secondary-btn */
+.main-btn.main-btn-red {
+  background-color: transparent;
+  border: 2px solid var(--red-color-500);
+  color: var(--red-color-500);
+  padding: 11px 24px;
+}
+
+.main-btn.main-btn-red:hover {
+  background-color: var(--red-color-500);
+  color: white;
+}
+
+/* secondary-btn */
 .secondary-btn {
   background-color: var(--tertiary-color);
   color: var(--secondary-color);
@@ -133,8 +145,6 @@ input:-webkit-autofill {
   background-color: var(--secondary-color);
   color: white;
 }
-
-/* tertiary-btn */
 
 /* nav-btn */
 .nav-btn {
@@ -270,14 +280,14 @@ input:-webkit-autofill {
 }
 
 /* 隱藏數字input調整箭頭 Chrome, Safari, Edge */
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
 /* 隱藏數字input調整箭頭 Firefox */
-input[type=number] {
+input[type="number"] {
   -moz-appearance: textfield;
 }
 
