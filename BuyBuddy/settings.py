@@ -284,3 +284,8 @@ SITE_ID = 1
 
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
+
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
+
+# settings.py
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
