@@ -18,6 +18,11 @@ from .forms import (
 from anymail.message import AnymailMessage
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse
+from google_auth_oauthlib.flow import Flow
+import os
+import requests
+from allauth.socialaccount.models import SocialLogin, SocialAccount
+from allauth.socialaccount.helpers import complete_social_login
 
 
 def send_verification_mail(request, user, email):
@@ -475,3 +480,107 @@ def address_cancel(request, address_id):
     return render(
         request, "users/shared/address.html", {"user_address_form": user_address_form}
     )
+
+
+# TODO: 發送授權碼到後端進行驗證和登入
+def google_oauth2(request):
+    
+    # 先加入調試訊息
+    code = request.POST.get("google_code")
+    print(f"收到JWT: {code}")
+    print(f"請求方法: {request.method}, 授權碼")
+    print(f"用戶已登入: {request.user.is_authenticated}")
+
+    if code:
+        try:
+            messages.success(request, f"Google OAuth2 授權碼已收到: {code[:10]}...")
+            # TODO: 在這裡處理 Google 授權碼，完成登入流程
+            
+            # 1. 用授權碼換取 access token
+            tokens = token_code_handler(code)
+            print(f"取得 tokens: {tokens.keys()}")
+
+            # 2. 用 access token 取得用戶資料
+            user_info = get_user_info(tokens['access_token'])
+            print(f"取得用戶資料: {user_info}")
+            
+
+            # 3. 創建或找到用戶並登入
+            social_login = create_google_login(user_info)
+            print(complete_social_login(request, social_login))
+
+            
+            return complete_social_login(request, social_login)
+        except Exception as e:
+            print(f"Google OAuth2 錯誤: {e}")
+            return redirect("users:new")
+    else:
+        print('授權碼不存在')
+        return redirect("users:new")  # 重導向到登入頁面而不是註冊頁面
+
+def token_code_handler(code):
+    # 設定 OAuth 流程
+    client_config = {
+        "web": {
+            "client_id": os.getenv("GOOGLE_CLIENT_ID"),
+            "client_secret": os.getenv("GOOGLE_CLIENT_SECRET"),
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+        }
+    }
+
+    flow = Flow.from_client_config(
+        client_config,
+        scopes=['https://www.googleapis.com/auth/userinfo.email', 
+        'https://www.googleapis.com/auth/userinfo.profile',
+        'openid']
+    )
+    
+    # 設定重導向 URI（必須與 Google Console 設定一致）
+    flow.redirect_uri = 'postmessage'  # 彈窗模式用這個
+    
+    # 用授權碼換取 token
+    flow.fetch_token(code=code)
+    
+    return {
+        'access_token': flow.credentials.token,
+        'id_token': flow.credentials.id_token,
+        'refresh_token': flow.credentials.refresh_token,
+    }
+
+
+def get_user_info(access_token):
+    response = requests.get(
+        'https://www.googleapis.com/oauth2/v3/userinfo',
+        headers={'Authorization': f'Bearer {access_token}'}
+    )
+
+    if response.status_code != 200:
+        raise Exception(f"取得用戶資料失敗: {response.status_code}")
+
+    return response.json()
+
+def create_google_login(user_info):
+    # 創建 SocialLogin
+    social_login = SocialLogin()
+    
+    # 創建 SocialAccount
+    social_login.account = SocialAccount()
+    social_login.account.provider = 'google'
+    social_login.account.uid = user_info.get('sub')  # Google 用戶 ID
+    social_login.account.extra_data = user_info
+    
+
+    # 創建 暫時的 User
+    user = User()
+    user.email = user_info.get('email', '')
+    user.username = user_info.get('email', '')  # 用 email 作為 username
+    user.first_name = user_info.get('given_name', '')
+    user.last_name = user_info.get('family_name', '')
+
+    # 關聯 User 和 SocialAccount
+    social_login.user = user
+    social_login.account.user = user
+    
+    return social_login
+

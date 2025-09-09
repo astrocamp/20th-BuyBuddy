@@ -31,4 +31,5 @@ urlpatterns = [
     path(
         "verify-email/<str:uid>/<str:token>/", views.verify_email, name="verify_email"
     ),
+    path("google-oauth2/", views.google_oauth2, name="google_oauth2"),
 ]
