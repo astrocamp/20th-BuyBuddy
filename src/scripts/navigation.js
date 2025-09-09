@@ -15,7 +15,10 @@ const navigationControl = () => {
     handleNavbar() {
       const currentScrollY = window.scrollY;
 
-      if (currentScrollY > this.lastScrollY) {
+      // 當滾動到頂部時（scrollY為0或接近0）強制顯示導航欄
+      if (currentScrollY <= 10) {
+        this.showNavbar = true;
+      } else if (currentScrollY > this.lastScrollY) {
         this.showNavbar = false;
       } else {
         this.showNavbar = true;
