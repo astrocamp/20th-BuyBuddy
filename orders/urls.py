@@ -26,6 +26,8 @@ urlpatterns = [
     ),
     # 確認收貨
     path("my-orders/<int:order_id>/received/", views.received, name="received"),
+    # 確認出貨
+    path("owned-orders/<int:order_id>/shipped/", views.shipped, name="shipped"),
     # 匯出跟團者資訊 Excel
     path(
         "owned-orders/buyer_list_export/<int:group_id>/",

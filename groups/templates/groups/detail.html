@@ -217,7 +217,7 @@
                 <div class="relative" x-data="{ quantity: 0 }">
                     <input type="hidden" id="product-{{ product.id }}" name="product-{{ product.id }}" x-model="quantity">
                     <div class="absolute w-full h-40 sm:h-44 lg:h-48 z-10">
-                        {% if product.image%}
+                        {% if product.banner %}
                             <img class="object-cover h-full w-full rounded-t-lg" src="{{ product.banner.url }}" alt="{{ product.name }}">
                         {% else %}
                             <div class="h-full w-full bg-gray-300 rounded-t-lg flex items-center justify-center">
