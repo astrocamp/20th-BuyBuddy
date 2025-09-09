@@ -2,12 +2,12 @@
 data-limited-config='{{ limited_config_json|safe }}'>
     {{ product_form.management_form }}
     
-    <div id="forms-container" x-ref="formsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div id="forms-container" x-ref="formsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for form in product_form %}
         <div class="bg-white p-6 border-2 border-[#EDEDED] rounded-lg flex flex-col gap-4">
-            <label for="{{ form.name.id_for_label }}" class="text-base">{{ form.name.label }}</label>
+            <label for="{{ form.name.id_for_label }}" class="text-sm text-center sm:text-base">{{ form.name.label }}</label>
             <input
-            class="w-full border-2 border-[#EDEDED] rounded-lg p-2 focus:border-[#1E1F24] focus:outline-none"
+            class="w-full border-2 border-[#EDEDED] rounded-lg p-2 focus:border-[#1E1F24] focus:outline-none text-sm sm:text-base"
             type="text"
             name="{{ form.name.html_name }}"
             id="{{ form.name.id_for_label }}"
@@ -18,9 +18,9 @@ data-limited-config='{{ limited_config_json|safe }}'>
                 {{ form.name.errors }}
             </div>
             {% endif %}
-            <label for="{{ form.price.auto_id }}" class="text-base">{{ form.price.label }}</label>
+            <label for="{{ form.price.auto_id }}" class="text-sm text-center sm:text-base">{{ form.price.label }}</label>
             <input
-            class="w-full border-2 border-[#EDEDED] rounded-lg p-2 focus:border-[#1E1F24] focus:outline-none"
+            class="w-full border-2 border-[#EDEDED] rounded-lg p-2 focus:border-[#1E1F24] focus:outline-none text-sm sm:text-base"
             type="number"
             name="{{ form.price.html_name }}"
             id="{{ form.price.auto_id }}"
@@ -32,7 +32,7 @@ data-limited-config='{{ limited_config_json|safe }}'>
                 {{ form.price.errors }}
             </div>
             {% endif %}
-            <label for="{{ form.description.auto_id }}" class="text-base">{{ form.description.label }}</label>
+            <label for="{{ form.description.auto_id }}" class="text-sm text-center sm:text-base">{{ form.description.label }}</label>
             {{ form.description }}
 			{% if form.description.errors %}
              <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
@@ -40,8 +40,8 @@ data-limited-config='{{ limited_config_json|safe }}'>
             </div>
             {% endif %}
             
-			<div x-data="imagePreview('')">
-            	<label for="{{ form.banner.id_for_label }}" class="text-base">產品圖片</label>
+			<div x-data="imagePreview('')" class="flex flex-col justify-center gap-4">
+            	<label for="{{ form.banner.id_for_label }}" class="text-sm text-center sm:text-base">產品圖片</label>
 				<div class="w-full h-40 border-2 border-dashed border-[#EDEDED] rounded-lg flex items-center justify-center cursor-pointer relative overflow-hidden group hover:bg-gray-50 transition-colors"
         			  @click="$refs.fileInput.click()">
 					<img x-show="imageUrl" :src="imageUrl" class="object-cover w-full h-full" />
@@ -71,7 +71,7 @@ data-limited-config='{{ limited_config_json|safe }}'>
     x-ref="addButton"
     type="button"
     @click="addForm"
-    class="w-24 h-24 rounded-full bg-white mt-8 lg:mt-30 border-2 border-dashed border-[#EDEDED] 
+    class="w-24 h-24 rounded-full bg-white mt-8 mb-8 lg:mt-30 border-2 border-dashed border-[#EDEDED] 
            flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors 
            justify-self-center self-center">
     <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-[#BDBDBD]" viewBox="0 0 24 24" fill="currentColor">
@@ -83,7 +83,7 @@ data-limited-config='{{ limited_config_json|safe }}'>
         <div class="bg-white p-6 border-2 border-[#EDEDED] rounded-lg flex flex-col gap-4">
             <label for="{{ empty_form.name.id_for_label }}" class="text-sm font-medium">{{ empty_form.name.label }}</label>
             <input
-            class="w-full border-2 border-[#EDEDED] rounded-lg p-2 focus:border-[#1E1F24] focus:outline-none"
+            class="w-full border-2 border-[#EDEDED] rounded-lg p-2 focus:border-[#1E1F24] focus:outline-none text-sm sm:text-base"
             type="text"
             name="{{ empty_form.name.html_name }}"
             id="{{ empty_form.name.id_for_label }}"
@@ -96,7 +96,7 @@ data-limited-config='{{ limited_config_json|safe }}'>
             {% endif %}
             <label for="{{ empty_form.price.auto_id }}" class="text-sm font-medium">{{ empty_form.price.label }}</label>
             <input
-            class="w-full border-2 border-[#EDEDED] rounded-lg p-2 focus:border-[#1E1F24] focus:outline-none"
+            class="w-full border-2 border-[#EDEDED] rounded-lg p-2 focus:border-[#1E1F24] focus:outline-none text-sm sm:text-base"
             type="number"
             name="{{ empty_form.price.html_name }}"
             id="{{ empty_form.price.auto_id }}"
@@ -104,7 +104,7 @@ data-limited-config='{{ limited_config_json|safe }}'>
 			min="0"
             />
 			{% if empty_form.price.errors %}
-             <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
+            <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
                 {{ empty_form.price.errors }}
             </div>
             {% endif %}
@@ -119,8 +119,8 @@ data-limited-config='{{ limited_config_json|safe }}'>
                 {{ empty_form.description.errors }}
             </div>
             {% endif %}
-            <div x-data="imagePreview('')">
-                <label for="{{ empty_form.banner.auto_id }}" class="text-base">產品圖片</label>
+            <div x-data="imagePreview('')" class="flex flex-col justify-center gap-4">
+                <label for="{{ empty_form.banner.auto_id }}" class="text-sm sm:text-base">產品圖片</label>
                 <div class="w-full h-40 border-2 border-dashed border-[#EDEDED] rounded-lg flex items-center justify-center cursor-pointer relative overflow-hidden group hover:bg-gray-50 transition-colors"
                       @click="$refs.fileInput.click()">
                     <img x-show="imageUrl" :src="imageUrl" class="object-cover w-full h-full" />

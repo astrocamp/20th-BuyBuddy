@@ -4,10 +4,10 @@
 {% endblock%}
 {% block content%}
 
-<div x-data="validators" class="max-w-[1440px] mx-auto px-16 sm:px-24 mt-12 lg:mt-16">
+<div x-data="validators" class="max-w-[1440px] mx-auto px-12 sm:px-24 mt-12 lg:mt-16">
     <div class="w-full max-w-[1105px] mx-auto">
-        <div class="text-center w-full mb-10">
-            <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold leading-[1.2]">新增團購</h1>
+        <div class="text-center w-full mb-4 md:mb-10">
+            <h1 class="text-xl sm:text-2xl md:text-3xl font-bold mb-2 sm:mb-4">新增團購</h1>
         </div>
 
         <form
@@ -18,11 +18,11 @@
         data-upload-url="{% url 'groups:upload_image' %}">
             {% csrf_token %}
             
-            <div class="bg-white flex flex-col gap-6 w-full p-8 border-2 border-[#EDEDED] rounded-lg">
-                <div class="flex flex-col gap-2">
-                    <label for="{{ group_form.name.id_for_label }}" class="text-base">{{ group_form.name.label }}</label>
+            <div class="bg-white flex flex-col gap-6 w-full p-4 md:p-8 border-2 border-[#EDEDED] rounded-lg">
+                <div class="flex flex-col gap-2 px-0 sm:px-4 md:px-6 lg:px-8">
+                    <label for="{{ group_form.name.id_for_label }}" class="text-sm text-center sm:text-base">{{ group_form.name.label }}</label>
                     <input
-                        class="w-full border-2 border-[#EDEDED] rounded-lg p-2 focus:border-[#1E1F24] focus:outline-none"
+                        class="w-full border-2 border-[#EDEDED] rounded-lg p-2 focus:border-[#1E1F24] focus:outline-none text-sm sm:text-base"
                         type="text"
                         name="{{ group_form.name.html_name }}"
                         id="{{ group_form.name.id_for_label }}"
@@ -33,8 +33,8 @@
                     </div>
                     {% endif %}
                 </div>
-                <div class="flex flex-col gap-2" x-data="imagePreview('')">
-                    <label for="{{ group_form.banner.id_for_label }}" class="text-base">{{ group_form.banner.label }}</label>
+                <div  class="flex flex-col gap-2 px-0 sm:px-4 md:px-6 lg:px-8" x-data="imagePreview('')">
+                    <label for="{{ group_form.banner.id_for_label }}" class="text-sm text-center sm:text-base">{{ group_form.banner.label }}</label>
 					<div class="w-full h-40 border-2 border-dashed border-[#EDEDED] rounded-lg flex items-center justify-center cursor-pointer relative overflow-hidden group hover:bg-gray-50 transition-colors"
         				 @click="$refs.fileInput.click()">
 						<img x-show="imageUrl" :src="imageUrl" class="object-cover w-full h-full" />
@@ -58,19 +58,19 @@
 					{% endif %}
                 </div>
 				
-                <div class="flex flex-col gap-2">
-                    <label for="{{ group_form.description.id_for_label }}" class="text-base">{{ group_form.description.label }}</label>
+                <div class="flex flex-col gap-2 px-0 sm:px-4 md:px-6 lg:px-8">
+                    <label for="{{ group_form.description.id_for_label }}" class="text-sm text-center sm:text-base">{{ group_form.description.label }}</label>
                     {{ group_form.description }}
 					{% if group_form.description.errors %}
-                    <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
+                    <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2 text-sm sm:text-base">
                         {{ group_form.description.errors }}
                     </div>
                     {% endif %}
                 </div>
-                <div class="flex flex-col gap-2">
-                    <label for="{{ group_form.deadline.id_for_label }}" class="text-base">{{ group_form.deadline.label }}</label>
+                <div class="flex flex-col gap-2 px-0 sm:px-4 md:px-6 lg:px-8">
+                    <label for="{{ group_form.deadline.id_for_label }}" class="text-sm text-center sm:text-base">{{ group_form.deadline.label }}</label>
                     <input
-                        class="w-full border-2 border-[#EDEDED] rounded-lg p-2 focus:border-[#1E1F24] focus:outline-none"
+                        class="w-full border-2 border-[#EDEDED] rounded-lg p-2 focus:border-[#1E1F24] focus:outline-none text-sm sm:text-base"
                         type="date"
                         name="{{ group_form.deadline.html_name }}"
                         id="{{ group_form.deadline.id_for_label }}"
@@ -82,11 +82,11 @@
                     {% endif %}
                 </div>
                 <div class="flex flex-col gap-2">
-    				<label for="{{ group_form.goal_choice.id_for_label }}" class="text-base">{{ group_form.goal_choice.label }}</label>
+    				<label for="{{ group_form.goal_choice.id_for_label }}" class="text-sm text-center sm:text-base">{{ group_form.goal_choice.label }}</label>
     				<select 
 						name="{{ group_form.goal_choice.html_name }}" 
 						id="{{ group_form.goal_choice.id_for_label }}"
-						class="{{ group_form.goal_choice.field.widget.attrs.class }}">
+						class="{{ group_form.goal_choice.field.widget.attrs.class }} text-sm sm:text-base">
         			<option value="" disabled selected>請選擇</option>
         			{% for choice, label in group_form.goal_choice.field.choices %}
             		<option value="{{ choice }}" {% if group_form.goal_choice.value == choice %} selected {% endif %}>
@@ -100,9 +100,9 @@
    				{% endfor %}
 				</div>
                 <div class="flex flex-col gap-2">
-                    <label for="{{ group_form.min_goal.id_for_label }}" class="text-base">{{ group_form.min_goal.label }}</label>
+                    <label for="{{ group_form.min_goal.id_for_label }}" class="text-sm text-center sm:text-base">{{ group_form.min_goal.label }}</label>
                     <input
-                        class="w-full border-2 border-[#EDEDED] rounded-lg p-2 focus:border-[#1E1F24] focus:outline-none"
+                        class="w-full border-2 border-[#EDEDED] rounded-lg p-2 focus:border-[#1E1F24] focus:outline-none text-sm sm:text-base"
                         type="number"
                         name="{{ group_form.min_goal.html_name }}"
                         id="{{ group_form.min_goal.id_for_label }}"
@@ -110,7 +110,7 @@
                         x-model="min_goal"
                         x-ref="min_goal"	
                         x-on:input="removeZero()"
-						value="{{ group_form.min_goal.value|default:'' }}"">
+						value="{{ group_form.min_goal.value|default:'' }}">
 					{% if group_form.min_goal.errors %}
                     <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
                         {{ group_form.min_goal.errors }}
@@ -122,7 +122,7 @@
             {% include 'groups/product_form.html' %}
         
             <div class="flex justify-center gap-4 mt-8">
-				<a class="main-btn main-btn-transparent" href="{% url 'groups:index' %}">取消</a>
+                <a  href="{% url 'groups:index' %}" class="main-btn main-btn-red">取消</a>
 				<button class="main-btn" type="submit">新增團購</button>
                 
             </div>
