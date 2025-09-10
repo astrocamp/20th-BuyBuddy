@@ -21,10 +21,18 @@ DEBUG = True
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
+	"13.215.172.147",
+    "ec2-13-215-172-147.ap-southeast-1.compute.amazonaws.com",
+    "buybuddy.site",
+    "www.buybuddy.site",
     os.getenv("HOSTNAME"),
 ]
 
 CSRF_TRUSTED_ORIGINS = [
+    "http://13.215.172.147/",
+    "http://ec2-13-215-172-147.ap-southeast-1.compute.amazonaws.com/",
+    "https://buybuddy.site/",
+    "https://www.buybuddy.site/",
     f"https://{os.getenv('HOSTNAME')}",
 ]
 
@@ -182,7 +190,7 @@ if DEBUG:
 # 正式環境階段
 else:
     # TODO 正式上線要改網域
-    SITE_URL = "https://yourdomain.com"
+    SITE_URL = "https://buybuddy.site/"
     SITE_NAME = "buybuddy"
     SESSION_COOKIE_SECURE = True
 
