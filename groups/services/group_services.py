@@ -215,13 +215,13 @@ class GroupService:
 		product_data_map = { item["id"]: item["quantity"] for item in products_data}
 		if group.goal_choice == "quantity":
 			total_quantity = sum(product_data_map.values())
-			if current_total + total_quantity > group.min_goal*1.2:
+			if current_total + total_quantity > group.min_goal:
 				raise ExceedsLimitException("超過可購買上限")
 		if group.goal_choice == "amount":
 			product_ids = list(product_data_map.keys())
 			products = Product.objects.filter(id__in=product_ids).values("id", "price")
 			total_amount = sum(product_data_map[product["id"]] * product["price"] for product in products)
-			if current_total + total_amount > group.min_goal:
+			if current_total + total_amount > group.min_goal*1.2:
 				raise ExceedsLimitException("超過可購買上限")
 			
 		

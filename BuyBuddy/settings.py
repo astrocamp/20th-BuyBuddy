@@ -54,7 +54,6 @@ INSTALLED_APPS = [
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
-    "allauth.socialaccount.providers.google",
     'widget_tweaks',
 ]
 
@@ -257,35 +256,18 @@ TINYMCE_LIMITED_CONFIG = {
 # 第三方登入 - Django Allauth 設定
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
-    "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
-SOCIALACCOUNT_PROVIDERS = {
-    "google": {
-        "APP": {
-            "client_id": os.getenv("GOOGLE_CLIENT_ID"),
-            "secret": os.getenv("GOOGLE_CLIENT_SECRET"),
-        },
-        'EMAIL_AUTHENTICATION': True,
-        'AUTO_SIGNUP': True,
-    }
-}
-
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False  # 因為你用 email 登入
-ACCOUNT_EMAIL_VERIFICATION = "none"  # 暫時關閉，避免與你的驗證系統衝突
-ACCOUNT_AUTHENTICATION_METHOD = "email"  # 使用 email 認證
-
-ACCOUNT_ADAPTER = "users.adapters.CustomAccountAdapter"
 SOCIALACCOUNT_ADAPTER = "users.adapters.CustomSocialAccountAdapter"
 
 # settings.py 末尾
 SITE_ID = 1
 
-LOGIN_REDIRECT_URL = "/"
+LOGIN_REDIRECT_URL="/"
 LOGOUT_REDIRECT_URL = "/"
 
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
 
 # settings.py
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+

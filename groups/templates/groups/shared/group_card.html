@@ -1,20 +1,20 @@
 {% load static %}
 <!-- Card  -->
-<div class="relative">
+<div class="relative h-full">
     <!-- Image -->
     <div class="absolute w-full h-40 sm:h-44 lg:h-48 z-10">
         <img class="object-cover h-full w-full rounded-t-lg" src="{{group.banner.url}}" alt="團購圖片">
     </div>
     <!-- Card Body -->
-    <div class="h-[420px] sm:h-[450px] lg:h-[480px] border-2 border-tertiary-color rounded-lg flex flex-col pt-40 sm:pt-44 lg:pt-48">
+    <div class="h-full border-2 border-tertiary-color rounded-lg flex flex-col pt-40 sm:pt-44 lg:pt-48">
         <!-- Card Content -->
-        <div class="flex-1 flex flex-col justify-between p-4 sm:p-6 lg:p-8">
+        <div class="flex-1 flex flex-col justify-between p-4 sm:p-6 lg:p-8 gap-10">
             <div>
                 <h3 class="text-xl lg:text-lg font-semibold line-clamp-2">{{ group.name }}</h3>
-                <p class="tertiary-color-500 text-sm mt-2 line-clamp-2">{{ group.description|striptags }}</p>
+                <p class="tertiary-color-500 text-sm mt-2 line-clamp-1 lg:line-clamp-2">{{ group.description|striptags }}</p>
             </div>
             
-            <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-4 mt-auto">
                 <!-- Progress bar -->
                 <div>
                     <!-- 進度條容器 -->
