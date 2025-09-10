@@ -1,4 +1,4 @@
-from BuyBuddy.celery_app import app
+from BuyBuddy.celery import app
 from django.utils import timezone
 from groups.models import Group
 import logging
