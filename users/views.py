@@ -25,6 +25,7 @@ from allauth.socialaccount.models import SocialLogin, SocialAccount
 from allauth.socialaccount.helpers import complete_social_login
 
 
+
 def send_verification_mail(request, user, email):
     try:
         # 製作 token - 使用自定義的 token 生成器
@@ -84,10 +85,13 @@ def create(request):
             "content": modal_content,
             "img": "assets/register.svg",
         }
-
-        new_user.backend = 'django.contrib.auth.backends.ModelBackend'
-        login(request, new_user)
-        return redirect("pages:homepage")
+        try:
+            login(request, new_user)
+            return redirect("pages:homepage")
+        except Exception as login_error:
+            print(f"登入發生錯誤: {login_error}")
+            messages.error(request, "註冊成功，請重新登入")
+            return redirect("users:sessions_new")
 
     except Exception as e:
         print(f"註冊時發生錯誤: {e}")
@@ -485,6 +489,7 @@ def address_cancel(request, address_id):
 # TODO: 發送授權碼到後端進行驗證和登入
 def google_oauth2(request):
     
+
     # 先加入調試訊息
     code = request.POST.get("google_code")
     print(f"收到JWT: {code}")
@@ -493,7 +498,6 @@ def google_oauth2(request):
 
     if code:
         try:
-            messages.success(request, f"Google OAuth2 授權碼已收到: {code[:10]}...")
             # TODO: 在這裡處理 Google 授權碼，完成登入流程
             
             # 1. 用授權碼換取 access token
@@ -507,11 +511,12 @@ def google_oauth2(request):
 
             # 3. 創建或找到用戶並登入
             social_login = create_google_login(user_info)
-            print(complete_social_login(request, social_login))
 
-            
             return complete_social_login(request, social_login)
         except Exception as e:
+            import traceback
+            print("完整錯誤堆疊:")
+            traceback.print_exc()
             print(f"Google OAuth2 錯誤: {e}")
             return redirect("users:new")
     else:
@@ -576,7 +581,7 @@ def create_google_login(user_info):
     user.email = user_info.get('email', '')
     user.username = user_info.get('email', '')  # 用 email 作為 username
     user.first_name = user_info.get('given_name', '')
-    user.last_name = user_info.get('family_name', '')
+    user.last_name = user_info.get('given_name', '')
 
     # 關聯 User 和 SocialAccount
     social_login.user = user

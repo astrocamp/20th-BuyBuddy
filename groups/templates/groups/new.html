@@ -15,7 +15,8 @@
         method="POST"
         enctype="multipart/form-data"
         action="{% url 'groups:new' %}"
-        data-upload-url="{% url 'groups:upload_image' %}">
+        data-upload-url="{% url 'groups:upload_image' %}"
+        @submit="loading = true">
             {% csrf_token %}
             
             <div class="bg-white flex flex-col gap-6 w-full p-4 md:p-8 border-2 border-[#EDEDED] rounded-lg">
@@ -124,7 +125,6 @@
             <div class="flex justify-center gap-4 mt-8">
                 <a  href="{% url 'groups:index' %}" class="main-btn main-btn-red">取消</a>
 				<button class="main-btn" type="submit">新增團購</button>
-                
             </div>
         </form>
     </div>
