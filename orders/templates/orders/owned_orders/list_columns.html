@@ -1,8 +1,8 @@
 {% load humanize %}
 
 {% for p in items %}
-<li class="grid grid-cols-4 gap-2 bg-gray-50 rounded-lg text-center my-2 p-2">
-    <p class="text-sm tertiary-color-500 col-span-3">{{ p.name }}</p>
+<li class="grid grid-cols-4 gap-2 bg-tertiary-color-50 rounded-lg text-center my-2 p-2 justify-between items-center">
+    <p class="text-sm tertiary-color-500 col-span-3 break-all text-left md:text-center">{{ p.name }}</p>
     <p class="text-sm tertiary-color-500">{{ p.formatted_price }}</p>
 </li>
 {% endfor %}

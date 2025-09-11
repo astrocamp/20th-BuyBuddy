@@ -5,26 +5,27 @@
 		{% endfor %}
 	{% else %}
 		<div class="col-span-full text-center py-12">
-            <h3 class="text-lg sm:text-xl text-gray-500">目前沒有符合條件的團購</h3>
+            <h3 class="text-lg sm:text-xl tertiary-color-500">目前沒有符合條件的團購</h3>
         </div>
 	{% endif %}
 </div>
 
 {% if page_groups.paginator.num_pages > 1 %}
 <nav aria-label="Page navigation" class="mt-8 lg:mt-12">
+
 	<ul class="flex items-center justify-center gap-2 sm:gap-4">
 		{% if page_groups.has_previous %}
 		<li>
-            <a href="{% url 'groups:index_filtered' filter_type=active_tab %}?page={{ page_groups.previous_page_number }}{% if active_status %}&status={{ active_status }}{% endif %}" class="flex items-center justify-center px-4 h-10 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-full hover:bg-gray-100 transition-colors">上一頁</a>
+            <a href="{% url 'groups:index_filtered' filter_type=active_tab %}?page={{ page_groups.previous_page_number }}{% if active_status %}&status={{ active_status }}{% endif %}" class="flex items-center justify-center px-4 h-10 text-sm font-medium rounded-full bg-[var(--tertiary-color)] hover:bg-[var(--tertiary-color-200)] transition-colors">上一頁</a>
         </li>
 		{% endif %}
 		{% for page_num in page_groups.paginator.page_range %}
 			{% if page_num >= page_groups.number|add:-2 and page_num <= page_groups.number|add:2 %}
 			<li>
 				 {% if page_groups.number == page_num %}
-				 <span class="flex items-center justify-center w-10 h-10 text-sm font-bold text-white bg-primary-color border border-primary-color rounded-full">{{ page_num }}</span>
+				 <span class="flex items-center justify-center w-10 h-10 text-sm font-bold bg-secondary-color text-white rounded-full">{{ page_num }}</span>
                 {% else %}
-				 <a href="{% url 'groups:index_filtered' filter_type=active_tab %}?page={{ page_num }}{% if active_status %}&status={{ active_status }}{% endif %}" class="flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-full hover:bg-gray-100 transition-colors">{{ page_num }}</a>
+				 <a href="{% url 'groups:index_filtered' filter_type=active_tab %}?page={{ page_num }}{% if active_status %}&status={{ active_status }}{% endif %}" class="flex items-center justify-center w-10 h-10 text-sm font-medium rounded-full bg-[var(--tertiary-color)] hover:bg-[var(--tertiary-color-200)]">{{ page_num }}</a>
                 {% endif %}
 			</li>
 			{% endif %}
@@ -32,7 +33,7 @@
 
 		{% if page_groups.has_next %}
 		<li>
-			<a href="{% url 'groups:index_filtered' filter_type=active_tab %}?page={{ page_groups.next_page_number }}{% if active_status %}&status={{ active_status }}{% endif %}" class="flex items-center justify-center px-4 h-10 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-full hover:bg-gray-100 transition-colors">下一頁</a>
+			<a href="{% url 'groups:index_filtered' filter_type=active_tab %}?page={{ page_groups.next_page_number }}{% if active_status %}&status={{ active_status }}{% endif %}" class="flex items-center justify-center px-4 h-10 text-sm font-medium rounded-full bg-[var(--tertiary-color)] hover:bg-[var(--tertiary-color-200)]">下一頁</a>
 		</li>
 		{% endif %}
 	</ul>

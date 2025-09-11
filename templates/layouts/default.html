@@ -13,10 +13,7 @@
 </head>
 <body class="min-h-screen flex flex-col" hx-headers='{"X-CSRFToken": "{{csrf_token}}"}' x-data="{ loading: false }">
     <header 
-        x-data="navigationControl"
-        @scroll.window="handleNavbar"
-        :class="showNavbar ? 'top-0' : '-top-[90px]' "
-        class="w-full bg-[var(--bg-color)] fixed z-40 transition-all duration-500 ease-in-out">
+        class="w-full bg-white fixed z-40 transition-all duration-500 ease-in-out">
         {% include "shared/navbar.html" %}
     </header>
 

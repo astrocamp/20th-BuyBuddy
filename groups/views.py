@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Group, JoinedGroup
 from products.models import JoinedGroupProduct
+from orders.models import Order
 from .forms import GroupForm, ProductFormSet
 from products.models import Product
 from django.contrib.auth.decorators import login_required
@@ -89,7 +90,7 @@ def new(request):
 
                 product_formset.instance = group
                 product_formset.save()
-            messages.success(request, "團購已建立")
+            messages.success(request, "新增團購成功")
             return redirect("groups:index_filtered", filter_type="owned")
 
         if product_formset.non_form_errors():
@@ -118,9 +119,11 @@ def detail(request, id):
     group = get_object_or_404(Group.objects.select_related("owner"), pk=id)
     user = request.user
     role = "guest"
+    order = None
 
     if user.is_authenticated:
         if group.status == "ongoing":
+
             if request.method == "POST" and request.POST.get("_method") == "delete":
                 if request.POST.get("role") == "owner" and group.owner == user:
                     GroupService.leave_group_batch(group=group)
@@ -174,22 +177,24 @@ def detail(request, id):
             )
             group.integrated_products = integrated_products
 
+            if group.status == "reached":
+                order = Order.objects.filter(joined_group=joined_group).first()
+
             role = "joiner"
 
     # 計算剩餘可跟團數量
     current_total = GroupService.get_total(group)
-    remaining_limit = 0
-
-    if group.goal_choice == "quantity":
-        total_limit = int(group.min_goal * 1.2)  # 數量目標的120%
-        remaining_limit = max(0, total_limit - current_total)
-    elif group.goal_choice == "amount":
-        remaining_limit = max(0, group.min_goal - current_total)
+    remaining_limit = max(0, group.min_goal - current_total)
 
     return render(
         request,
         "groups/detail.html",
-        {"group": group, "role": role, "remaining_limit": remaining_limit},
+        {
+            "group": group,
+            "role": role,
+            "remaining_limit": remaining_limit,
+            "order": order,
+        },
     )
 
 

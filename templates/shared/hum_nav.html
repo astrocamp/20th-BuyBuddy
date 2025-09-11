@@ -19,19 +19,19 @@ class="pl-[80px] sm:pl-[100px] pb-12 bg-tertiary-color  fixed top-0 right-0 w-[8
 <div class="sticky top-0 bg-tertiary-color pt-[85px] pb-4 z-10 rounded-t-[50px]">
     <button class="absolute top-[35px] md:top-[40px] right-[25px] md:right-[50px] cursor-pointer 
     hover:outline-[var(--secondary-color)] hover:outline-[1.5px] hover:outline-offset-8 rounded-full transition-all" @click="open=false">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#1e1f24" viewBox="0 0 256 256"><path d="M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z"></path></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#2e2d2d" viewBox="0 0 256 256"><path d="M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z"></path></svg>
     </button>
 
     {% if user.is_authenticated %}
         <ul class="pr-[100px]">
             <li class="py-8">
-                <a href="{% url 'groups:new' %}" class="w-[128px] flex flex-col main-btn hover:scale-115 hover:py-2 text-center">
+                <a href="{% url 'groups:new' %}" class="w-[140px] flex flex-col main-btn hover:scale-115 hover:py-2 text-center ">
                     我要開團
                 </a>
             </li>
 
             <li class="py-8">
-                <a href="{% url 'groups:index' %}" class="w-[128px] flex flex-col hover:scale-115 hover:py-2 transition-all duration-300 origin-left  text-center">
+                <a href="{% url 'groups:index' %}" class="w-[140px] flex flex-col hover:scale-115 hover:py-2 transition-all duration-300 origin-left  text-center">
                     團購一覽
                 </a>
             </li>

@@ -7,7 +7,7 @@
 			hx-target="#groups-container"
 			hx-push-url="true"
 			{% endif %}
-			class="transition-all duration-300 px-4 sm:px-6 py-2 rounded-[50px] text-sm min-w-[88px] inline-block {% if active_tab == 'owned' %} bg-secondary-color text-white{% else %}bg-[var(--tertiary-color)] hover:bg-[var(--tertiary-color-200)]{% endif %}">
+			class="transition-all duration-300 px-4 sm:px-6 py-2 rounded-[50px] text-sm sm:text-base min-w-[88px] inline-block {% if active_tab == 'owned' %} bg-secondary-color text-white{% else %}bg-[var(--tertiary-color)] hover:bg-[var(--tertiary-color-200)]{% endif %}">
 			我開的團
 			</a>
 		</li>
@@ -18,7 +18,7 @@
 			hx-target="#groups-container"
 			hx-push-url="true"
 			{% endif %}
-			class="transition-all duration-300 px-4 sm:px-6 py-2 rounded-[50px] text-sm min-w-[102px] inline-block  {% if not active_tab or active_tab == 'ongoing' %}bg-secondary-color text-white {% else %}bg-[var(--tertiary-color)] hover:bg-[var(--tertiary-color-200)]{% endif %}">
+			class="transition-all duration-300 px-4 sm:px-6 py-2 rounded-[50px] text-sm sm:text-base min-w-[102px] inline-block  {% if not active_tab or active_tab == 'ongoing' %}bg-secondary-color text-white {% else %}bg-[var(--tertiary-color)] hover:bg-[var(--tertiary-color-200)]{% endif %}">
 			現正開團中
 			</a>
 		</li>
@@ -29,7 +29,7 @@
 			hx-target="#groups-container"
 			hx-push-url="true"
 			{% endif %}
-			class="transition-all duration-300 px-4 sm:px-6 py-2 rounded-[50px] text-sm min-w-[88px] inline-block {% if active_tab == 'followed' %} bg-secondary-color text-white{% else %}bg-[var(--tertiary-color)] hover:bg-[var(--tertiary-color-200)]{% endif %}">
+			class="transition-all duration-300 px-4 sm:px-6 py-2 rounded-[50px] text-sm sm:text-base min-w-[88px] inline-block {% if active_tab == 'followed' %} bg-secondary-color text-white{% else %}bg-[var(--tertiary-color)] hover:bg-[var(--tertiary-color-200)]{% endif %}">
 			我跟的團</a>
 		</li>
 	</ul>
