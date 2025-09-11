@@ -2,335 +2,201 @@
 {% load static %}
 {% block content %}
 
-<!-- Button -->
-{% if role == "owner" %}
-<section class="max-w-[1440px] mx-auto px-8 sm:px-12 mt-[40px]">
-	<div class="flex justify-center gap-4">
-		<a href="{% url 'orders:buyer_list' group.id %}" class="main-btn main-btn-black">
-			查看跟團者資訊
-		</a>
-		{% if group.status == 'ongoing'%}
-		<a href="{% url 'groups:manage_edit' group.id %}" class="main-btn main-btn-black">
-		編輯團購
-		</a>
 
-		{% endif %}
-	</div>
-</section>
-{% endif %}
+ <section class="max-w-[1440px] mx-auto px-8 sm:px-12 flex flex-col gap-[40px]">
 
-{% if role != "owner" and group.status == "reached" %}
-<section class="max-w-[1440px] mx-auto px-8 sm:px-12 mt-[40px]">
-	<div class="flex justify-center gap-4">
-		<a href="{% url 'orders:my_orders' %}?tab=pending" class="main-btn">
-			去付款
-		</a>
-	</div>
-</section>
-{% endif %}
-
-<!-- Group -->
-<section class="max-w-[1440px] mx-auto px-8 sm:px-12 mt-[40px]">
-	<div class="w-full h-[200px] sm:h-[300px] md:h-[400px] rounded-[25px] md:rounded-[50px] overflow-hidden">
-	  <div class="w-full h-full bg-center bg-cover" style="background-image:url('{{ group.banner.url }}');"></div>
-	</div>
-</section>
-
-<!-- Group Name -->
-<section class="max-w-[1440px] mx-auto px-8 sm:px-12 mt-[50px]">
-	<div class="flex justify-center">
-	  <div class="flex flex-col items-center gap-4">
-		<div class="inline-flex items-center gap-[10px] rounded-[50px] px-8 py-2 text-sm font-medium {% if group.status == 'ongoing' %}bg-primary-color{% else %} bg-secondary-color text-white {% endif %}">
-			{{ group.get_status_display}}
-		</div>
-		<div class="text-center">
-		  <h1 class="text-2xl sm:text-3xl md:text-4xl font-semibold leading-[1.2]">{{ group.name }}</h1>
-		</div>
-	  </div>
-	</div>
-</section>
-
-
-
-<!-- Desc -->
-<section class="max-w-[1440px] mx-auto px-8 sm:px-12 mt-[40px]">
-	<div class="w-full max-w-[1100px] mx-auto">
-		<!-- 截止時間與目標進度 -->
-		{% if group.status == "ongoing" %}
-		<div class="mb-8 md:p-6">
-			<div class="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8">
-				<!-- 截止時間 -->
-				<div class="w-full md:w-1/2 flex flex-col items-center">
-					<span class="text-sm md:text-base font-medium mb-2 tertiary-color-500">截止日期</span>
-					<span class="text-2xl font-bold">{{ group.deadline|date:"Y / m / d" }}</span>
-				</div>
-				
-				<!-- 剩餘數量 -->
-				<div class="w-full md:w-1/2 flex flex-col items-center">
-					{% if group.goal_choice == "amount" %}
-					<span class="text-sm md:text-base font-medium mb-2 tertiary-color-500">剩餘可跟團金額</span>
-					<span class="text-2xl font-bold">${{ remaining_limit }}</span>
-					{% elif group.goal_choice == "quantity" %}
-					<span class="text-sm md:text-base font-medium mb-2 tertiary-color-500">剩餘可跟團數量</span>
-					<span class="text-2xl font-bold">{{ remaining_limit }} 件</span>
-					{% endif %}
-				</div>
-			</div>
-		</div>
-		{% endif %}
-		
-		<!-- 其他團購資訊 -->
-		<div class="flex justify-between gap-4 md:gap-8 mb-6">
-				<div class="flex flex-col sm:flex-row items-start sm:items-center text-xs sm:text-sm md:text-base md:text-lg tertiary-color-500">
-					<div class="flex sm:hidden">
-						<span>團主：</span>
-					</div>
-					<div class="hidden sm:flex">
-						<span>團主</span>
-						<span class="mx-1">：</span>
-					</div>
-					<span class="block sm:inline">{{ group.owner.username }}</span>
-				</div>
-			
-				<div class="flex flex-col sm:flex-row items-start sm:items-center text-xs sm:text-sm md:text-base md:text-lg tertiary-color-500">
-					<div class="flex sm:hidden">
-						<span>創立時間：</span>
-					</div>
-					<div class="hidden sm:flex">
-						<span>創立時間</span>
-						<span class="mx-1">：</span>
-					</div>
-					<span class="block sm:inline">{{ group.created_at|date:"Y/m/d" }}</span>
-				</div>
-			
-				<div class="flex flex-col sm:flex-row items-start sm:items-center text-xs sm:text-sm md:text-base md:text-lg tertiary-color-500">
-					<div class="flex sm:hidden">
-						<span>目標：</span>
-					</div>
-					<div class="hidden sm:flex">
-						<span>目標</span>
-						<span class="mx-1">：</span>
-					</div>
-					<span class="block sm:inline">
-						{% if group.goal_choice == "amount" %}
-						${{ group.min_goal }}
-						{% elif group.goal_choice == "quantity" %}
-						{{ group.min_goal }} 件
-						{% endif %}
-					</span>
-				</div>
-		</div>
-	</div>
-</section>
-
-<!-- Progress -->
-<section class="max-w-[1440px] mx-auto px-8 sm:px-12 mt-[40px]">
-	<div class="w-full max-w-[1100px] mx-auto space-y-14">
-		<div class="relative w-full h-[10px] bg-gray-200 rounded-full">
-			<div class="h-full bg-[#FFC900] rounded-full" style="width: {{ group.current_progress }}%"></div>
-			<div class="absolute top-[20px] text-2xl font-bold text-[#FFC900]" style="left: calc({{ group.current_progress }}% - 20px);">
-			{{ group.current_progress }}%
-			</div>
-		</div>
-	</div>
-</section>
-
-
-
-<!-- Title -->
-{% if not role == "joiner" %}
-<section class="max-w-[1440px] mx-auto px-16 sm:px-24 mt-[80px]">
-	<form action="{% url 'groups:detail' group.id %}" method="post">
-		{% csrf_token %}
-		<input type="hidden" name="group-id" value="{{ group.id }}">
-
-		<div class="w-full max-w-[1105px] mx-auto space-y-10">
-			<div class="text-center">
-			<h2 class="text-3xl font-semibold leading-[1.5]">選購商品</h2>
-			</div>
-			
-			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 auto-rows-fr">
-				{% for product in group.products.all %}
-                <div class="relative h-full" x-data="{ quantity: 0 }">
-                    <input type="hidden" id="product-{{ product.id }}" name="product-{{ product.id }}" x-model="quantity">
-                    <div class="absolute w-full h-40 sm:h-44 lg:h-48 z-10">
-                        {% if product.banner%}
-                            <img class="object-cover h-full w-full rounded-t-lg" src="{{ product.banner.url }}" alt="{{ product.name }}">
-                        {% else %}
-                            <div class="h-full w-full bg-gray-300 rounded-t-lg flex items-center justify-center">
-                                <span class="text-gray-500">無圖片</span>
-                            </div>
-                        {% endif %}
-                    </div>
-                    <div class="h-full border-2 border-[#EDEDED] rounded-lg flex flex-col pt-40 sm:pt-44 lg:pt-48 ">
-                        <div class="flex-1 flex flex-col justify-between p-4 sm:p-6 lg:p-8 gap-4">
-                            <div>
-                                <h3 class="text-xl lg:text-lg font-semibold break-all">{{ product.name }}</h3>
-                                <p class="tertiary-color-500 text-sm mt-2 break-all">{{ product.description|striptags }}</p>
-                            </div>
-                            
-                            <div class="flex flex-col gap-4 mt-auto">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-lg font-semibold text-[#FFC900]">${{ product.price }}</span>
-                                </div>
-                                {% if not role == "owner" %}
-                                <div class="flex justify-between items-center space-x-2">
-									<div>選擇數量</div>
-									<div class=" flex items-center space-x-2">
-										<button 
-											type="button"
-											@click="quantity > 0 ? quantity-- : null"
-											class="px-2 py-1 border border-[#1E1F24] text-[#1E1F24] rounded-full text-sm cursor-pointer hover:bg-[var(--secondary-color)] hover:text-white transition duration-300"
-										>
-											－
-										</button>
-										<span x-text="quantity" class="text-base font-semibold w-6 text-center"></span>
-										<button 
-											type="button"
-											@click="quantity++"
-											class="px-2 py-1 border border-[var(--secondary-color)] rounded-full text-sm cursor-pointer hover:bg-[var(--primary-color)] hover:border-[var(--primary-color)] transition duration-200"
-										>
-											＋
-										</button>
-									</div>
-                                </div>
-								{% endif %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-				{% endfor %}
-			</div>
-{% else %}
-<section class="max-w-[1440px] mx-auto px-16 sm:px-24 mt-[80px]">
-	<form action="{% url 'groups:detail' group.id %}" method="post">
-		{% csrf_token %}
-		<input type="hidden" name="group-ird" value="{{ group.id }}">
-
-		<div class="w-full max-w-[1105px] mx-auto space-y-10">
-			<div class="text-center">
-			<h2 class="text-2xl sm:text-3xl md:text-4xl font-semibold leading-[1.2]">更新團購商品數量</h2>
-			</div>
-			
-			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 auto-rows-fr">
-				{% for product in group.integrated_products %}
-                <div class="relative h-full" x-data="{ quantity: 0 }">
-                    <input type="hidden" id="product-{{ product.id }}" name="product-{{ product.id }}" x-model="quantity">
-                    <div class="absolute w-full h-40 sm:h-44 lg:h-48 z-10">
-                        {% if product.banner %}
-                            <img class="object-cover h-full w-full rounded-t-lg" src="{{ product.banner.url }}" alt="{{ product.name }}">
-                        {% else %}
-                            <div class="h-full w-full bg-gray-300 rounded-t-lg flex items-center justify-center">
-                                <span class="text-gray-500">無圖片</span>
-                            </div>
-                        {% endif %}
-                    </div>
-                    <div class="h-full border-2 border-[#EDEDED] rounded-lg flex flex-col pt-40 sm:pt-44 lg:pt-48">
-                        <div class="flex-1 flex flex-col justify-between p-4 sm:p-6 lg:p-8">
-                            <div>
-                                <h3 class="text-xl lg:text-lg font-semibold">{{ product.name }}</h3>
-                                <p class="tertiary-color-500 text-sm mt-2 break-all">{{ product.description|striptags }}</p>
-                            </div>
-                            
-                            <div class="flex flex-col gap-4 mt-auto">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-lg font-semibold text-[#FFC900]">${{ product.price }}</span>
-                                </div>
-								{% if group.goal_choice == 'amount' %}
-                                <div class="flex justify-between items-center space-x-2">
-									<div>已選購金額</div>
-									<div class=" flex items-center space-x-2">{{ product.subtotal_amount}}</div>
-								</div>
-								<div class="flex justify-between items-center">
-									<div>更改訂購數量</div>
-									<div><input type="number" id="product-{{ product.id }}" name="product-{{ product.id }}" class="text-right" min="0" value="{{ product.user_quantity}}"></div>
-								</div>
-								{% elif group.goal_choice == 'quantity' %}
-								<div class="flex justify-between items-center space-x-2 pr-4">
-									<div>已選購數量</div>
-									<div class=" flex items-center space-x-2">{{ product.user_quantity}}</div>
-								</div>
-									{% if group.status != "reached" %}
-										<div class="w-full flex justify-between items-center gap-6">
-											<div class="whitespace-nowrap">更改數量</div>
-											<input type="number" id="product-{{ product.id }}" name="product-{{ product.id }}"
-												class="flex-1 min-w-0 py-2 px-4 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px] text-right" min="0" value="{{ product.user_quantity}}">
-										</div>
-									{% endif %}
-								{% endif %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-				{% endfor %}
-			</div>
-{% endif %}
-
-			{% if not role == "owner" %}
-			<div class="w-full text-center mt-10">
-				{% if group.status == 'reached' %}
-                {% elif role == 'joiner' %}
-				<button type="submit" class="inline-flex items-center gap-[10px] rounded-[50px] bg-[#1E1F24] px-[34px] py-[15px] text-white text-base font-medium cursor-pointer hover:bg-[#373943] transition duration-300">
-                修改數量
-                </button>
-				{% else %}
-				<button type="submit" class="inline-flex items-center gap-[10px] rounded-[50px] bg-[#1E1F24] px-[34px] py-[15px] text-white text-base font-medium cursor-pointer hover:bg-[#373943] transition duration-300">
-                一鍵跟團
-                </button>
-				{% endif %}
-            </div>
+	<!-- Button -->
+	{% if role == "owner" %}
+	<div>
+		<div class="flex justify-center gap-4">
+			<a href="{% url 'orders:buyer_list' group.id %}" class="main-btn main-btn-black">
+				查看跟團者資訊
+			</a>
+			{% if group.status == 'ongoing'%}
+			<a href="{% url 'groups:manage_edit' group.id %}" class="main-btn main-btn-black">
+			編輯團購
+			</a>
+	
 			{% endif %}
 		</div>
-	</form>
-
-	<!-- divider -->
-	<hr class="max-w-[1105px] mx-auto border-[var(--tertiary-color-300)] mt-[60px] md:mt-[120px] mb-[30px] md:mb-[60px]">
-</section>
-
-
-<section class="max-w-[1440px] mx-auto px-16 sm:px-24">
-	<div class="w-full max-w-[1105px] mx-auto space-y-16 break-all">
-	  
-		<div class="text-center">
-			<h2 class="text-2xl sm:text-3xl md:text-4xl font-semibold leading-[1.2]">團購介紹</h2>
-		</div>
-	  
-		<div class="w-full text-center">
-			{{ group.description|safe }}
-		</div>
-
 	</div>
-</section>
-
-{% if group.status == 'ongoing' %}
-	{% if role == "owner" %}
-	<section class="max-w-[1440px] mx-auto px-8 sm:px-12 mt-[80px] mb-[60px]">
-		<div class="flex justify-center">
-			<form action="{% url 'groups:detail' group.id %}" method="post" onsubmit="return confirm('確定要刪除這個團購嗎？此操作無法復原。');">
-				{% csrf_token %}
-				<input type="hidden" name="_method" value="delete">
-				<input type="hidden" name="role" value="owner">
-				<button type="submit" class="main-btn main-btn-red">
-					刪除團購
-				</button>
-			</form>
-		</div>
-	</section>
 	{% endif %}
-
-	{% if role == "joiner" %}
-	<section class="max-w-[1440px] mx-auto px-8 sm:px-12 mt-[80px] mb-[60px]">
-		<div class="flex justify-center">
-			<form action="{% url 'groups:detail' group.id %}" method="post" onsubmit="return confirm('確定要退出嗎？');">
-				{% csrf_token %}
-				<input type="hidden" name="_method" value="delete">
-				<button type="submit" class="main-btn main-btn-red">
-					退出團購
-				</button>
-			</form>
-		</div>
-	</section>
+	
+	{% if role != "owner" and order %}
+		<div class="flex justify-center gap-4 mt-2">
+				{% if order.order_status == "pending" %}
+					<a href="{% url 'orders:my_orders' %}?tab=pending" class="main-btn">
+						去付款
+					</a>
+				{% endif %}
+			</div>
 	{% endif %}
-{% endif %}
+	
+
+	<!-- Group -->
+	<div>
+		<div class="w-full h-[200px] sm:h-[300px] md:h-[400px] rounded-[25px] md:rounded-[50px] overflow-hidden">
+		<div class="w-full h-full bg-center bg-cover" style="background-image:url('{{ group.banner.url }}');"></div>
+		</div>
+	</div>
+	
+	<div class="px-4 flex flex-col gap-[40px]">
+
+		<!-- Group Name -->
+		<div >
+			<div class="flex justify-center">
+			<div class="flex flex-col items-center gap-4">
+				<div class="inline-flex items-center gap-[10px] rounded-[50px] px-8 py-2 text-sm font-medium  text-white {% if group.status == 'ongoing' %}bg-primary-color{% else %} bg-secondary-color{% endif %}">
+					{{ group.get_status_display}}
+				</div>
+				<div class="text-center">
+				<h1 class="text-2xl sm:text-3xl md:text-4xl font-semibold leading-[1.2] break-all">{{ group.name }}</h1>
+				</div>
+			</div>
+			</div>
+		</div>
+		
+		
+		<!-- Desc -->
+		<div>
+			<div class="w-full max-w-[1100px] mx-auto">
+				<!-- 截止時間與目標進度 -->
+				{% if group.status == "ongoing" %}
+				<div class="mb-8 md:p-6">
+					<div class="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8">
+						<!-- 截止時間 -->
+						<div class="w-full md:w-1/2 flex flex-col items-center">
+							<span class="text-sm md:text-base font-medium mb-2 tertiary-color-500">截止日期</span>
+							<span class="text-2xl font-bold">{{ group.deadline|date:"Y / m / d" }}</span>
+						</div>
+						
+						<!-- 剩餘數量 -->
+						<div class="w-full md:w-1/2 flex flex-col items-center">
+							{% if group.goal_choice == "amount" %}
+							<span class="text-sm md:text-base font-medium mb-2 tertiary-color-500">剩餘可跟團金額</span>
+							<span class="text-2xl font-bold">${{ remaining_limit }}</span>
+							{% elif group.goal_choice == "quantity" %}
+							<span class="text-sm md:text-base font-medium mb-2 tertiary-color-500">剩餘可跟團數量</span>
+							<span class="text-2xl font-bold">{{ remaining_limit }} 件</span>
+							{% endif %}
+						</div>
+					</div>
+				</div>
+				{% endif %}
+				
+				<!-- 其他團購資訊 -->
+				<div class="flex justify-between gap-4 md:gap-8 mb-6">
+						<div class="flex flex-col sm:flex-row items-start sm:items-center text-xs sm:text-sm md:text-base md:text-lg tertiary-color-500">
+							<div class="flex sm:hidden">
+								<span>團主：</span>
+							</div>
+							<div class="hidden sm:flex">
+								<span>團主</span>
+								<span class="mx-1">：</span>
+							</div>
+							<span class="block sm:inline">{{ group.owner.username }}</span>
+						</div>
+					
+						<div class="flex flex-col sm:flex-row items-start sm:items-center text-xs sm:text-sm md:text-base md:text-lg tertiary-color-500">
+							<div class="flex sm:hidden">
+								<span>創立時間：</span>
+							</div>
+							<div class="hidden sm:flex">
+								<span>創立時間</span>
+								<span class="mx-1">：</span>
+							</div>
+							<span class="block sm:inline">{{ group.created_at|date:"Y/m/d" }}</span>
+						</div>
+					
+						<div class="flex flex-col sm:flex-row items-start sm:items-center text-xs sm:text-sm md:text-base md:text-lg tertiary-color-500">
+							<div class="flex sm:hidden">
+								<span>目標：</span>
+							</div>
+							<div class="hidden sm:flex">
+								<span>目標</span>
+								<span class="mx-1">：</span>
+							</div>
+							<span class="block sm:inline">
+								{% if group.goal_choice == "amount" %}
+								${{ group.min_goal }}
+								{% elif group.goal_choice == "quantity" %}
+								{{ group.min_goal }} 件
+								{% endif %}
+							</span>
+						</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Progress -->
+		<div>
+			<div class="w-full max-w-[1100px] mx-auto space-y-14">
+				<div class="relative w-full h-[10px] bg-tertiary-color-200 rounded-full">
+					<div class="h-full bg-primary-color rounded-full" style="width: {{ group.current_progress }}%"></div>
+					<!-- 百分比 -->
+					{% with progress=group.current_progress %}
+						<span class="absolute top-[20px] text-2xl md:text-3xl font-bold primary-color -translate-x-1/2"
+								style="left: {% if progress < 10 %}5%{% elif progress > 85 %}93%{% else %}{{ progress }}%{% endif %};">
+							{{ progress }}%
+						</span>
+					{% endwith %}
+
+					
+				</div>
+			</div>
+		</div>
+		
+		<!-- Product -->
+		<div class="mt-[40px]">
+			<!-- Title -->
+				
+				{% include "groups/shared/update_products.html" %}
+			
+				<!-- divider -->
+				<hr class="max-w-[1105px] mx-auto border-[var(--tertiary-color-300)] mt-[60px] md:mt-[120px] mb-[30px] md:mb-[60px]">
+			</div>
+		</div>
+		
+		
+		<div class="break-all m-auto">
+			
+			<div class="text-center mb-4">
+				<h2 class="text-2xl sm:text-3xl md:text-4xl font-semibold leading-[1.2]">團購介紹</h2>
+			</div>
+		
+			<div class="w-full text-center break-all">
+				{{ group.description|safe }}
+			</div>
+		
+		</div>
+		
+		{% if group.status == 'ongoing' %}
+			{% if role == "owner" %}
+				<div class="flex justify-center">
+					<form action="{% url 'groups:detail' group.id %}" method="post" onsubmit="return confirm('確定要刪除這個團購嗎？此操作無法復原。');">
+						{% csrf_token %}
+						<input type="hidden" name="_method" value="delete">
+						<input type="hidden" name="role" value="owner">
+						<button type="submit" class="main-btn main-btn-red">
+							刪除團購
+						</button>
+					</form>
+				</div>
+			{% endif %}
+		
+			{% if role == "joiner" %}
+				<div class="flex justify-center">
+					<form action="{% url 'groups:detail' group.id %}" method="post" onsubmit="return confirm('確定要退出嗎？');">
+						{% csrf_token %}
+						<input type="hidden" name="_method" value="delete">
+						<button type="submit" class="main-btn main-btn-red">
+							退出團購
+						</button>
+					</form>
+				</div>
+			{% endif %}
+		{% endif %}
+	</div>
+ </section>
 
 {% endblock %}

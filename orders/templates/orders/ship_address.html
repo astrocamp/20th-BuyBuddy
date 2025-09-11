@@ -27,7 +27,7 @@
             {% for address in addresses %}
             
             <label for="address-{{address.id}}" class="block cursor-pointer group">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center rounded-lg p-6 transition-all duration-200 border-2 border-[var(--tertiary-color)] group-has-[:checked]:border-[#1e1f24]">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center rounded-lg p-6 transition-all duration-200 border-2 border-[var(--tertiary-color)] group-has-[:checked]:border-[var(--secondary-color)]">
                     
                     <div class="relative mb-3 sm:mb-0 sm:mr-6 flex-shrink-0 self-start sm:self-center">
                         <input type="radio" id="address-{{address.id}}" name="ship-address" value="address-{{address.id}}" class="appearance-none w-6 h-6 peer" {% if address.is_default %}checked{% endif %} />
@@ -35,7 +35,7 @@
                         <svg class="absolute inset-0 w-6 h-6 transition-opacity fill-[var(--tertiary-color-300)] peer-checked:opacity-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
                             <path d="M230,128A102,102,0,1,1,128,26,102.12,102.12,0,0,1,230,128Zm-12,0a90,90,0,1,0-90,90A90.1,90.1,0,0,0,218,128Z"></path>
                         </svg>
-                        <svg class="absolute inset-0 w-6 h-6 opacity-0 peer-checked:opacity-100 transition-opacity fill-[var(--main-color)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+                        <svg class="absolute inset-0 w-6 h-6 opacity-0 peer-checked:opacity-100 transition-opacity" fill="#2e2d2d" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
                             <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"></path>
                         </svg>
                     </div>
