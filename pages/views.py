@@ -3,7 +3,7 @@ from groups.models import Group
 
 
 def homepage(request):
-    groups = Group.objects.filter(status="ongoing")[:9]
+    groups = Group.objects.filter(status="ongoing").order_by("-id")[:9]
 
     # 取出寄信 modal 狀態
     verify_email_modal = request.session.pop("verify_email_modal", None)

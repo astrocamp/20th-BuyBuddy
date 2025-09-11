@@ -27,7 +27,7 @@
                 <div class="mb-4">
                     <p class="text-xs text-[var(--tertiary-color-500)] mb-1">頭像</p>
                     <div class="mt-2">
-                        <label for="id_avatar_url" class="text-sm w-full py-2 px-4 border border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px] flex items-center justify-center cursor-pointer overflow-hidden">
+                        <label for="id_avatar_url" class="text-sm w-full py-2 px-4 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px] flex items-center justify-center cursor-pointer overflow-hidden">
                             <span class="truncate" x-text="fileName || '選擇檔案'">選擇檔案</span>
                             <input type="file" 
                                    id="id_avatar_url" 
@@ -45,7 +45,7 @@
                         <input type="text" 
                                name="{{ user_form.username.html_name }}" 
                                value="{{ user_form.username.value|default:'' }}" 
-                               class="text-sm w-full py-2 px-4 border border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px]"
+                               class="text-sm w-full py-2 px-4 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px]"
                                placeholder="請輸入用戶名">
                     </div>
                     {% if user_form.username.errors %}

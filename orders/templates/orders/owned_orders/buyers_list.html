@@ -3,13 +3,15 @@
 {% block content %}
 
 <section class="max-w-[1440px] mx-auto px-16 sm:px-24 mt-12 lg:mt-16">
-  <h2 class="text-center text-md sm:text-xl font-medium">{{ group.name }} - 跟團者列表</h2>
+  <h2 class="text-center text-xl sm:text-2xl font-medium">{{ group.name }}</h2>
+  <h3 class="text-center text-md sm:text-xl">－跟團者列表－</h3>
   {% if orders %}
-  <button class="block mx-auto mt-4 card-btn card-btn-yellow"><a href="{% url 'orders:buyer_list_export' group.id %}" class="">匯出 Excel 檔</a></button>
+  <button class="block mx-auto mt-4 card-btn card-btn-orange"><a href="{% url 'orders:buyer_list_export' group.id %}" class="">匯出 Excel 檔</a></button>
+
   {% for order in orders %}
-  <div class="box-border flex flex-col gap-2"> 
+  <div class="box-border flex flex-col gap-2 mb-6"> 
     <div class="mt-5">
-      <div class="flex justify-between items-center mb-2">
+      <div class="flex flex-col sm:flex-row gap-4 justify-between items-center mb-2 items-center mb-4">
         <p>訂單號碼: 
           {% if order.order_number %}
           {{ order.order_number }}
@@ -20,7 +22,7 @@
         {% if order.order_status == order.OrderStatus.PROCESSING %}
         <form action="{% url 'orders:shipped' order.id %}" method="post" class="inline">
           {% csrf_token %}
-          <button class="card-btn card-btn-secondary h-[25px]">出貨</button>
+          <button class="card-btn card-btn-secondary">出貨</button>
         </form> 
         {% endif %}
       </div>
@@ -31,16 +33,16 @@
       </div>
       {% for jqp in order.joined_group.joined_group_products.all %}
       <div class="grid grid-cols-3 text-center border-x">
-        <p class="border-b">{{ jqp.product.name }}</p>
-        <p class="border-x border-b">{{ jqp.quantity }}</p>
-        <p class="border-b">${{ jqp.product.price }}</p>
+        <p class="border-b p-2">{{ jqp.product.name }}</p>
+        <p class="border-x border-b p-2">{{ jqp.quantity }}</p>
+        <p class="border-b p-2">${{ jqp.product.price }}</p>
       </div>
       {% endfor %}
       <div class="grid grid-cols-3 border-x">
-        <p class="col-span-2 text-right border-r">合計：</p>
-        <p class="text-center">${{ order.total_amount | intcomma }}</p>
+        <p class="col-span-2 text-right border-r p-2">合計：</p>
+        <p class="text-center p-2">${{ order.total_amount | intcomma }}</p>
       </div>
-      <div class="border">
+      <div class="border p-4">
         <p>收件人: {{ order.ship_recipient_name }}</p>
         <p>電話: {{ order.ship_phone }}</p>
         <p>付款狀態: {{ order.get_order_status_display }}</p>
@@ -49,12 +51,13 @@
     </div>
   </div>
   {% endfor %}
+
   {% elif buyers %}
   {% for buyer in buyers %}
-  <div class="box-border flex flex-col gap-2"> 
+  <div class="box-border flex flex-col gap-2 mb-6"> 
     <div class="mt-5">
       <div class="flex justify-between items-center mb-2">
-        <p>用戶ID: 
+        <p>用戶: 
           {% if buyer.buyer.username %}
           {{ buyer.buyer.username }}
           {% else %}
@@ -69,14 +72,14 @@
       </div>
       {% for jqp in buyer.joined_group_products.all %}
       <div class="grid grid-cols-3 text-center border-x">
-        <p class="border-b">{{ jqp.product.name }}</p>
-        <p class="border-x border-b">{{ jqp.quantity }}</p>
-        <p class="border-b">${{ jqp.product.price }}</p>
+        <p class="border-b p-2">{{ jqp.product.name }}</p>
+        <p class="border-x border-b p-2">{{ jqp.quantity }}</p>
+        <p class="border-b p-2">${{ jqp.product.price }}</p>
       </div>
       {% endfor %}
       <div class="grid grid-cols-3 border-x border-b">
-        <p class="col-span-2 text-right border-r">合計：</p>
-        <p class="text-center">${{ buyer.total_amount | intcomma }}</p>
+        <p class="col-span-2 text-right border-r p-2">合計：</p>
+        <p class="text-center p-2">${{ buyer.total_amount | intcomma }}</p>
       </div>
     </div>
   </div>

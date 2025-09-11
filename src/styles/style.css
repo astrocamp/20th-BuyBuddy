@@ -8,24 +8,22 @@
 
 :root {
   font-family: "Montserrat", sans-serif;
-  --bg-color: #f8f8f8;
-  --primary-color: #ffc900;
-  --primary-color-400: #fecd0b;
-  --secondary-color: #1e1f24;
-  --secondary-color-900: #373943;
-  --tertiary-color: #ededed;
-  --tertiary-color-50: #f8f8f8;
+  --primary-color: #ec6c00;
+  --primary-color-400: #fb7304;
+  --secondary-color: #2e2d2d;
+  --secondary-color-900: #3d3c3c;
+  --tertiary-color: #eeeeee;
+  --tertiary-color-50: #f6f6f6;
   --tertiary-color-200: #dcdcdc;
-  --tertiary-color-300: #bdbdbd;
-  --tertiary-color-500: #7c7c7c;
-  --red-color-500: #fb2c36;
+  --tertiary-color-300: #c2bfbf;
+  --tertiary-color-500: #7d7878;
+  --red-color-500: #ee2933;
   --red-color-700: #c10007;
   --green-color: #06890aff;
 }
 
 html {
-  background: var(--bg-color);
-  color: var(--secondary-color);
+  color: var(--secondary-color-900);
   list-style-type: none;
 }
 
@@ -37,6 +35,18 @@ input:-webkit-autofill {
   background: var(--tertiary-color) !important;
   box-shadow: 0 0 0 100px var(--tertiary-color) inset !important;
   -webkit-text-fill-color: #000 !important;
+}
+
+input:focus {
+  outline-color: var(--tertiary-color-500) !important;
+}
+
+textarea:focus {
+  outline-color: var(--tertiary-color-500) !important;
+}
+
+select:focus {
+  outline-color: var(--tertiary-color-500) !important;
 }
 
 .primary-color {
@@ -63,24 +73,40 @@ input:-webkit-autofill {
   border-color: var(--secondary-color);
 }
 
+.tertiary-color {
+  color: var(--tertiary-color);
+}
+
+.bg-tertiary-color {
+  background-color: var(--tertiary-color);
+}
+
 .border-tertiary-color {
   border-color: var(--tertiary-color);
 }
 
-.tertiary-color {
-  color: var(--tertiary-color);
+.bg-tertiary-color-50 {
+  background-color: var(--tertiary-color-50);
+}
+
+.bg-tertiary-color-200 {
+  background-color: var(--tertiary-color-200);
 }
 
 .tertiary-color-300 {
   color: var(--tertiary-color-300);
 }
 
-.tertiary-color-500 {
-  color: var(--tertiary-color-500);
+.bg-tertiary-color-300 {
+  background-color: var(--tertiary-color-300);
 }
 
-.bg-tertiary-color {
-  background-color: var(--tertiary-color);
+.border-tertiary-color-300 {
+  border-color: var(--tertiary-color-300);
+}
+
+.tertiary-color-500 {
+  color: var(--tertiary-color-500);
 }
 
 .red-color-700 {
@@ -94,7 +120,7 @@ input:-webkit-autofill {
 /* main-btn */
 .main-btn {
   background-color: var(--primary-color);
-  color: var(--secondary-color);
+  color: white;
   border-radius: 50px;
   transition: all 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
   cursor: pointer;
@@ -155,7 +181,7 @@ input:-webkit-autofill {
 
   /* 手機版 */
   padding: 12px 24px;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .nav-btn::after {
@@ -216,10 +242,10 @@ input:-webkit-autofill {
   color: white;
 }
 
-.card-btn-yellow {
+.card-btn-orange {
   background-color: var(--primary-color);
   border: 1.5px solid var(--primary-color);
-  color: var(--secondary-color);
+  color: white;
 }
 
 .card-btn-yellow:hover {
@@ -295,7 +321,7 @@ input[type="number"] {
 @media (min-width: 640px) {
   .main-btn {
     padding: 16px 32px;
-    font-size: 1rem; /* 16px */
+    font-size: 18px;
   }
 
   .secondary-btn {
@@ -305,18 +331,18 @@ input[type="number"] {
 
   .nav-btn {
     padding: 16px 32px;
-    font-size: 16px;
+    font-size: 18px;
   }
 }
 
 @media (min-width: 1024px) {
   .main-btn {
     padding: 15px 34px;
-    font-size: 1.125rem; /* 18px */
+    font-size: 18px;
   }
 
   .main-btn.nav {
-    font-size: 1rem; /* 16px */
+    font-size: 18px;
   }
 
   .nav-btn {
@@ -363,4 +389,8 @@ input[type="number"] {
 }
 .ball-bounce-animate:nth-child(3) {
   animation-delay: 0.3s;
+}
+
+.tox-tinymce {
+  border-color: var(--tertiary-color-300) !important;
 }

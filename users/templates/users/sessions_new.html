@@ -15,7 +15,7 @@
                     <input type="email" 
                            placeholder="請輸入信箱" 
                            name="email" 
-                           class="text-sm w-full py-2 px-4 pl-14 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px]"
+                           class="text-sm w-full py-2 px-4 pl-14 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full transition-colors h-[42px]"
                            value="{{form.email.value|default:''}}">
                 </div>
                 {% if form.email.errors %}
@@ -33,7 +33,7 @@
                     <input type="password" 
                            placeholder="請輸入密碼" 
                            name="password" 
-                           class="text-sm w-full py-2 px-4 pl-14 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full focus:outline-none transition-colors h-[42px]"
+                           class="text-sm w-full py-2 px-4 pl-14 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full transition-colors h-[42px]"
                            value="{{form.password.value|default:''}}">
                 </div>
                 {% if form.password.errors %}

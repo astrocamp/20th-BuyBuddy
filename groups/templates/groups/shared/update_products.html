@@ -1,0 +1,161 @@
+{% if not role == "joiner" %}
+    <div>
+        <form action="{% url 'groups:detail' group.id %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="group-id" value="{{ group.id }}">
+    
+            <div class="w-full max-w-[1105px] mx-auto space-y-10">
+                <div class="text-center">
+                <h2 class="text-3xl font-semibold leading-[1.5]">選購商品</h2>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 auto-rows-fr">
+                    {% for product in group.products.all %}
+                    <div class="relative h-full" x-data="{ quantity: 0 }">
+                        <input type="hidden" id="product-{{ product.id }}" name="product-{{ product.id }}" x-model="quantity">
+                        <div class="absolute w-full h-40 sm:h-44 lg:h-48 z-10">
+                            {% if product.banner %}
+                                <img class="object-cover h-full w-full rounded-t-lg" src="{{ product.banner.url }}" alt="{{ product.name }}">
+                            {% else %}
+                                <div class="h-full w-full bg-tertiary-color-300 rounded-t-lg flex items-center justify-center">
+                                    <span class="tertiary-color-500">無圖片</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="h-full border-2 border-tertiary-color rounded-lg flex flex-col pt-40 sm:pt-44 lg:pt-48 ">
+                            <div class="flex-1 flex flex-col justify-between p-4 sm:p-6 lg:p-8 gap-4">
+                                <div>
+                                    <h3 class="text-xl lg:text-lg font-semibold break-all">{{ product.name }}</h3>
+                                    <p class="tertiary-color-500 text-sm mt-2 break-all">{{ product.description|striptags }}</p>
+                                </div>
+                                
+                                <div class="flex flex-col gap-4 mt-auto">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-lg md:text-2xl font-semibold primary-color">
+                                            ${{ product.price }}
+                                        </span>
+                                    </div>
+                                    
+                                    {% if not role == "owner" %}
+                                    <div class="flex justify-between items-center space-x-2">
+                                        <div>選擇數量</div>
+                                        <div class=" flex items-center space-x-2">
+                                            <button 
+                                                type="button"
+                                                @click="quantity > 0 ? quantity-- : null"
+                                                class="px-2 py-1 border border-secondary rounded-full text-sm cursor-pointer hover:bg-[var(--secondary-color)] hover:text-white transition duration-200"
+                                            >
+                                                －
+                                            </button>
+                                            <span x-text="quantity" class="text-base font-semibold w-6 text-center"></span>
+                                            <button 
+                                                type="button"
+                                                @click="quantity++"
+                                                class="px-2 py-1 border border-[var(--secondary-color)] rounded-full text-sm cursor-pointer hover:bg-[var(--primary-color)] hover:border-[var(--primary-color)] transition duration-200"
+                                            >
+                                                ＋
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+             
+                
+{% else %}
+    <div>
+
+    <form action="{% url 'groups:detail' group.id %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="group-id" value="{{ group.id }}">
+
+        <div class="w-full max-w-[1105px] mx-auto space-y-10">
+            <div class="text-center">
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-semibold leading-[1.2]">更新團購商品數量</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 auto-rows-fr">
+                {% for product in group.integrated_products %}
+                <div class="relative h-full" x-data="{ quantity: {{ product.user_quantity}} }">
+                    <input type="hidden" id="product-{{ product.id }}" name="product-{{ product.id }}" x-model="quantity">
+
+                    <div class="absolute w-full h-40 sm:h-44 lg:h-48 z-10">
+                        {% if product.banner %}
+                            <img class="object-cover h-full w-full rounded-t-lg" src="{{ product.banner.url }}" alt="{{ product.name }}">
+                        {% else %}
+                            <div class="h-full w-full bg-tertiary-color-300 rounded-t-lg flex items-center justify-center">
+                                <span class="tertiary-color-500">無圖片</span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="h-full border-2 border-tertiary-color rounded-lg flex flex-col pt-40 sm:pt-44 lg:pt-48">
+                        <div class="flex-1 flex flex-col justify-between p-4 sm:p-6 lg:p-8">
+
+                            <div>
+                                <h3 class="text-xl lg:text-lg font-semibold">{{ product.name }}</h3>
+                                <p class="tertiary-color-500 text-sm mt-2 break-all">{{ product.description|striptags }}</p>
+                            </div>
+                            
+                            <div class="flex flex-col gap-4 mt-auto">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xl font-semibold primary-color">${{ product.price }}</span>
+                                </div>
+
+                                    <div class="flex justify-between items-center space-x-2 pr-4">
+                                        <div>已選購數量</div>
+                                        <div class=" flex items-center space-x-2">{{ product.user_quantity}}</div>
+                                    </div>
+
+                                    {% if group.status != "reached" %}
+                                        <div class="w-full flex justify-between items-center gap-6">
+                                            <div>更改數量</div>
+                                            <div class=" flex items-center space-x-2">
+                                                <button 
+                                                    type="button"
+                                                    @click="quantity > 0 ? quantity-- : null"
+                                                    class="px-2 py-1 border border-secondary-color rounded-full text-sm cursor-pointer hover:bg-[var(--secondary-color)] hover:text-white transition duration-300"
+                                                >
+                                                    －
+                                                </button>
+                                                <span x-text="quantity" class="text-base font-semibold w-6 text-center">
+                                                </span>
+                                                <button 
+                                                    type="button"
+                                                    @click="quantity++"
+                                                    class="px-2 py-1 border border-[var(--secondary-color)] rounded-full text-sm cursor-pointer hover:bg-[var(--primary-color)] hover:border-[var(--primary-color)] hover:text-white transition duration-200"
+                                                >
+                                                    ＋
+                                                </button>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+            {% if not role == "owner" %}
+            <div class="w-full text-center mt-10">
+                {% if group.status == 'reached' %}
+                {% elif role == 'joiner' %}
+                <button type="submit" class="main-btn">
+                修改數量
+                </button>
+                {% else %}
+                <button type="submit" class="main-btn">
+                一鍵跟團
+                </button>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </form>
+</div>

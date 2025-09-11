@@ -8,122 +8,130 @@ from django.conf import settings
 
 
 class GroupForm(ModelForm):
-	goal_choice = forms.ChoiceField(
-	choices=Group.GOAL_CHOICES,
-	  label='成團方式',
-	  required=True, 
-		widget=forms.Select(attrs={
-			"class": "w-full border-2 border-[#EDEDED] rounded-lg p-2 focus:border-[#1E1F24] focus:outline-none"
-		}),
-		error_messages={"required": "請選擇成團標準"}
-	)
+    goal_choice = forms.ChoiceField(
+        choices=Group.GOAL_CHOICES,
+        label='成團方式',
+        required=True,
+        widget=forms.Select(
+            attrs={"class": "w-full border-2 border-tertiary-color-300 rounded-lg p-2"}
+        ),
+        error_messages={"required": "請選擇成團標準"},
+    )
 
-	class Meta:
-		model = Group
-		fields = ["name", "banner", "description", "deadline", "goal_choice", "min_goal"]
-		labels = {
-			"name": "團購名稱",
-			"banner": "團購圖片",
-			"description": "團購描述",
-			"deadline": "團購截止日期",
-			"goal_choice": "成團方式",
-			"min_goal": "成團目標"
-		}
-		error_messages = {
-		"name": {
-				"required": "請輸入團購名稱",
-				},
-			"banner": {
-				"required": "請選擇團購圖片",
-			},
-			"description": {
-				"required": "請輸入團購介紹",
-			},
-			"deadline": {
-				"required": "請輸入截止日期",
-			},
-			"min_goal": {
-				"required": "請輸入成團金額/數量",
-			},
-		}
-	
+    class Meta:
+        model = Group
+        fields = [
+            "name",
+            "banner",
+            "description",
+            "deadline",
+            "goal_choice",
+            "min_goal",
+        ]
+        labels = {
+            "name": "團購名稱",
+            "banner": "團購圖片",
+            "description": "團購描述",
+            "deadline": "團購截止日期",
+            "goal_choice": "成團方式",
+            "min_goal": "成團目標",
+        }
+        error_messages = {
+            "name": {
+                "required": "請輸入團購名稱",
+            },
+            "banner": {
+                "required": "請選擇團購圖片",
+            },
+            "description": {
+                "required": "請輸入團購介紹",
+            },
+            "deadline": {
+                "required": "請輸入截止日期",
+            },
+            "min_goal": {
+                "required": "請輸入成團金額/數量",
+            },
+        }
+
 
 class ProductForm(forms.ModelForm):
-	class Meta:
-		model = Product
-		fields = ["name", "price", "description", "banner"]  
-		labels = {
-			"name": "產品名稱",
-			"price": "產品價格",
-			"description": "產品描述",
-			"banner": "產品圖片",
-		}
-		error_messages = {
-	   	"name": {
-			"required": "請輸入商品名稱",
-			},
-		"price": {
-			"required": "請輸入商品單價",
-		},
-		"description": {
-			"required": "請輸入商品介紹",
-		},
-		"banner": {
-			"required": "請上傳商品圖片",
-		},
-		}
-		widgets = {
-			"description": TinyMCE(mce_attrs=settings.TINYMCE_LIMITED_CONFIG),
-		}
+    class Meta:
+        model = Product
+        fields = ["name", "price", "description", "banner"]
+        labels = {
+            "name": "產品名稱",
+            "price": "產品價格",
+            "description": "產品描述",
+            "banner": "產品圖片",
+        }
+        error_messages = {
+            "name": {
+                "required": "請輸入商品名稱",
+            },
+            "price": {
+                "required": "請輸入商品單價",
+            },
+            "description": {
+                "required": "請輸入商品介紹",
+            },
+            "banner": {
+                "required": "請上傳商品圖片",
+            },
+        }
+        widgets = {
+            "description": TinyMCE(mce_attrs=settings.TINYMCE_LIMITED_CONFIG),
+        }
 
 
 class ProductBaseForm(BaseInlineFormSet):
-	def __init__(self, *args, **kwargs):
-		super().__init__(*args, **kwargs)
-		instance = kwargs.get('instance', None)
-		if instance and instance.pk:
-			self.extra = 0
-	
-	def clean(self):
-		super().clean()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        instance = kwargs.get('instance', None)
+        if instance and instance.pk:
+            self.extra = 0
 
-		valid_forms = 0
+    def clean(self):
+        super().clean()
 
-		for form in self.forms:
-			has_data = any([
-				form.cleaned_data.get("name"),
-				form.cleaned_data.get("price"),
-				form.cleaned_data.get("description"),
-				form.cleaned_data.get("banner")
-			])
+        valid_forms = 0
 
-			if has_data:
-				if all([form.cleaned_data.get('name'), form.cleaned_data.get('price'), form.cleaned_data.get('description')]):
-					valid_forms += 1
+        for form in self.forms:
+            has_data = any(
+                [
+                    form.cleaned_data.get("name"),
+                    form.cleaned_data.get("price"),
+                    form.cleaned_data.get("description"),
+                    form.cleaned_data.get("banner"),
+                ]
+            )
 
-		if valid_forms == 0:
-			raise forms.ValidationError('請至少添加一個完整的產品')
-			
-	
+            if has_data:
+                if all(
+                    [
+                        form.cleaned_data.get('name'),
+                        form.cleaned_data.get('price'),
+                        form.cleaned_data.get('description'),
+                    ]
+                ):
+                    valid_forms += 1
+
+        if valid_forms == 0:
+            raise forms.ValidationError('請至少添加一個完整的產品')
+
 
 ProductFormSet = inlineformset_factory(
-	Group,
-	Product,
-	form=ProductForm,
-	fields=['name', 'price', 'description', "banner"],
-	extra=2,
-	can_delete=False,
-	labels = {
-		'name': '產品名稱',
-		'price': '產品價格',
-		'description': '產品描述',
-		'banner': '產品圖片'
-		},
-	formset = ProductBaseForm) 
-					
-
- 
-
-
-
-
+    Group,
+    Product,
+    form=ProductForm,
+    fields=['name', 'price', 'description', "banner"],
+    extra=2,
+    can_delete=False,
+    labels={
+        'name': '產品名稱',
+        'price': '產品價格',
+        'description': '產品描述',
+        'banner': '產品圖片',
+    },
+    formset=ProductBaseForm,
+)
