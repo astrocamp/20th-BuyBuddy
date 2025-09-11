@@ -158,7 +158,7 @@ class GroupService:
 	@staticmethod
 	@transaction.atomic
 	def join_group(user, group, products_data):
-		GroupService.check_amount_limit(group, products_data)
+		GroupService.check_amount_limit(user, group, products_data)
 		joined_group, is_new_member = GroupService.get_or_create_joined_group(user=user, group=group)
 		products = GroupService.add_products_to_joined_group(joined_group=joined_group, products_data=products_data)
 		GroupService.update_total_and_progress(group)
@@ -210,19 +210,39 @@ class GroupService:
 		return True
 	
 	@staticmethod
-	def check_amount_limit(group, products_data):
+	def check_amount_limit(user, group, products_data):
 		current_total = GroupService.get_total(group=group)
 		product_data_map = { item["id"]: item["quantity"] for item in products_data}
+		try:
+			joined_group = JoinedGroup.objects.get(buyer=user, group=group, deleted_at__isnull=True)
+			existing_products = JoinedGroupProduct.objects.filter(
+				joined_group=joined_group,
+				deleted_at__isnull=True
+			)
+
+		except JoinedGroup.DoesNotExist:
+			existing_products = JoinedGroupProduct.objects.none()
+
 		if group.goal_choice == "quantity":
-			total_quantity = sum(product_data_map.values())
-			if current_total + total_quantity > group.min_goal:
+			existing_quantity = existing_products.aggregate(total=Sum("quantity"))["total"] or 0
+			updated_quantity = sum(product_data_map.values())
+			net_quantity = updated_quantity - existing_quantity
+			if current_total + net_quantity > group.min_goal:
 				raise ExceedsLimitException("超過可購買上限")
-		if group.goal_choice == "amount":
+		elif group.goal_choice == "amount":
+			existing_amount = existing_products.aggregate(total=Sum(F("quantity") * F("product__price")))["total"] or 0
 			product_ids = list(product_data_map.keys())
 			products = Product.objects.filter(id__in=product_ids).values("id", "price")
-			total_amount = sum(product_data_map[product["id"]] * product["price"] for product in products)
-			if current_total + total_amount > group.min_goal*1.2:
+			updated_amount = sum(product_data_map[product["id"]] * product["price"] for product in products)
+			net_amount = updated_amount - existing_amount
+			if current_total + net_amount > group.min_goal*1.2:
 				raise ExceedsLimitException("超過可購買上限")
+		
+	
+			
+
+		
+
 			
 		
 	

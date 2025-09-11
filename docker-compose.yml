@@ -3,9 +3,8 @@ version: '3.8'
 services:
   web:
     build: .
-    command: gunicorn --bind 0.0.0.0:8000 BuyBuddy.wsgi:application
+    command: gunicorn --bind 0.0.0.0:8000 --workers 3 --timeout 120 --max-requests 1000 --max-requests-jitter 50 BuyBuddy.wsgi:application
     volumes:
-      - .:/app
       - static_volume:/app/staticfiles
     expose:
       - "8000"
@@ -13,6 +12,7 @@ services:
       - rabbitmq
     env_file:
       - .env
+    restart: unless-stopped
 
   nginx:
     image: nginx:alpine
@@ -53,3 +53,6 @@ services:
       - rabbitmq
     env_file:
       - .env
+
+volumes:
+  static_volume:
