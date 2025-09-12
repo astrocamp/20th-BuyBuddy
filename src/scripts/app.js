@@ -7,6 +7,7 @@ import { setupTinyMCECsrf } from "./tinymceCsrf.js";
 import { productFormset } from "./productFormset.js";
 import { backToTopBtnControl } from "./backToTopBtn.js";
 import { addressFormControl } from "./address.js";
+import { googleAuth } from "./googleAuth.js";
 
 window.Alpine = Alpine;
 Alpine.data("messagesControl", messagesControl);
@@ -19,4 +20,5 @@ Alpine.start();
 
 document.addEventListener("DOMContentLoaded", function () {
   setupTinyMCECsrf();
+  googleAuth();
 });

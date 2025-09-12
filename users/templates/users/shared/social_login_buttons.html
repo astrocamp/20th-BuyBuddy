@@ -9,9 +9,10 @@
 
     <div class="flex flex-col justify-center gap-4 mt-4">
         <!-- Google OAuth2 Popup 登入按鈕 -->
-        <form id="google-oauth2-form" action="{% url 'users:google_oauth2' %}" method="post">
+        <form id="google-oauth2-form" action="{% url 'users:social_oauth2' %}" method="post">
             {% csrf_token %}
             <input type="hidden" name="google_code" id="google_code">
+            <input type="hidden" name="social_provider" id="social_provider">
             <button id="google-signin-btn" 
                 class="flex items-center justify-center gap-2 w-full py-2 px-4 border border-[var(--tertiary-color-300)] rounded-full hover:border-[var(--tertiary-color)] hover:bg-[var(--tertiary-color)] transition-colors">
                 <img src="{% static 'assets/google.png' %}" alt="Google" class="w-4 h-4">
@@ -24,49 +25,4 @@
             <span class="text-sm">Line</span>
         </a>
     </div>
-
-
-    <script>
-        // 頁面載入完成後初始化
-        window.addEventListener('load', function() {
-            console.log("Google OAuth2 Popup 初始化完成");
-            
-            // 綁定 Google 登入按鈕點擊事件
-            const googleBtn = document.getElementById('google-signin-btn');
-            if (googleBtn) {
-                googleBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    console.log('觸發 Google OAuth2 Popup 登入');
-                    triggerGoogleSignIn();
-                });
-            }
-        });
-
-        // 觸發 Google OAuth2 Popup 登入
-        function triggerGoogleSignIn() {
-            if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
-                const client = google.accounts.oauth2.initCodeClient({
-                    client_id: '',
-                    scope: 'email profile openid',
-                    ux_mode: 'popup',
-                    callback: handleGoogleOAuthResponse
-                });
-                client.requestCode();
-            } else {
-                console.error('Google OAuth2 API 尚未載入完成');
-            }
-        }
-
-        // Google OAuth2 Popup 登入處理
-        function handleGoogleOAuthResponse(response) {
-            if (response.code) {
-                // 顯示成功訊息
-                console.log('OAuth2 授權碼回應:', response);
-                document.getElementById('google_code').value = response.code;
-                document.getElementById('google-oauth2-form').submit();
-            } else if (response.error) {
-                console.error('OAuth2 錯誤:', response.error);
-            }
-        }        
-    </script>
 </div>
