@@ -26,28 +26,51 @@ from allauth.socialaccount.helpers import complete_social_login
 from django.http import JsonResponse
 from allauth.exceptions import ImmediateHttpResponse
 
+from django.http import HttpResponse, HttpRequest
+from allauth.account.views import PasswordResetFromKeyView
+from .forms import CustomResetPasswordFromKeyForm
+
+
+def custom_password_reset_from_key(request, uid=None, key=None):
+    if request.method == "POST":
+        form = CustomResetPasswordFromKeyForm(request.POST)
+        if form.is_valid():
+            form.save()  # 更新密碼
+            messages.success(request, "密碼已重置成功")
+            return redirect("account_login")  # 或你想要的頁面
+    else:
+        form = CustomResetPasswordFromKeyForm(initial={"uid": uid, "key": key})
+
+    return render(
+        request,
+        "account/password_reset_from_key.html",
+        {"form": form},
+    )
+
 
 def js_google_client(request):
     return JsonResponse({"client_id": os.getenv("GOOGLE_CLIENT_ID")})
 
+
 def handle_error(request):
     error_messages = {
-        'config_error': '系統配置載入失敗，請稍後再試',
-        'network_error': '網路連線異常，請檢查網路狀態',
-        'unknown': '發生未知錯誤，請聯絡客服',
-        'auth_failed': '登入取消，請稍後再試',
+        "config_error": "系統配置載入失敗，請稍後再試",
+        "network_error": "網路連線異常，請檢查網路狀態",
+        "unknown": "發生未知錯誤，請聯絡客服",
+        "auth_failed": "登入取消，請稍後再試",
     }
     if request.GET.get("type") == "config_error":
-        messages.error(request, error_messages['config_error'])
+        messages.error(request, error_messages["config_error"])
         return redirect("users:sessions_new")
     elif request.GET.get("type") == "network_error":
-        messages.error(request, error_messages['network_error'])
+        messages.error(request, error_messages["network_error"])
         return redirect("users:sessions_new")
     elif request.GET.get("type") == "auth_failed":
-        messages.info(request, error_messages['auth_failed'])
+        messages.info(request, error_messages["auth_failed"])
         return redirect("users:sessions_new")
-    messages.error(request, error_messages['unknown'])
+    messages.error(request, error_messages["unknown"])
     return redirect("users:sessions_new")
+
 
 def send_verification_mail(request, user, email):
     try:
@@ -441,7 +464,6 @@ def address_create(request):
 
             # 代表是從選擇地址來的
             if order_id:
-
                 # 轉址把 order 和 address 帶過去
                 url = f"{reverse('orders:check_order', args=[order_id])}?address_id={new_address_form.id}"
 
@@ -515,18 +537,18 @@ def social_oauth2(request):
     code = request.POST.get("google_code")
 
     if not code:
-        messages.error(request, '過程中斷，請重新嘗試')
+        messages.error(request, "過程中斷，請重新嘗試")
         return redirect("users:sessions_new")
-    
+
     try:
         # 處理 Google 授權碼，完成登入流程
-        
+
         # 1. 用授權碼換取 access token
         tokens = token_code_handler(code)
 
         # 2. 用 access token 取得用戶資料
-        user_info = get_user_info(tokens['access_token'])
-        
+        user_info = get_user_info(tokens["access_token"])
+
         # 3. 前往登入或註冊
         social_login = create_google_login(user_info)
         return complete_social_login(request, social_login)
@@ -534,14 +556,15 @@ def social_oauth2(request):
         # 讓 allauth 的重導向正常通過
         raise
     except (ValueError, KeyError) as e:
-      messages.error(request, 'Google 授權失敗，請稍後再試')
-      return redirect("users:sessions_new")
+        messages.error(request, "Google 授權失敗，請稍後再試")
+        return redirect("users:sessions_new")
     except requests.RequestException as e:
-        messages.error(request, '網路連線失敗，請稍後再試')
+        messages.error(request, "網路連線失敗，請稍後再試")
         return redirect("users:sessions_new")
     except Exception as e:
-        messages.error(request, '系統錯誤，請稍後再試')
+        messages.error(request, "系統錯誤，請稍後再試")
         return redirect("users:sessions_new")
+
 
 def token_code_handler(code):
     # 設定 OAuth 流程
@@ -556,28 +579,30 @@ def token_code_handler(code):
 
     flow = Flow.from_client_config(
         client_config,
-        scopes=['https://www.googleapis.com/auth/userinfo.email', 
-        'https://www.googleapis.com/auth/userinfo.profile',
-        'openid']
+        scopes=[
+            "https://www.googleapis.com/auth/userinfo.email",
+            "https://www.googleapis.com/auth/userinfo.profile",
+            "openid",
+        ],
     )
-    
+
     # 設定重導向 URI（必須與 Google Console 設定一致）
-    flow.redirect_uri = 'postmessage'  # 彈窗模式用這個
-    
+    flow.redirect_uri = "postmessage"  # 彈窗模式用這個
+
     # 用授權碼換取 token
     flow.fetch_token(code=code)
-    
+
     return {
-        'access_token': flow.credentials.token,
-        'id_token': flow.credentials.id_token,
-        'refresh_token': flow.credentials.refresh_token,
+        "access_token": flow.credentials.token,
+        "id_token": flow.credentials.id_token,
+        "refresh_token": flow.credentials.refresh_token,
     }
 
 
 def get_user_info(access_token):
     response = requests.get(
-        'https://www.googleapis.com/oauth2/v3/userinfo',
-        headers={'Authorization': f'Bearer {access_token}'}
+        "https://www.googleapis.com/oauth2/v3/userinfo",
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     if response.status_code != 200:
@@ -585,25 +610,29 @@ def get_user_info(access_token):
 
     return response.json()
 
+
 def create_google_login(user_info):
     # 創建 SocialLogin
     social_login = SocialLogin()
-    
+
     # 創建 SocialAccount
     social_login.account = SocialAccount()
-    social_login.account.provider = 'google'
-    social_login.account.uid = user_info.get('sub')  # Google 用戶 ID
+    social_login.account.provider = "google"
+    social_login.account.uid = user_info.get("sub")  # Google 用戶 ID
     social_login.account.extra_data = user_info
-    
 
     # 創建 暫時的 User
     user = User()
-    user.email = user_info.get('email', '')
-    user.username = user_info.get('email', '')  # 用 email 作為 username
+    user.email = user_info.get("email", "")
+    user.username = user_info.get("email", "")  # 用 email 作為 username
     user.is_verified = True
 
     # 關聯 User 和 SocialAccount
     social_login.user = user
     social_login.account.user = user
-    
+
     return social_login
+
+
+def password_reset_redirect(request):
+    return redirect("users:sessions_new")

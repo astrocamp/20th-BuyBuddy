@@ -26,7 +26,7 @@ ALLOWED_HOSTS = [
     "buybuddy.site",
     "www.buybuddy.site",
     os.getenv("HOSTNAME"),
-    "cce894edfc1c.ngrok-free.app"
+    "cce894edfc1c.ngrok-free.app",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -63,7 +63,7 @@ INSTALLED_APPS = [
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
-    'widget_tweaks',
+    "widget_tweaks",
 ]
 
 MIDDLEWARE = [
@@ -123,25 +123,25 @@ AUTH_USER_MODEL = "users.User"
 if DEBUG:
     AUTH_PASSWORD_VALIDATORS = [
         {
-            'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-            'OPTIONS': {
-                'min_length': 8,
+            "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+            "OPTIONS": {
+                "min_length": 8,
             },
         },
     ]
 else:
     AUTH_PASSWORD_VALIDATORS = [
         {
-            'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+            "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
         },
         {
-            'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+            "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
         },
         {
-            'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+            "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
         },
         {
-            'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+            "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
         },
     ]
 
@@ -201,13 +201,13 @@ else:
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # DEFAULT_FROM_EMAIL = 'noreply@yoursite.com'
 
-
 # 真實發信
 # Anymail 設定
 ANYMAIL = {
     "MAILGUN_API_KEY": os.environ.get("MAILGUN_API_KEY"),
     "MAILGUN_SENDER_DOMAIN": os.environ.get("MAILGUN_SENDER_DOMAIN"),
 }
+
 EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 
@@ -268,9 +268,17 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
 ]
 
+
+ACCOUNT_ADAPTER = "users.adapters.CustomAccountAdapter"
+
+
 SOCIALACCOUNT_ADAPTER = "users.adapters.CustomSocialAccountAdapter"
 ACCOUNT_ADAPTER = "users.adapters.CustomAccountAdapter"
 ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_FORMS = {
+    "reset_password": "users.forms.MyResetPasswordForm",
+    "reset_password_from_key": "users.forms.CustomResetPasswordFromKeyForm",
+}
 
 # settings.py 末尾
 SITE_ID = 1

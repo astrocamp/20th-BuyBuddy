@@ -43,20 +43,25 @@
                     </div>
                 {% endif %}
             </div>
-            <div class="flex items-center gap-2 ml-2 mt-2">
-                <label class="relative w-6 h-6 cursor-pointer flex items-center">
-                    <input type="checkbox" 
-                           id="remember_me" 
-                           name="remember_me" 
-                           class="peer absolute opacity-0 w-full h-full cursor-pointer">
-                    <svg class="absolute w-6 h-6 transition-opacity fill-[var(--tertiary-color-300)] peer-checked:fill-[var(--main-color)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
-                        <path d="M230,128A102,102,0,1,1,128,26,102.12,102.12,0,0,1,230,128Zm-12,0a90,90,0,1,0-90,90A90.1,90.1,0,0,0,218,128Z"></path>
-                    </svg>
-                    <svg class="absolute w-6 h-6 opacity-0 peer-checked:opacity-100 transition-opacity fill-[var(--main-color)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
-                        <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"></path>
-                    </svg>
-                </label>
-                <label for="remember_me" class="cursor-pointer text-[var(--tertiary-color-500)] text-sm">記住我</label>
+            <div class="flex items-center justify-between gap-2 ml-2 mt-2">
+                <div class="flex items-center gap-2">
+                    <label class="relative w-6 h-6 cursor-pointer flex items-center">
+                        <input type="checkbox" 
+                               id="remember_me" 
+                               name="remember_me" 
+                               class="peer absolute opacity-0 w-full h-full cursor-pointer">
+                        <svg class="absolute w-6 h-6 transition-opacity fill-[var(--tertiary-color-300)] peer-checked:fill-[var(--main-color)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+                            <path d="M230,128A102,102,0,1,1,128,26,102.12,102.12,0,0,1,230,128Zm-12,0a90,90,0,1,0-90,90A90.1,90.1,0,0,0,218,128Z"></path>
+                        </svg>
+                        <svg class="absolute w-6 h-6 opacity-0 peer-checked:opacity-100 transition-opacity fill-[var(--main-color)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+                            <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"></path>
+                        </svg>
+                    </label>
+                    <label for="remember_me" class="cursor-pointer text-[var(--tertiary-color-500)] text-sm">記住我</label>
+                </div>
+                <div class="text-sm pr-2">
+                    <a href="{% url 'account_reset_password' %}" class="border-b-2">忘記密碼？</a>
+                </div>
             </div>
             <div class="flex justify-center mt-2 sm:mt-6">
                 <button class="main-btn">
