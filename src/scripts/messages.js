@@ -70,7 +70,7 @@ const messagesControl = () => {
               alignItems: "center",
               gap: "5px",
               boxShadow: "none",
-			  width: "fit-content",
+              width: "fit-content",
             },
             stopOnFocus: true,
             // 自定義通知內容，添加客製關閉按鈕

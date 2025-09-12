@@ -185,3 +185,17 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"訂單 {self.order.id} - 付款編號：{self.payment_number}"
+
+
+class OrderMessage(models.Model):
+    order = models.ForeignKey(
+        Order, on_delete=models.CASCADE, related_name='messages', db_index=True
+    )
+    sender = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name="sent_messages"
+    )
+    receiver = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name="received_messages"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    content = models.TextField()

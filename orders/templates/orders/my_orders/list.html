@@ -138,18 +138,19 @@
 						
 						<div class="flex justify-center sm:justify-end items-center gap-2 pt-2">
 							<div class="flex items-center gap-2">
+								<a href="{% url 'groups:detail' order.group.id %}" class="card-btn card-btn-white">檢視</a>
+								<a href="{% url 'orders:order_messages' order.id %}" class="card-btn card-btn-secondary">留言板</a>
 								{% if order.order_status == order.OrderStatus.PENDING %}
 								<form action="{% url 'orders:ship_address' order.id %}" method="get" class="inline">
-									<button class="card-btn card-btn-secondary">去付款</button>
+									<button class="card-btn card-btn-orange">去付款</button>
 								</form>
 								{% endif %}
 								{% if order.order_status == order.OrderStatus.SHIPPED %}
 								<form action="{% url 'orders:received' order.id %}" method="post" class="inline">
 									{% csrf_token %}
-									<button class="card-btn card-btn-secondary">我收到貨了</button>
+									<button class="card-btn card-btn-orange">我收到貨了</button>
 								</form>
 								{% endif %}
-								<a href="{% url 'groups:detail' order.group.id %}" class="card-btn card-btn-white">檢視</a>
 							</div>
 						</div>
 					</div>
