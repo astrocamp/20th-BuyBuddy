@@ -267,6 +267,8 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 SOCIALACCOUNT_ADAPTER = "users.adapters.CustomSocialAccountAdapter"
+ACCOUNT_ADAPTER = "users.adapters.CustomAccountAdapter"
+ACCOUNT_EMAIL_VERIFICATION = "none"
 
 # settings.py 末尾
 SITE_ID = 1

@@ -23,8 +23,31 @@ import os
 import requests
 from allauth.socialaccount.models import SocialLogin, SocialAccount
 from allauth.socialaccount.helpers import complete_social_login
+from django.http import JsonResponse
+from allauth.exceptions import ImmediateHttpResponse
 
 
+def js_google_client(request):
+    return JsonResponse({"client_id": os.getenv("GOOGLE_CLIENT_ID")})
+
+def handle_error(request):
+    error_messages = {
+        'config_error': '系統配置載入失敗，請稍後再試',
+        'network_error': '網路連線異常，請檢查網路狀態',
+        'unknown': '發生未知錯誤，請聯絡客服',
+        'auth_failed': '登入取消，請稍後再試',
+    }
+    if request.GET.get("type") == "config_error":
+        messages.error(request, error_messages['config_error'])
+        return redirect("users:sessions_new")
+    elif request.GET.get("type") == "network_error":
+        messages.error(request, error_messages['network_error'])
+        return redirect("users:sessions_new")
+    elif request.GET.get("type") == "auth_failed":
+        messages.info(request, error_messages['auth_failed'])
+        return redirect("users:sessions_new")
+    messages.error(request, error_messages['unknown'])
+    return redirect("users:sessions_new")
 
 def send_verification_mail(request, user, email):
     try:
@@ -153,7 +176,7 @@ def sessions_delete(request):
 @require_POST
 @login_required
 def check_email(request):
-    # TODO: 個人頁面需要二次驗證
+    # TODO 個人頁面需要二次驗證
     user = request.user
 
     if user.is_verified:
@@ -486,42 +509,39 @@ def address_cancel(request, address_id):
     )
 
 
-# TODO: 發送授權碼到後端進行驗證和登入
-def google_oauth2(request):
-    
-
+# TODO: 接收前端的授權碼進行驗證和登入
+def social_oauth2(request):
     # 先加入調試訊息
     code = request.POST.get("google_code")
-    print(f"收到JWT: {code}")
-    print(f"請求方法: {request.method}, 授權碼")
-    print(f"用戶已登入: {request.user.is_authenticated}")
 
-    if code:
-        try:
-            # TODO: 在這裡處理 Google 授權碼，完成登入流程
-            
-            # 1. 用授權碼換取 access token
-            tokens = token_code_handler(code)
-            print(f"取得 tokens: {tokens.keys()}")
+    if not code:
+        messages.error(request, '過程中斷，請重新嘗試')
+        return redirect("users:sessions_new")
+    
+    try:
+        # 處理 Google 授權碼，完成登入流程
+        
+        # 1. 用授權碼換取 access token
+        tokens = token_code_handler(code)
 
-            # 2. 用 access token 取得用戶資料
-            user_info = get_user_info(tokens['access_token'])
-            print(f"取得用戶資料: {user_info}")
-            
-
-            # 3. 創建或找到用戶並登入
-            social_login = create_google_login(user_info)
-
-            return complete_social_login(request, social_login)
-        except Exception as e:
-            import traceback
-            print("完整錯誤堆疊:")
-            traceback.print_exc()
-            print(f"Google OAuth2 錯誤: {e}")
-            return redirect("users:new")
-    else:
-        print('授權碼不存在')
-        return redirect("users:new")  # 重導向到登入頁面而不是註冊頁面
+        # 2. 用 access token 取得用戶資料
+        user_info = get_user_info(tokens['access_token'])
+        
+        # 3. 前往登入或註冊
+        social_login = create_google_login(user_info)
+        return complete_social_login(request, social_login)
+    except ImmediateHttpResponse:
+        # 讓 allauth 的重導向正常通過
+        raise
+    except (ValueError, KeyError) as e:
+      messages.error(request, 'Google 授權失敗，請稍後再試')
+      return redirect("users:sessions_new")
+    except requests.RequestException as e:
+        messages.error(request, '網路連線失敗，請稍後再試')
+        return redirect("users:sessions_new")
+    except Exception as e:
+        messages.error(request, '系統錯誤，請稍後再試')
+        return redirect("users:sessions_new")
 
 def token_code_handler(code):
     # 設定 OAuth 流程
@@ -580,12 +600,10 @@ def create_google_login(user_info):
     user = User()
     user.email = user_info.get('email', '')
     user.username = user_info.get('email', '')  # 用 email 作為 username
-    user.first_name = user_info.get('given_name', '')
-    user.last_name = user_info.get('given_name', '')
+    user.is_verified = True
 
     # 關聯 User 和 SocialAccount
     social_login.user = user
     social_login.account.user = user
     
     return social_login
-
