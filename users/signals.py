@@ -2,6 +2,8 @@ from django.db.models.signals import post_save, pre_save, pre_delete
 from django.dispatch import receiver
 from django.conf import settings
 from .models import UserAddress, DefaultAddressRequiredError
+from allauth.account.signals import password_reset
+from django.contrib import messages
 
 User = settings.AUTH_USER_MODEL
 
@@ -46,3 +48,13 @@ def ensure_default_before_save(sender, instance: UserAddress, **kwargs):
 def ensure_default_on_delete(sender, instance: UserAddress, **kwargs):
     if not _has_other_default(instance.user, exclude_pk=instance.pk):
         raise DefaultAddressRequiredError("無法刪除預設地址")
+
+
+@receiver(password_reset)
+def on_password_reset(sender, request, **kwargs):
+    # By default, allauth adds a success message.
+    # We clear existing messages and add our own custom one.
+    storage = messages.get_messages(request)
+    list(storage)
+
+    messages.success(request, "新密碼已儲存成功，請使用新密碼登入您的帳號")
