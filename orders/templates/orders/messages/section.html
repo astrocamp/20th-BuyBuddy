@@ -1,0 +1,86 @@
+{% extends "layouts/default.html" %}
+{% load humanize %}
+{% block content %}
+<section class="max-w-[1440px] mx-auto px-4 sm:px-8 md:px-16 mt-6 lg:mt-8 flex flex-1 min-h-[calc(100dvh-270px)] xl:max-h-[calc(100dvh-270px)]">
+    <div class="flex flex-col flex-1 justify-center items-stretch xl:flex-row gap-8 px-6 sm:px-0 ">
+        <!-- 訂單資訊 -->
+        <div class="rounded-2xl w-full xl:w-[40%] flex flex-col flex-none">
+            <div class="flex flex-row gap-4 items-center mb-4">
+                <!-- 圖片 -->
+                <div class="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 rounded-lg overflow-hidden">
+                    {% if order.group.banner %}
+                    <img class="w-full h-full object-cover object-center" src="{{ order.group.banner.url }}" alt="{{ order.group.name }}">
+                    {% else %}
+                    <div class="w-full h-full bg-tertiary-color-300 flex items-center justify-center tertiary-color-300">
+                        <span>無圖片</span>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-xs sm:text-base tertiary-color-500">#{{order.order_number}}</span>
+                    <h2 class="text-lg sm:text-2xl font-semibold">{{ order.group.name }}</h2>
+                </div>
+            </div>
+            <div>
+                <ul class="min-h-[80px]">
+                    <li class="hidden md:grid grid-cols-1 md:grid-cols-2 gap-2 bg-tertiary-color-50 rounded-lg text-center p-2 px-4">
+                        <p class="text-xs tertiary-color-500">商品</p>
+                        <p class="hidden md:grid grid-cols-3 gap-4 text-sm tertiary-color-500">
+                            <span>價格</span>
+                            <span>數量</span>
+                            <span>小計</span>
+                        </p>
+                    </li>
+                    {% for jgp in joined_group_products %}
+                    <li class="hidden md:grid grid-cols-1 md:grid-cols-2 gap-2 bg-tertiary-color-50 rounded-lg my-2 p-2 items-center">
+                        <p class="text-sm tertiary-color-500 text-left md:text-center">{{ jgp.product.name }}</p>
+                        <p class="grid grid-cols-3 gap-4 text-sm tertiary-color-500">
+                            <span class="text-left md:text-center">${{ jgp.product.price|intcomma }}</span>
+                            <span class="text-left md:text-center">x {{ jgp.quantity|intcomma }}</span>
+                            <span class="text-center">${{ jgp.subtotal|intcomma }}</span>
+                        </p>
+                    </li>
+                    <li class="grid md:hidden grid-cols-1 gap-2 bg-tertiary-color-50 rounded-lg my-2 px-4 py-2">
+                        <div class="flex flex-row items-center justify-between w-full">
+                            <span class="text-xs tertiary-color-500 flex-1 text-left">{{ jgp.product.name }}</span>
+                            <span class="text-xs tertiary-color-500 flex-none ml-2">x {{ jgp.quantity|intcomma }}</span>
+                            <span class="text-xs tertiary-color-500 flex-none ml-2">${{ jgp.product.price|intcomma }}</span>
+                            <span class="text-xs font-bold flex-none ml-2">${{ jgp.subtotal|intcomma }}</span>
+                        </div>
+                    </li>
+                    {% endfor %}
+                    <li class="hidden md:grid grid-cols-2 gap-2 bg-tertiary-color-50 rounded-lg text-center my-2 p-2">
+                        <p class="grid col-start-2 grid-cols-3 gap-4 text-base font-semibold">
+                            <span class="col-start-2">合計</span>
+                            <span>${{ order.amount|floatformat:0|intcomma }}</span>
+                        </p>
+                    </li>
+                    <li class="grid md:hidden rounded-lg text-center my-2 px-4 py-2 bg-tertiary-color-50">
+                        <p class="text-sm font-semibold text-right">合計 ${{ order.amount|floatformat:0|intcomma }}</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- 留言板 -->
+        <div class="bg-white rounded-2xl border-2 border-tertiary-color p-6 pt-0 mb-4 w-full flex flex-col flex-1 justify-end">
+            {% include "orders/messages/messages_board_partial.html" %}
+            <form hx-post="{% url 'orders:send_message' order.id %}"
+                  hx-target="#messages-board"
+                  hx-swap="outerHTML"
+                  class="mt-4 flex flex-col sm:flex-row gap-2">
+                  <input id="message-input" type="text" name="message_content"
+                         placeholder="輸入留言..."
+                         class="w-full sm:w-auto border border-tertiary-color-300 rounded-full px-4 py-2 flex-1 placeholder:text-sm">
+                  <button type="submit" class="card-btn card-btn-orange w-full sm:w-auto">
+                      送出
+                  </button>
+            </form>
+        </div>
+    </div>
+</section>
+
+
+
+
+{% endblock %}

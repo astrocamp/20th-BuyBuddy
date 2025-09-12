@@ -248,7 +248,7 @@ select:focus {
   color: white;
 }
 
-.card-btn-yellow:hover {
+.card-btn-orange:hover {
   background-color: var(--primary-color-400);
   border: 1.5px solid var(--primary-color-400);
 }

@@ -1,0 +1,30 @@
+{% if update_message  %}
+<input id="message-input" type="text" name="message_content"
+        placeholder="輸入留言..."
+        class="w-full sm:w-auto border border-tertiary-color-300 rounded-full px-4 py-2 flex-1 placeholder:text-sm"
+        hx-swap-oob="true">
+{% endif %}
+
+<div id="messages-container" class="overflow-y-auto max-h-[380px] md:max-h-none" x-data x-init="$el.scrollTop = $el.scrollHeight" hx-swap-oob="true">
+    {% if partial_msg_show %}
+        {% include "shared/flash_messages_content.html" with messages=messages only %}
+    {% endif %}
+
+    <ul id="messages-board">
+        {% for message in order_messages %}
+            <li class="mt-3 mb-3 flex flex-col text-left {% if message.sender == request.user %}items-end{% else %}items-start{% endif %}">
+                {% if message.sender == request.user %}
+                    <div class="bg-secondary-color text-white px-4 py-3 max-w-[200px] sm:max-w-[300px] break-all rounded-lg rounded-br-none self-end">
+                    <span class="block text-base">{{ message.content }}</span>
+                    </div>
+                    <span class="block ml-auto text-right text-xs mt-1 px-2 text-right max-w-[200px] sm:max-w-[300px] tertiary-color-500">{{ message.created_at|date:'Y/m/d H:i' }}</span>
+                {% else %}
+                    <div class="bg-tertiary-color px-4 py-3 max-w-[200px]  sm:max-w-[300px] break-all rounded-lg rounded-bl-none self-start">
+                        <span class="block text-base">{{ message.content }}</span>
+                    </div>
+                    <span class="block text-xs mt-1 px-2 max-w-[200px]  sm:max-w-[300px] tertiary-color-500">{{ message.created_at|date:'Y/m/d H:i' }}</span>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+</div>

@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import message_views
 
 app_name = "orders"
 
@@ -64,4 +65,23 @@ urlpatterns = [
     path("my-orders/payment/fail/", views.fail, name="payment_fail"),
     # 確認收貨
     path("my-orders/<int:order_id>/received/", views.received, name="received"),
+    # ========== 訂單留言版相關 ==========
+    # 跟團者留言板
+    path(
+        "my-orders/<int:order_id>/messages/",
+        message_views.order_messages,
+        name="order_messages",
+    ),
+    # 開團者留言板
+    path(
+        "owned-orders/<int:order_id>/messages/",
+        message_views.group_owner_order_messages,
+        name="group_owner_order_messages",
+    ),
+    # 新增留言
+    path(
+        "<int:order_id>/messages/send/",
+        message_views.send_message,
+        name="send_message",
+    ),
 ]
