@@ -21,7 +21,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
-	"13.215.172.147",
+    "13.215.172.147",
     "ec2-13-215-172-147.ap-southeast-1.compute.amazonaws.com",
     "buybuddy.site",
     "www.buybuddy.site",
@@ -147,7 +147,7 @@ else:
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "zh-hant"
 
 TIME_ZONE = "Asia/Taipei"
 
@@ -271,11 +271,10 @@ SOCIALACCOUNT_ADAPTER = "users.adapters.CustomSocialAccountAdapter"
 # settings.py 末尾
 SITE_ID = 1
 
-LOGIN_REDIRECT_URL="/"
+LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
 
 # settings.py
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
-
