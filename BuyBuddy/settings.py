@@ -26,14 +26,15 @@ ALLOWED_HOSTS = [
     "buybuddy.site",
     "www.buybuddy.site",
     os.getenv("HOSTNAME"),
+    "cce894edfc1c.ngrok-free.app"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://13.215.172.147/",
     "http://ec2-13-215-172-147.ap-southeast-1.compute.amazonaws.com/",
-    "https://buybuddy.site/",
-    "https://www.buybuddy.site/",
-    f"https://{os.getenv('HOSTNAME')}",
+    "http://buybuddy.site/",
+    "http://www.buybuddy.site/",
+    f"http://{os.getenv('HOSTNAME')}",
 ]
 
 # Application definition
@@ -183,16 +184,17 @@ if DEBUG:
     SITE_URL = "http://127.0.0.1:8000"
     SITE_NAME = "buybuddy (dev)"
 
-    # Session Cookie 設定
+    # Session  Cookie 設定
     SESSION_COOKIE_SECURE = False
     SESSION_COOKIE_SAMESITE = "Lax"
 
 # 正式環境階段
 else:
     # TODO 正式上線要改網域
-    SITE_URL = "https://buybuddy.site/"
+    SITE_URL = "http://buybuddy.site/"
     SITE_NAME = "buybuddy"
-    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = False
+    SESSION_COOKIE_SAMESITE = "Lax"
 
 
 # 開發階段：在 terminal 顯示郵件內容
@@ -278,3 +280,8 @@ SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
 
 # settings.py
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+
+LINE_CHANNEL_ID = os.getenv("LINE_CHANNEL_ID")
+LINE_CHANNEL_SECRET_KEY = os.getenv("LINE_CHANNEL_SECRET_KEY")
+LINE_PRIVATE_KEY = os.getenv("LINE_PRIVATE_KEY")
+LINE_KID = os.getenv("LINE_KID")

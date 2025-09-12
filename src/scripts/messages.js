@@ -70,6 +70,7 @@ const messagesControl = () => {
               alignItems: "center",
               gap: "5px",
               boxShadow: "none",
+			  width: "fit-content",
             },
             stopOnFocus: true,
             // 自定義通知內容，添加客製關閉按鈕
@@ -81,7 +82,7 @@ const messagesControl = () => {
               // 加文字
               const textEl = document.createElement("span");
               textEl.textContent = text;
-              container.classList.add("flash-messages-text");
+              textEl.classList.add("flash-messages-text");
 
               // 客製關閉按鈕
               const closeBtn = document.createElement("button");
@@ -90,7 +91,7 @@ const messagesControl = () => {
                   <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
                 </svg>
               `;
-              container.classList.add("flash-messages-close-btn");
+              closeBtn.classList.add("flash-messages-close-btn");
 
               // 點擊關閉通知功能
               closeBtn.addEventListener("click", () => {
