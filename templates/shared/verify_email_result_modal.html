@@ -3,7 +3,7 @@
     x-data="{ modalShow: {{ verify_email_modal.modalShow|yesno:'true,false'|default:'false' }} }"
     x-show="modalShow"
     class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 text-center">
-    <div class="bg-[var(--bg-color)] p-10 rounded-2xl w-[60%] md:w-[40%] lg:w-[30%] relative">
+    <div class="bg-white p-10 rounded-2xl w-[60%] md:w-[40%] lg:w-[30%] relative">
 
         {% if verify_email_modal.img %}
             <div class="m-auto w-30 sm:w-40 aspect-square text-center">

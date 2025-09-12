@@ -20,3 +20,9 @@ node_modules
 staticfiles
 celerybeat-schedule
 buybuddy_db.sql
+
+public/styles/*
+!public/styles/.keep
+
+public/scripts/*
+!public/scripts/.keep
