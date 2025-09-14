@@ -4,6 +4,36 @@
 {% endblock%}
 {% block content%}
 
+<div class="max-w-[1440px] mx-auto px-12 sm:px-24 mt-12 lg:mt-16">
+    <div class="w-full max-w-[1105px] mx-auto">
+        <div class="text-center w-full mb-4 md:mb-10">
+            <h1 class="text-xl sm:text-2xl md:text-3xl font-bold mb-2 sm:mb-4">智能截取</h1>
+        </div>
+		<div class="bg-white flex flex-col gap-6 w-full py-4 md:py-8 px-8 md:px-16 border-2 border-tertiary-color-300 rounded-lg">
+			<form class="flex flex-col gap-2 text-sm sm:text-base" action="{% url 'groups:extract' %}" method="post" @submit="loading = true">
+      		{% csrf_token %}
+      			<div class="flex gap-2 sm:gap-4 items-center">
+          			<div class="flex-1">
+              			<input
+                			type="text"
+                			name="{{ url_extractor_form.url.html_name }}"
+                			id="{{ url_extractor_form.url.id_for_label }}"
+                			value="{{ url_extractor_form.url.value|default:'' }}"
+                			placeholder="請輸入產品網址"
+                			class="w-full border-2 border-tertiary-color-300 rounded-lg p-2 text-sm sm:text-base resize-none overflow-hidden">
+              			{% if url_extractor_form.url.errors %}
+                		<div class="text-[var(--red-color-700)] text-sm mt-2">
+                      		{{ url_extractor_form.url.errors }}
+                  		</div>
+              			{% endif %}
+          			</div>
+          			<button type="submit" class="main-btn whitespace-nowrap">送出</button>
+      			</div>
+  			</form>
+		</div>
+	</div>
+</div>
+ {% if group_form %}
 <div x-data="validators" class="max-w-[1440px] mx-auto px-12 sm:px-24 mt-12 lg:mt-16">
     <div class="w-full max-w-[1105px] mx-auto">
         <div class="text-center w-full mb-4 md:mb-10">
@@ -18,6 +48,9 @@
         data-upload-url="{% url 'groups:upload_image' %}"
         @submit="loading = true">
             {% csrf_token %}
+			{% if scraped_image %}
+  			<input type="hidden" name="scraped_image_url" value="{{ scraped_image }}">
+  			{% endif %}
             
             <div class="bg-white flex flex-col gap-6 w-full py-4 md:py-8 px-8 md:px-16 border-2 border-tertiary-color-300 rounded-lg">
                 <div class="flex flex-col gap-2">
@@ -36,7 +69,7 @@
                     </div>
                     {% endif %}
                 </div>
-                <div  class="flex flex-col gap-2" x-data="imagePreview('')">
+                <div  class="flex flex-col gap-2 px-0 sm:px-4 md:px-6 lg:px-8" x-data="imagePreview('{{ scraped_image|default:''}}')">
                     <label for="{{ group_form.banner.id_for_label }}" class="text-sm text-center sm:text-base">{{ group_form.banner.label }}</label>
 					<div class="w-full h-40 border-2 border-dashed border-tertiary-color-300 rounded-lg flex items-center justify-center cursor-pointer relative overflow-hidden group hover:bg-[var(--tertiary-color-50)] transition-colors"
         				 @click="$refs.fileInput.click()">
@@ -88,7 +121,7 @@
                     </div>
                     {% endif %}
                 </div>
-                <div class="flex flex-col gap-2">
+                <div class="flex flex-col gap-2 px-0 sm:px-4 md:px-6 lg:px-8">
     				<label for="{{ group_form.goal_choice.id_for_label }}" class="text-sm text-center sm:text-base">{{ group_form.goal_choice.label }}</label>
     				<select 
 						name="{{ group_form.goal_choice.html_name }}" 
@@ -106,7 +139,7 @@
         			<div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">{{ error }}</div>
    				{% endfor %}
 				</div>
-                <div class="flex flex-col gap-2">
+                <div class="flex flex-col gap-2  px-0 sm:px-4 md:px-6 lg:px-8">
                     <label for="{{ group_form.min_goal.id_for_label }}" class="text-sm text-center sm:text-base">{{ group_form.min_goal.label }}</label>
                     <input
                         class="w-full border-2 border-tertiary-color-300 rounded-lg p-2 text-sm sm:text-base"
@@ -142,4 +175,10 @@
         </form>
     </div>
 </div>
+ {% else %}
+      <!-- 當 URL 驗證失敗時，顯示錯誤訊息 -->
+      <div class="text-center text-gray-500 mt-8">
+          <p>請重新輸入正確的產品網址</p>
+      </div>
+  {% endif %}
 {% endblock %}
