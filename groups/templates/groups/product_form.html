@@ -24,7 +24,7 @@ data-limited-config='{{ limited_config_json|safe }}'>
             type="number"
             name="{{ form.price.html_name }}"
             id="{{ form.price.auto_id }}"
-            value="{{ form.price.value|default:'' }}"
+            value="{{ form.price.value|default:form.price.initial|default:'' }}"
 			min="0"
             />
 			{% if form.price.errors %}
@@ -40,7 +40,7 @@ data-limited-config='{{ limited_config_json|safe }}'>
             </div>
             {% endif %}
             
-			<div x-data="imagePreview('')" class="flex flex-col justify-center gap-4">
+			<div x-data="imagePreview('{{ scraped_image|default:'' }}')" class="flex flex-col justify-center gap-4">
             	<label for="{{ form.banner.id_for_label }}" class="text-sm text-center sm:text-base">產品圖片</label>
 				<div class="w-full h-40 border-2 border-dashed border-tertiary-color-300 rounded-lg flex items-center justify-center cursor-pointer relative overflow-hidden group hover:bg-[var(--tertiary-color-50)] transition-colors"
         			  @click="$refs.fileInput.click()">

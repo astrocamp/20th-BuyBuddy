@@ -121,17 +121,34 @@ class ProductBaseForm(BaseInlineFormSet):
 
 
 ProductFormSet = inlineformset_factory(
-    Group,
-    Product,
-    form=ProductForm,
-    fields=['name', 'price', 'description', "banner"],
-    extra=2,
-    can_delete=False,
-    labels={
-        'name': '產品名稱',
-        'price': '產品價格',
-        'description': '產品描述',
-        'banner': '產品圖片',
-    },
-    formset=ProductBaseForm,
-)
+	Group,
+	Product,
+	form=ProductForm,
+	fields=['name', 'price', 'description', "banner"],
+	extra=2,
+	can_delete=False,
+	labels = {
+		'name': '產品名稱',
+		'price': '產品價格',
+		'description': '產品描述',
+		'banner': '產品圖片'
+		},
+	formset = ProductBaseForm) 
+
+class URLExtractForm(forms.Form):
+	url = forms.URLField(
+		label="產品網址",
+		required=True,
+		widget=forms.URLInput(),
+		error_messages={
+			"required": "請輸入有效網址",
+			"invalid": "請輸入有效網址"
+		}
+	)
+					
+
+ 
+
+
+
+
