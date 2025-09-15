@@ -364,6 +364,19 @@ input[type="number"] {
 }
 
 /* loading 動畫 */
+/* 兼容 iOS Safari */
+@-webkit-keyframes ball-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+  50% {
+    transform: translateY(-100%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+}
+
 @keyframes ball-bounce {
   0%,
   100% {
@@ -377,16 +390,19 @@ input[type="number"] {
 }
 
 .ball-bounce-animate {
-  animation: ball-bounce 0.8s ease-in-out infinite;
+  -webkit-animation: ball-bounce 0.8s ease-in-out 0s infinite both;
+  animation: ball-bounce 0.8s ease-in-out 0s infinite both;
+  will-change: transform;
+  transform: translateZ(0);
 }
-.ball-bounce-animate:nth-child(1) {
-  animation-delay: 0s;
-}
+
 .ball-bounce-animate:nth-child(2) {
-  animation-delay: 0.15s;
+  -webkit-animation: ball-bounce 0.8s ease-in-out 0.15s infinite both;
+  animation: ball-bounce 0.8s ease-in-out 0.15s infinite both;
 }
 .ball-bounce-animate:nth-child(3) {
-  animation-delay: 0.3s;
+  -webkit-animation: ball-bounce 0.8s ease-in-out 0.3s infinite both;
+  animation: ball-bounce 0.8s ease-in-out 0.3s infinite both;
 }
 
 .tox-tinymce {
