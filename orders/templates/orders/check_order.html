@@ -4,8 +4,8 @@
 <section class="max-w-[1440px] mx-auto px-16 sm:px-24 mt-12 lg:mt-16">
     {% include "orders/shared/payment_progress_bar.html"%}
     <h1 class="text-center text-xl md:text-2xl mb-4 font-semibold text-primary-700">請確認訂單資訊</h1>
-
-
+    
+    
     <!-- 收件資訊 -->
     <div class="p-6 rounded-lg border-2 border-[var(--tertiary-color)] mb-6">
         <h2 class="text-lg mb-4 font-semibold text-primary-700">收件資訊</h2>
@@ -24,10 +24,10 @@
             </div>
         </div>
         
-
+        
     </div>
     
-
+    
     <div class="p-6 rounded-lg border-2 border-[var(--tertiary-color)] mb-6">
         <!-- 訂單資訊 -->
         <h2 class="text-lg mb-4 font-semibold text-primary-700">訂單資訊</h2>
@@ -41,10 +41,10 @@
                 <span class="font-medium">{{order.group.name}}</span>
             </div>
         </div>
-
+        
         <!-- 分隔線 -->
         <div class="border border-[var(--tertiary-color-300)] w-full my-6"></div>
-
+        
         <!-- 商品明細 -->
         <h2 class="text-lg mb-4 font-semibold text-primary-700">商品明細</h2>
         <div>
@@ -59,19 +59,19 @@
                     </tr>
                 </thead>
                 <tbody>
-                        {% for joined_group_product in joined_group_products %}
-                            <tr class="border-b-[1.5px] border-[var(--tertiary-color-300)] transition align-middle" style="height: 64px;">
-                                <td class="py-4 flex items-center gap-2">
-                                    {% if joined_group_product.product.banner %}
-                                        <img src="{{ joined_group_product.product.banner.url }}" class="w-12 h-12 object-cover rounded mr-2">
-                                    {% endif %}
-                                    <span>{{ joined_group_product.product.name }}</span>
-                                </td>
-                                <td class="text-right p-4">{{ joined_group_product.product.formatted_price }}</td>
-                                <td class="text-right p-4">{{ joined_group_product.quantity }}</td>
-                                <td class="text-right p-4">${{ joined_group_product.subtotal|floatformat:0 }}</td>
-                            </tr>
-                        {% endfor %}
+                    {% for joined_group_product in joined_group_products %}
+                    <tr class="border-b-[1.5px] border-[var(--tertiary-color-300)] transition align-middle" style="height: 64px;">
+                        <td class="py-4 flex items-center gap-2">
+                            {% if joined_group_product.product.banner %}
+                            <img src="{{ joined_group_product.product.banner.url }}" class="w-12 h-12 object-cover rounded mr-2">
+                            {% endif %}
+                            <span>{{ joined_group_product.product.name }}</span>
+                        </td>
+                        <td class="text-right p-4">{{ joined_group_product.product.formatted_price }}</td>
+                        <td class="text-right p-4">{{ joined_group_product.quantity }}</td>
+                        <td class="text-right p-4">${{ joined_group_product.subtotal|floatformat:0 }}</td>
+                    </tr>
+                    {% endfor %}
                 </tbody>
                 <tfoot>
                     <tr>
@@ -86,7 +86,7 @@
                 <div class="border-b pb-4 last:border-b-0 flex flex-col gap-2">
                     <div class="flex items-center gap-2">
                         {% if joined_group_product.product.banner %}
-                            <img src="{{ joined_group_product.product.banner.url }}" class="w-16 h-16 object-cover rounded mr-2">
+                        <img src="{{ joined_group_product.product.banner.url }}" class="w-16 h-16 object-cover rounded mr-2">
                         {% endif %}
                         <span class="font-semibold">{{ joined_group_product.product.name }}</span>
                     </div>
@@ -102,16 +102,19 @@
             </div>
         </div>
     </div>
-
-
-                <form action="{% url 'orders:payment_request' order.id %}" method="post" class="flex flex-col sm:flex-row justify-between gap-3 text-center"  @submit="loading = true">
-                        {% csrf_token %}
-                        <a href="{% url 'orders:ship_address' order.id %}" class="main-btn main-btn-black w-full sm:w-auto">回上一步</a>
-                        <button class="main-btn w-full sm:w-auto flex gap-2 justify-center items-center">
-
-                            <img class="h-4" src="{% static "assets/LINE_Pay_logo.png" %}" alt="LINE Pay logo">
-                            付款
-                        </button>
-                </form>
+    <form action="{% url 'orders:payment_type' order.id %}" method="post">
+        <div class="p-6 rounded-lg border-2 border-[var(--tertiary-color)] mb-6 w-full">
+            {% csrf_token %}
+            <h2 class="text-lg mb-4 font-semibold text-primary-700">付款方式</h2>
+            <select class="w-full border-2 border-[var(--tertiary-color-300)] rounded-lg p-2 focus:border-[var(--main-color)] focus:outline-none" name="payment_type" id="payment_type">
+                <option class="text-sm m-auto" value="newebpay">信用卡</option>
+                <option class="text-sm m-auto" value="linepay">LINE PAY</option>
+            </select>
+        </div>
+        <div class="flex flex-col sm:flex-row justify-between gap-3 text-center">
+            <a href="{% url 'orders:ship_address' order.id %}" class="main-btn main-btn-black w-full sm:w-auto">回上一步</a>
+            <button class="main-btn w-full sm:w-auto" id="pay-btn">去付款</button>
+        </div>
+    </form>
 </section>
 {% endblock %}

@@ -16,8 +16,11 @@ from products.models import JoinedGroupProduct
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.db.models import Sum, F, Q, Prefetch
+from .newebpay.service import create_payment_request, handle_newebpay_notify
 from .utils import get_buyer_list_data
 from .exports import export_orders_to_excel
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
 
 
 REQUIRED_ADDR_FIELDS = (
@@ -138,9 +141,11 @@ def create_headers(body, uri):
     return headers
 
 
-@require_POST
+
 @login_required
-def request(request, order_id):
+# TODO: 付款
+def linepay(request, order_id):
+    print("request: ", order_id)
     order = get_object_or_404(Order, pk=order_id)
     if not order.user == request.user:
         messages.error(request, "訂單發生錯誤，請稍後再試")
@@ -531,3 +536,74 @@ def shipped(request, order_id):
 
     messages.success(request, "訂單已確認出貨")
     return redirect('orders:buyer_list', group_id=order.group.id)
+
+# 付款方式
+@require_POST
+@login_required
+def payment_type(request, order_id):
+    payment_type = request.POST.get("payment_type")
+    if payment_type == "newebpay":
+        return redirect("orders:newebpay", order_id=order_id)
+    elif payment_type == "linepay":
+        return redirect("orders:linepay", order_id=order_id)
+
+
+# 藍新金流
+@login_required
+def newebpay(request, order_id):
+    order = get_object_or_404(Order, pk=order_id, user=request.user)
+    payment = Payment.objects.create(order=order)
+    
+    try:
+        payment_data = create_payment_request(order, payment)
+        
+        # 生成自動提交的 HTML，讓瀏覽器來提交
+        html_content = f"""
+        <html>
+        <body>
+        <form id="newebpay-form" method="POST" action="{settings.NEWEBPAY_URL}">
+        <input type="hidden" name="MerchantID" value="{payment_data.get('MerchantID', '')}">
+        <input type="hidden" name="TradeInfo" value="{payment_data.get('TradeInfo', '')}">
+        <input type="hidden" name="TradeSha" value="{payment_data.get('TradeSha', '')}">
+        <input type="hidden" name="Version" value="{payment_data.get('Version', '')}">
+        </form>
+        <script>document.getElementById('newebpay-form').submit();</script>
+        </body>
+        </html>
+        """
+
+    except Exception as e:
+        messages.error(request, "藍新金流付款請求失敗，請稍後再試")
+        return redirect("orders:my_orders")
+    
+    return HttpResponse(html_content)
+
+@csrf_exempt
+def newebpay_notify(request):
+    payment_data = handle_newebpay_notify(request)
+    payment_number = payment_data.get("merchant_order_no")
+    payment = get_object_or_404(Payment, payment_number=payment_number)
+    order = payment.order
+    
+    if payment_data.get("status") == "SUCCESS":
+        payment.mark_as_paid()
+        payment.save()
+        order.mark_as_processing()
+        order.save()
+        return HttpResponse(status=200)
+    else:
+        payment.mark_as_failed()
+        payment.save()
+        return HttpResponse(status=400)
+
+    
+
+@csrf_exempt
+def newebpay_return(request):
+    payment_data = handle_newebpay_notify(request)
+    if payment_data.get("status") == "SUCCESS":
+        messages.success(request, "付款成功，請至訂單頁面查看")
+        return redirect(f"{reverse('orders:my_orders')}?auto_tab=processing")
+    else:
+        messages.error(request, f"{payment_data.get('message')}")
+        return redirect(f"{reverse('orders:my_orders')}?auto_tab=pending")

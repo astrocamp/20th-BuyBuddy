@@ -26,7 +26,7 @@ ALLOWED_HOSTS = [
     "buybuddy.site",
     "www.buybuddy.site",
     os.getenv("HOSTNAME"),
-    "cce894edfc1c.ngrok-free.app",
+    os.getenv("NGROK_HOSTNAME")
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -35,6 +35,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://buybuddy.site/",
     "http://www.buybuddy.site/",
     f"http://{os.getenv('HOSTNAME')}",
+    f"https://{os.getenv('NGROK_HOSTNAME')}",
 ]
 
 # Application definition
@@ -288,10 +289,26 @@ LOGOUT_REDIRECT_URL = "/"
 
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
 
-# settings.py
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
 LINE_CHANNEL_ID = os.getenv("LINE_CHANNEL_ID")
 LINE_CHANNEL_SECRET_KEY = os.getenv("LINE_CHANNEL_SECRET_KEY")
 LINE_PRIVATE_KEY = os.getenv("LINE_PRIVATE_KEY")
 LINE_KID = os.getenv("LINE_KID")
+
+# 藍新金流設定
+NEWEBPAY_MERCHANT_ID = os.getenv("NEWEBPAY_MERCHANT_ID")
+NEWEBPAY_HASH_KEY= os.getenv("NEWEBPAY_HASH_KEY")
+NEWEBPAY_HASH_IV= os.getenv("NEWEBPAY_HASH_IV")
+NEWEBPAY_URL = "https://ccore.newebpay.com/MPG/mpg_gateway"
+NGROK_HOSTNAME = os.getenv("NGROK_HOSTNAME")
+
+# 給藍新用的CORS設定
+if DEBUG:
+    # 開發環境 (ngrok)
+    # # ngrok 域名每次都變，所以允許全部
+    CORS_ALLOWED_ORIGINS = [
+        os.getenv("NGROK_HOSTNAME"),
+    ]
+    # 允許跨域請求攜帶認證資訊 (cookies, session 等)
+    CORS_ALLOW_CREDENTIALS = True
