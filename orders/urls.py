@@ -51,9 +51,9 @@ urlpatterns = [
     ),
     # 請求付款
     path(
-        "my-orders/<int:order_id>/payment/request/",
-        views.request,
-        name="payment_request",
+        "my-orders/<int:order_id>/payment/linepay/",
+        views.linepay,
+        name="linepay",
     ),
     # 付款確認
     path("my-orders/payment/confirm/", views.confirm, name="payment_confirm"),
@@ -84,4 +84,17 @@ urlpatterns = [
         message_views.send_message,
         name="send_message",
     ),
+
+    # 付款方式
+    path("my-orders/payment/type/<int:order_id>/", views.payment_type, name="payment_type"),
+
+    # 藍新金流
+    path("my-orders/payment/newebpay/<int:order_id>/",
+        views.newebpay,
+        name="newebpay",
+    ),
+    path("my-orders/payment/newebpay/return/", views.newebpay_return, name="newebpay_return"),
+    path("my-orders/payment/newebpay/notify/", views.newebpay_notify, name="newebpay_notify"),
+
+    
 ]
