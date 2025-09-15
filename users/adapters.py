@@ -18,11 +18,11 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         # 檢查登入來源並顯示對應訊息
         if request.session.get('is_social_signup'):
             # 註冊路線
-            messages.success(request, f"註冊成功！歡迎加入 BuyBuddy！{user.username}")
+            messages.success(request, f"註冊成功")
             del request.session['is_social_signup']
         else:
             # 傳統登入
-            messages.success(request, f"登入成功！歡迎回來 {user.username}！")
+            messages.success(request, f"登入成功")
 
         return redirect('/')
 
