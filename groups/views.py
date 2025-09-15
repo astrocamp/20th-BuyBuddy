@@ -149,6 +149,7 @@ def detail(request, id):
 	group = get_object_or_404(Group.objects.select_related("owner"), pk=id)
 	user = request.user
 	role = "guest"
+	order = None
 
 	if user.is_authenticated:
 		if group.status == "ongoing":
@@ -368,6 +369,9 @@ def download_image_from_url(image_url, filename_prefix="scraped_image"):
 		headers = {
 			"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
 		}
+		if "momoshop.com.tw" in image_url:
+			headers["Referer"] = "https://www.momoshop.com.tw/"
+			
 
 		response = requests.get(image_url, timeout=10, headers=headers)
 		response.raise_for_status()

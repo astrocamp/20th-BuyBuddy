@@ -30,12 +30,8 @@ ALLOWED_HOSTS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://13.215.172.147/",
-    "http://ec2-13-215-172-147.ap-southeast-1.compute.amazonaws.com/",
-    "http://buybuddy.site/",
-    "http://www.buybuddy.site/",
-    f"http://{os.getenv('HOSTNAME')}",
-    f"https://{os.getenv('NGROK_HOSTNAME')}",
+    "https://www.buybuddy.site",
+    "https://buybuddy.site",
 ]
 
 # Application definition
