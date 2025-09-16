@@ -32,6 +32,8 @@ ALLOWED_HOSTS = [
 CSRF_TRUSTED_ORIGINS = [
     "https://www.buybuddy.site",
     "https://buybuddy.site",
+    f"https://{os.getenv('HOSTNAME')}",
+    f"https://{os.getenv('NGROK_HOSTNAME')}",
 ]
 
 # Application definition

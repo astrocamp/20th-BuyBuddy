@@ -164,8 +164,8 @@ class GroupService:
 		GroupService.update_total_and_progress(group)
 		
 		if GroupService.is_reached(group=group):
-			group.reached()
-			group.save()
+			group.reach()
+
 
 		return {
 			"joined_group_id":joined_group.id,
