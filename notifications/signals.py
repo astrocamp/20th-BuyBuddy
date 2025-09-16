@@ -44,7 +44,7 @@ def handle_member_join_and_check_goal(sender, instance, created, **kwargs):
 
                 if count >= group_to_check.min_goal:
                     logger.info(f"團購 '{group_to_check.name}' 已達數量目標。")
-                    group_to_check.reach()
+                    group_to_check.reached()
     except Exception as e:
         logger.error(f"處理 JoinedGroup 信號時發生未預期錯誤: {e}", exc_info=True)
 

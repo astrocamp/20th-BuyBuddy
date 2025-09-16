@@ -145,19 +145,15 @@ def create_headers(body, uri):
 @login_required
 # TODO: 付款
 def linepay(request, order_id):
-    print("request: ", order_id)
     order = get_object_or_404(Order, pk=order_id)
     if not order.user == request.user:
         messages.error(request, "訂單發生錯誤，請稍後再試")
         return redirect(f"{reverse('orders:my_orders')}?auto_tab=pending")
-
     if not order.is_pending():
         messages.warning(request, "訂單已付款，請至訂單紀錄查看")
         return redirect(f"{reverse('orders:my_orders')}?auto_tab=processing")
-
     payment = Payment.objects.create(order=order)
     package_id = f"pkg_{order.order_number}_{str(uuid.uuid4())[:8]}"
-
     payload = {
         "amount": int(order.amount),
         "currency": order.currency,
@@ -180,15 +176,12 @@ def linepay(request, order_id):
             "cancelUrl": f"https://{settings.HOSTNAME}/orders/my-orders/payment/cancel",
         },
     }
-
     signature_uri = settings.LINE_SIGNATURE_REQUEST_URI
     headers = create_headers(payload, signature_uri)
     body = json.dumps(payload)
     url = f"{settings.LINE_SANDBOX_URL}{settings.LINE_SIGNATURE_REQUEST_URI}"
-
     try:
         response = requests.post(url, headers=headers, data=body, timeout=10)
-
         if response.status_code == 200:
             data = response.json()
             if data["returnCode"] == "0000":

@@ -19,11 +19,11 @@ RUN apt-get update \
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install Playwright browsers and dependencies
+RUN python -m playwright install --with-deps
+
 # Copy project
 COPY . /app/
-
-# Collect static files
-RUN python manage.py collectstatic --noinput
 
 # Create a non-root user
 RUN useradd --create-home --shell /bin/bash app \
@@ -35,3 +35,4 @@ EXPOSE 8000
 
 # Run the application
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "BuyBuddy.wsgi:application"]
+
