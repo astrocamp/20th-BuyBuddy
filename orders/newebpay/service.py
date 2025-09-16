@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 NEWEBPAY_MERCHANT_ID = settings.NEWEBPAY_MERCHANT_ID
 NEWEBPAY_HASH_KEY = settings.NEWEBPAY_HASH_KEY
 NEWEBPAY_HASH_IV = settings.NEWEBPAY_HASH_IV
-NGROK_HOSTNAME = settings.NGROK_HOSTNAME
+HOSTNAME = settings.HOSTNAME
   
 # 建立要送出給 藍新金流的資料
 def create_payment_request(order, payment):
@@ -33,8 +33,8 @@ def create_payment_request(order, payment):
     # 產品資訊
     "ItemDesc": order.group.name,
     # 回傳網址
-    "ReturnURL": f"https://{NGROK_HOSTNAME}/orders/my-orders/payment/newebpay/return/",
-    "NotifyURL": f"https://{NGROK_HOSTNAME}/orders/my-orders/payment/newebpay/notify/",
+    "ReturnURL": f"https://{HOSTNAME}/orders/my-orders/payment/newebpay/return/",
+    "NotifyURL": f"https://{HOSTNAME}/orders/my-orders/payment/newebpay/notify/",
   }
 
   # 將 TradeInfo 轉換為 格式化字串

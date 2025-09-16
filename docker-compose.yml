@@ -3,9 +3,11 @@ version: '3.8'
 services:
   web:
     build: .
-    command: gunicorn --bind 0.0.0.0:8000 --workers 3 --timeout 120 --max-requests 1000 --max-requests-jitter 50 BuyBuddy.wsgi:application
+    command: gunicorn --bind 0.0.0.0:8000 --workers 2 --timeout 300 --max-requests 1000 --max-requests-jitter 50 BuyBuddy.wsgi:application
+    shm_size: '2g'
     volumes:
       - static_volume:/app/staticfiles
+      - media_volume:/app/media
     expose:
       - "8000"
     depends_on:
@@ -22,6 +24,7 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
       - static_volume:/app/staticfiles
+      - media_volume:/app/media 
     depends_on:
       - web
 
@@ -37,6 +40,7 @@ services:
   celery:
     build: .
     command: celery -A BuyBuddy worker -l info
+    shm_size: '2g' 
     volumes:
       - .:/app
     depends_on:
@@ -47,6 +51,7 @@ services:
   celery-beat:
     build: .
     command: celery -A BuyBuddy beat -l info
+    shm_size: '2g' 
     volumes:
       - .:/app
     depends_on:
@@ -56,3 +61,4 @@ services:
 
 volumes:
   static_volume:
+  media_volume: {}

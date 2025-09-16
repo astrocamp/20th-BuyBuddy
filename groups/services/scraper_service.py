@@ -610,7 +610,12 @@ JSON:"""
 
     async def scrape_product(self, url: str) -> Dict[str, Any]:
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
+            proxy_server = os.getenv("PROXY_SERVER", None)
+            launch_options = {"headless": True}
+            if proxy_server:
+                launch_options["proxy"] = {"server": proxy_server}
+            
+            browser = await p.chromium.launch(**launch_options)
             page = await browser.new_page()
             
             await page.set_extra_http_headers({

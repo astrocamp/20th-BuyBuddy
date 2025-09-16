@@ -57,7 +57,7 @@ class Group(models.Model):
         self.save()
 
     @transition(field=status, source="ongoing", target="reached")
-    def reach(self):
+    def reached(self):
         from orders.services import create_orders
 
         create_orders(self)

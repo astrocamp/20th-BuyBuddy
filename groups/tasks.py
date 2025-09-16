@@ -13,3 +13,4 @@ def check_deadline():
 	except Exception as e:
 		logging.getLogger(__name__).exception("執行 check_deadline 任務時發生錯誤")
 		return f"執行失敗: {str(e)}"
+

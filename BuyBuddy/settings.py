@@ -16,18 +16,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "t")
 
-ALLOWED_HOSTS = [
-    "127.0.0.1",
-    "localhost",
-    "13.215.172.147",
-    "ec2-13-215-172-147.ap-southeast-1.compute.amazonaws.com",
-    "buybuddy.site",
-    "www.buybuddy.site",
-    os.getenv("HOSTNAME"),
-    os.getenv("NGROK_HOSTNAME")
-]
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
 CSRF_TRUSTED_ORIGINS = [
     "https://www.buybuddy.site",
@@ -188,9 +179,9 @@ if DEBUG:
 # 正式環境階段
 else:
     # TODO 正式上線要改網域
-    SITE_URL = "http://buybuddy.site/"
+    SITE_URL = "https://www.buybuddy.site/"
     SITE_NAME = "buybuddy"
-    SESSION_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_SAMESITE = "Lax"
 
 
@@ -297,11 +288,6 @@ SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
-LINE_CHANNEL_ID = os.getenv("LINE_CHANNEL_ID")
-LINE_CHANNEL_SECRET_KEY = os.getenv("LINE_CHANNEL_SECRET_KEY")
-LINE_PRIVATE_KEY = os.getenv("LINE_PRIVATE_KEY")
-LINE_KID = os.getenv("LINE_KID")
-
 # 藍新金流設定
 NEWEBPAY_MERCHANT_ID = os.getenv("NEWEBPAY_MERCHANT_ID")
 NEWEBPAY_HASH_KEY= os.getenv("NEWEBPAY_HASH_KEY")
@@ -318,3 +304,4 @@ if DEBUG:
     ]
     # 允許跨域請求攜帶認證資訊 (cookies, session 等)
     CORS_ALLOW_CREDENTIALS = True
+
