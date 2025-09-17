@@ -23,14 +23,14 @@
                                 class="w-full h-full border-2 border-tertiary-color-300 rounded-lg p-2 text-sm sm:text-base">
                             
                         </div>
-                         {% if url_extractor_form.url.errors %}
-                            <div class="red-color-700 text-sm text-center">
-                                <p>{{ url_extractor_form.url.errors }}</p>
-                            </div>
-                        {% endif %}
+                         
                         <button type="submit" class="main-btn whitespace-nowrap w-full sm:w-auto">送出</button>
                     </div>
-                   
+                    {% if url_extractor_form.url.errors %}
+                            <div class="red-color-700 text-sm text-center mt-2 break-all">
+                                <p>{{ url_extractor_form.url.errors }}</p>
+                            </div>
+                    {% endif %}
   			</form>
 		</div>
 	</div>
