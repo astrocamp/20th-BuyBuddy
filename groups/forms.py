@@ -5,6 +5,7 @@ from products.models import Product
 from django.forms.widgets import *
 from tinymce.widgets import TinyMCE
 from django.conf import settings
+from django.utils.timezone import now
 
 
 class GroupForm(ModelForm):
@@ -53,6 +54,17 @@ class GroupForm(ModelForm):
                 "required": "請輸入成團金額/數量",
             },
         }
+        
+    def clean_deadline(self):
+        deadline = self.cleaned_data.get('deadline')
+        if deadline and deadline.date() < now().date():
+            raise forms.ValidationError("截止日期不能早於今天")
+        return deadline
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["deadline"].widget.attrs["min"] = now().strftime("%Y-%m-%d")
+            
 
 
 class ProductForm(forms.ModelForm):

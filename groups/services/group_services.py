@@ -229,14 +229,6 @@ class GroupService:
 			net_quantity = updated_quantity - existing_quantity
 			if current_total + net_quantity > group.min_goal:
 				raise ExceedsLimitException("超過可購買上限")
-		elif group.goal_choice == "amount":
-			existing_amount = existing_products.aggregate(total=Sum(F("quantity") * F("product__price")))["total"] or 0
-			product_ids = list(product_data_map.keys())
-			products = Product.objects.filter(id__in=product_ids).values("id", "price")
-			updated_amount = sum(product_data_map[product["id"]] * product["price"] for product in products)
-			net_amount = updated_amount - existing_amount
-			if current_total + net_amount > group.min_goal*1.2:
-				raise ExceedsLimitException("超過可購買上限")
 		
 	
 			
