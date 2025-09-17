@@ -1,0 +1,13 @@
+{% load static %}
+<section class="max-w-[1440px] mx-auto px-12 sm:px-24 mt-12 lg:mt-16" x-data>
+    <div class="flex items-center justify-center">
+            <img class="w-[270px] sm:w-[360px]" src="{% static img_src %}" alt="{{alt}}">
+    </div>
+    <div class="text-center mb-14">
+        <p>{{content}}</p>
+    </div>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <a href="{% url 'pages:homepage' %}" class="py-[12px] px-[24px] rounded-full border-[1.5px] border-secondary-color hover:bg-[var(--secondary-color)] hover:text-white transition-all duration-300 text-base sm:text-lg w-full sm:w-auto text-center">返回首頁</a>
+        <button @click="history.back()" class="main-btn w-full sm:w-auto">返回上一頁</button>
+    </div>
+</section>

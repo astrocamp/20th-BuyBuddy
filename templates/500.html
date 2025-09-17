@@ -1,0 +1,5 @@
+{% extends "layouts/default.html" %}
+{% load static %}
+{% block content %}
+    {% include "shared/error_page.html" with img_src="assets/500.svg" alt="500 伺服器回應出錯" content="抱歉，伺服器回應出錯，請稍後嘗試" only %}
+{% endblock %}
