@@ -32,7 +32,7 @@
                     >{{ group_form.name.value|default:'' }}</textarea>
                     
 					{% if group_form.name.errors %}
-                    <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
+                    <div class="red-color-700 text-sm ml-8 mt-2">
                         {{ group_form.name.errors }}
                     </div>
                     {% endif %}
@@ -56,7 +56,7 @@
 					
 					</div>
 					{% if group_form.banner.errors %}
-                    <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
+                    <div class="red-color-700 text-sm ml-8 mt-2">
                         {{ group_form.banner.errors }}
                     </div>
 					{% endif %}
@@ -66,7 +66,7 @@
                     <label for="{{ group_form.description.id_for_label }}" class="text-sm text-center sm:text-base">{{ group_form.description.label }}</label>
                     {{ group_form.description }}
 					{% if group_form.description.errors %}
-                    <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
+                    <div class="red-color-700 text-sm ml-8 mt-2">
                         {{ group_form.description.errors }}
                     </div>
                     {% endif %}
@@ -80,7 +80,7 @@
                         id="{{ group_form.deadline.id_for_label }}"
 						value="{{ one_week_later|date:'Y-m-d' }}">
 					{% if group_form.deadline.errors %}
-                    <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
+                    <div class="red-color-700 text-sm ml-8 mt-2">
                         {{ group_form.deadline.errors }}
                     </div>
                     {% endif %}
@@ -100,7 +100,7 @@
     			</select>
 
     			{% for error in group_form.goal_choice.errors %}
-        			<div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">{{ error }}</div>
+        			<div class="red-color-700 text-sm ml-8 mt-2">{{ error }}</div>
    				{% endfor %}
 				</div>
                 <div class="flex flex-col gap-2">
@@ -116,7 +116,7 @@
                         x-on:input="removeZero()"
 						value="{{ group_form.min_goal.value|default:'' }}">
 					{% if group_form.min_goal.errors %}
-                    <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
+                    <div class="red-color-700 text-sm ml-8 mt-2">
                         {{ group_form.min_goal.errors }}
                     </div>
                     {% endif %}

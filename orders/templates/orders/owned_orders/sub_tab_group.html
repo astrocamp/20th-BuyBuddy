@@ -1,5 +1,7 @@
 <nav aria-label="我開團的訂單分頁" class="my-6 overflow-hidden px-8">
-    <ul class="flex flex-nowrap overflow-x-scroll pb-3 justify-center items-center gap-4 bg-transparent px-2 py-1">
+    <ul class="flex flex-nowrap overflow-x-scroll pb-3 md:justify-center items-center gap-4 bg-transparent px-2 py-1"
+    x-data="subTabControl"
+    x-init="$nextTick(() => scrollSubTab())">
         {% include "orders/owned_orders/sub_tab.html" with tab="all" current_sub_tab=current_sub_tab content="全部訂單" only %}
 
         {% include "orders/owned_orders/sub_tab.html" with tab="ongoing" current_sub_tab=current_sub_tab content="未成團訂單" only %}

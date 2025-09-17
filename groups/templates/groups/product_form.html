@@ -7,20 +7,20 @@ data-limited-config='{{ limited_config_json|safe }}'>
         <div class="bg-white p-6 border-2 border-tertiary-color-300 rounded-lg flex flex-col gap-4">
             <label for="{{ form.name.id_for_label }}" class="text-sm text-center sm:text-base">{{ form.name.label }}</label>
             <input
-            class="w-full border-2 border-tertiary-color-300 rounded-lg p-2 text-sm sm:text-base"
+            class="w-full border-2 border-tertiary-color-300 rounded-lg p-2 text-sm sm:text-base text-center"
             type="text"
             name="{{ form.name.html_name }}"
             id="{{ form.name.id_for_label }}"
             value="{{ form.name.value|default:'' }}"
             />
 			{% if form.name.errors %}
-             <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
+             <div class="red-color-700 text-sm sm:text-base text-center">
                 {{ form.name.errors }}
             </div>
             {% endif %}
             <label for="{{ form.price.auto_id }}" class="text-sm text-center sm:text-base">{{ form.price.label }}</label>
             <input
-            class="w-full border-2 border-tertiary-color-300 rounded-lg p-2 text-sm sm:text-base"
+            class="w-full border-2 border-tertiary-color-300 rounded-lg p-2 text-sm sm:text-base text-center"
             type="number"
             name="{{ form.price.html_name }}"
             id="{{ form.price.auto_id }}"
@@ -28,14 +28,14 @@ data-limited-config='{{ limited_config_json|safe }}'>
 			min="0"
             />
 			{% if form.price.errors %}
-             <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
+             <div class="red-color-700 text-sm sm:text-base text-center">
                 {{ form.price.errors }}
             </div>
             {% endif %}
             <label for="{{ form.description.auto_id }}" class="text-sm text-center sm:text-base">{{ form.description.label }}</label>
             {{ form.description }}
 			{% if form.description.errors %}
-             <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
+             <div class="red-color-700 text-sm sm:text-base text-center">
                 {{ form.description.errors }}
             </div>
             {% endif %}
@@ -58,7 +58,7 @@ data-limited-config='{{ limited_config_json|safe }}'>
 				accept="image/*"
 				@change="handleFile">
 				{% if form.banner.errors %}
-             	<div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
+             	<div class="red-color-700 text-sm sm:text-base text-center">
                 	{{ form.banner.errors }}
             	</div>
             {% endif %}
@@ -89,7 +89,7 @@ data-limited-config='{{ limited_config_json|safe }}'>
             value="{{ empty_form.name.value|default:'' }}"
             />
 			{% if empty_form.name.errors %}
-             <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
+             <div class="red-color-700 text-sm sm:text-base text-center">
                 {{ empty_form.name.errors }}
             </div>
             {% endif %}
@@ -103,7 +103,7 @@ data-limited-config='{{ limited_config_json|safe }}'>
 			min="0"
             />
 			{% if empty_form.price.errors %}
-            <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
+            <div class="red-color-700 text-sm sm:text-base text-center">
                 {{ empty_form.price.errors }}
             </div>
             {% endif %}
@@ -114,7 +114,7 @@ data-limited-config='{{ limited_config_json|safe }}'>
             id="{{ empty_form.description.auto_id }}"
             >{{ empty_form.description.value|default:'' }}</textarea>
             {% if empty_form.description.errors %}
-             <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
+             <div class="red-color-700 text-sm sm:text-base text-center">
                 {{ empty_form.description.errors }}
             </div>
             {% endif %}
@@ -136,7 +136,7 @@ data-limited-config='{{ limited_config_json|safe }}'>
                 accept="image/*"
                 @change="handleFile">
 				{% if empty_form.banner.errors %}
-            	 <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
+            	 <div class="red-color-700 text-sm sm:text-base text-center">
                 	{{ empty_form.banner.errors }}
             	</div>
             {% endif %}

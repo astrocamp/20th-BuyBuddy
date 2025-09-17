@@ -8,6 +8,7 @@ import { productFormset } from "./productFormset.js";
 import { backToTopBtnControl } from "./backToTopBtn.js";
 import { addressFormControl } from "./address.js";
 import { googleAuth } from "./googleAuth.js";
+import { subTabControl } from "./subTabControl.js";
 
 window.Alpine = Alpine;
 Alpine.data("messagesControl", messagesControl);
@@ -16,6 +17,7 @@ Alpine.data("imagePreview", imagePreview);
 Alpine.data("productFormset", productFormset);
 Alpine.data("backToTopBtnControl", backToTopBtnControl);
 Alpine.data("addressFormControl", addressFormControl);
+Alpine.data("subTabControl", subTabControl);
 Alpine.start();
 
 document.addEventListener("DOMContentLoaded", function () {
