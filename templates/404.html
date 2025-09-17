@@ -1,0 +1,5 @@
+{% extends "layouts/default.html" %}
+{% load static %}
+{% block content %}
+    {% include "shared/error_page.html" with img_src="assets/404.svg" alt="404 您查找的頁面不存在" content="抱歉，您查找的頁面不存在" only %}
+{% endblock %}
