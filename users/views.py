@@ -150,7 +150,7 @@ def create(request):
 
 def sessions_new(request):
     if request.user.is_authenticated:
-        messages.info(request, "您已經登入了")
+        messages.warning(request, "您已登入")
         return redirect("groups:index")
     if request.GET.get("next"):
         messages.warning(request, "請先登入，以繼續訪問頁面")
@@ -189,6 +189,10 @@ def sessions_create(request):
 
 
 def sessions_delete(request):
+    if not request.user.is_authenticated:
+        messages.warning(request, "您已登出")
+        return redirect("pages:homepage")
+
     next_url = request.GET.get("next")
     if next_url and next_url.strip():
         logout(request)

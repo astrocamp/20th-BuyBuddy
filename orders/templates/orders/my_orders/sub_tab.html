@@ -3,7 +3,8 @@
         hx-target="#my-order-list"
         hx-swap="innerHTML"
         hx-trigger="click"
-        class="sub-tab-btn min-w-[110px] {% if tab == current_sub_tab %}active{% endif %}">
+        class="sub-tab-btn min-w-[110px] {% if tab == current_sub_tab %}active{% endif %}"
+        {% if tab == current_sub_tab %}x-ref="activeTab"{% endif %}>
     {{ content }}
     </a>
 </li>

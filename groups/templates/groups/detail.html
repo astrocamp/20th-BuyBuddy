@@ -73,11 +73,11 @@
 						<!-- 剩餘數量 -->
 						<div class="w-full md:w-1/2 flex flex-col items-center">
 							{% if group.goal_choice == "amount" %}
-							<span class="text-sm md:text-base font-medium mb-2 tertiary-color-500">剩餘可跟團金額</span>
-							<span class="text-2xl font-bold">${{ remaining_limit }}</span>
+							<span class="text-sm md:text-base font-medium mb-2 tertiary-color-500">距離成團還差</span>
+							<span class="text-2xl font-bold primary-color">${{ remaining_limit }}</span>
 							{% elif group.goal_choice == "quantity" %}
 							<span class="text-sm md:text-base font-medium mb-2 tertiary-color-500">剩餘可跟團數量</span>
-							<span class="text-2xl font-bold">{{ remaining_limit }} 件</span>
+							<span class="text-2xl font-bold primary-color">{{ remaining_limit }} 件</span>
 							{% endif %}
 						</div>
 					</div>
@@ -85,44 +85,54 @@
 				{% endif %}
 				
 				<!-- 其他團購資訊 -->
-				<div class="flex justify-between gap-4 md:gap-8 mb-6">
-						<div class="flex flex-col sm:flex-row items-start sm:items-center text-xs sm:text-sm md:text-base md:text-lg tertiary-color-500">
-							<div class="flex sm:hidden">
-								<span>團主：</span>
+				<div class="flex flex-col justify-center items-center gap-1 mb-6 sm:flex-row sm:justify-between sm:items-stretch sm:gap-8">
+
+						<!-- 團主 -->
+						<div class="flex">
+							<div class="contents sm:flex sm:flex-row items-start sm:items-center text-xs sm:text-sm sm:text-base md:text-lg tertiary-color-500 w-full sm:w-auto">
+								<div class="flex sm:hidden">
+									<span>團主：</span>
+								</div>
+								<div class="hidden sm:flex">
+									<span>團主</span>
+									<span class="mx-1">：</span>
+								</div>
+								<span class="block sm:inline break-all">{{ group.owner.username }}</span>
 							</div>
-							<div class="hidden sm:flex">
-								<span>團主</span>
-								<span class="mx-1">：</span>
-							</div>
-							<span class="block sm:inline">{{ group.owner.username }}</span>
 						</div>
-					
-						<div class="flex flex-col sm:flex-row items-start sm:items-center text-xs sm:text-sm md:text-base md:text-lg tertiary-color-500">
-							<div class="flex sm:hidden">
-								<span>創立時間：</span>
+						
+						<!-- 創立時間 -->
+						<div class="flex">
+							<div class="contents sm:flex sm:flex-row items-start sm:items-center text-xs sm:text-sm sm:text-base md:text-lg tertiary-color-500 w-full sm:w-auto">
+								<div class="flex sm:hidden">
+									<span>創立時間：</span>
+								</div>
+								<div class="hidden sm:flex">
+									<span>創立時間</span>
+									<span class="mx-1">：</span>
+								</div>
+								<span class="block sm:inline">{{ group.created_at|date:"Y/m/d" }}</span>
 							</div>
-							<div class="hidden sm:flex">
-								<span>創立時間</span>
-								<span class="mx-1">：</span>
-							</div>
-							<span class="block sm:inline">{{ group.created_at|date:"Y/m/d" }}</span>
 						</div>
-					
-						<div class="flex flex-col sm:flex-row items-start sm:items-center text-xs sm:text-sm md:text-base md:text-lg tertiary-color-500">
-							<div class="flex sm:hidden">
-								<span>目標：</span>
+
+						<!-- 目標 -->
+						<div class="flex">
+							<div class="contents sm:flex sm:flex-row items-start sm:items-center text-xs sm:text-sm sm:text-base md:text-lg tertiary-color-500 w-full sm:w-auto">
+								<div class="flex sm:hidden break-keep">
+									<span>目標：</span>
+								</div>
+								<div class="hidden sm:flex break-keep">
+									<span>目標</span>
+									<span class="mx-1">：</span>
+								</div>
+								<span class="block sm:inline">
+									{% if group.goal_choice == "amount" %}
+									${{ group.min_goal }}
+									{% elif group.goal_choice == "quantity" %}
+									{{ group.min_goal }} 件
+									{% endif %}
+								</span>
 							</div>
-							<div class="hidden sm:flex">
-								<span>目標</span>
-								<span class="mx-1">：</span>
-							</div>
-							<span class="block sm:inline">
-								{% if group.goal_choice == "amount" %}
-								${{ group.min_goal }}
-								{% elif group.goal_choice == "quantity" %}
-								{{ group.min_goal }} 件
-								{% endif %}
-							</span>
 						</div>
 				</div>
 			</div>
