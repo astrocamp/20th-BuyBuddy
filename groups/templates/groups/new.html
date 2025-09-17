@@ -114,7 +114,8 @@
                         type="date"
                         name="{{ group_form.deadline.html_name }}"
                         id="{{ group_form.deadline.id_for_label }}"
-						value="{{ one_week_later|date:'Y-m-d' }}">
+						value="{{ one_week_later|date:'Y-m-d' }}"
+						min="{{ group_form.deadline.field.widget.attrs.min }}">
 					{% if group_form.deadline.errors %}
                     <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2">
                         {{ group_form.deadline.errors }}

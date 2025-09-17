@@ -60,6 +60,8 @@ def index(request, filter_type="ongoing"):
 	else:
 		filter_type = "ongoing"
 		all_groups = Group.objects.filter(status="ongoing")
+		if user.is_authenticated:
+			all_groups = all_groups.exclude(owner=user)
 		status_filter = None
 
 	all_groups = all_groups.order_by("-id")
@@ -82,7 +84,7 @@ def index(request, filter_type="ongoing"):
 
 @login_required
 def new(request):
-	if request.method == "POST":
+	if request.method == "POST": 
 		group_form = GroupForm(request.POST, request.FILES, prefix="group")
 		product_formset = ProductFormSet(request.POST, request.FILES, prefix="product")
 		
@@ -210,6 +212,10 @@ def detail(request, id):
 				order = Order.objects.filter(joined_group=joined_group).first()
 
 			role = "joiner"
+	else:
+		if request.method == "POST" and not request.user.is_authenticated :
+			login_url = reverse("users:sessions_new")
+			return redirect(f"{login_url}?next={request.path}")
 
     # 計算剩餘可跟團數量
 	current_total = GroupService.get_total(group)
@@ -230,35 +236,37 @@ def detail(request, id):
 @login_required
 def manage_edit(request, id):
 	group = get_object_or_404(Group, id=id)
-	if (
-		request.method == "POST"
-		and request.user == group.owner
-		and group.status == "ongoing"
-	):
-		group_form = GroupForm(
-			request.POST, request.FILES, instance=group, prefix='group'
-		)
+	if request.user == group.owner:
+		if (
+			request.method == "POST"
+			and group.status == "ongoing"
+		):
+			group_form = GroupForm(
+				request.POST, request.FILES, instance=group, prefix='group'
+			)
 
-		if group_form.is_valid():
-			with transaction.atomic():
-				group_form.save()
-				messages.success(request, "團購已更新")
-			return redirect("groups:detail", id=id)
+			if group_form.is_valid():
+				with transaction.atomic():
+					group_form.save()
+					messages.success(request, "團購已更新")
+				return redirect("groups:detail", id=id)
+			else:
+				messages.warning(request, "欄位填寫有誤，請檢查後再試")
 		else:
-			messages.warning(request, "欄位填寫有誤，請檢查後再試")
-	else:
-		group_form = GroupForm(instance=group, prefix="group")
+			group_form = GroupForm(instance=group, prefix="group")
 
-	one_week_later = timezone.now() + timedelta(days=7)
+		one_week_later = timezone.now() + timedelta(days=7)
 
-	return render(
-		request,
-		"groups/manage_edit.html",
-		{
-			'group_form': group_form,
-			'one_week_later': one_week_later,
-		},
-	)
+		return render(
+			request,
+			"groups/manage_edit.html",
+			{
+				'group_form': group_form,
+				'one_week_later': one_week_later,
+			},
+		)
+	messages.warning(request, "你沒有權限編輯此團購")
+	return redirect("groups:detail", id=id)
 
 
 @login_required
@@ -356,7 +364,7 @@ def extract(request):
                     "product_form": product_formsets,
                     "scraped_image": first_image,
 					"empty_form": product_formsets.empty_form,
-                    "result": result
+                    "result": result,
                   })
 	return render(request, "groups/new.html", context)
 
