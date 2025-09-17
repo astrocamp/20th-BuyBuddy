@@ -7,7 +7,7 @@
 
 <div class="rounded-lg p-5 border-2 {% if user_address_form.is_default.value %}border-secondary{% else %}border-[var(--tertiary-color)]{% endif %}" id="user_address_{{user_address_form.instance.id}}">
     <div class="flex items-center mb-4 justify-between">
-        <h3 class="text-lg font-bold text-primary-700">{{ user_address_form.recipient_name.value }}</h3>
+        <h3 class="text-lg font-bold text-primary-700">{{ user_address_form.recipient_name.value|default:"尚未設定" }}</h3>
         {% if user_address_form.is_default.value %}
             <span class="ml-3 tertiary-color-500 text-xs font-medium px-2 py-1 rounded">預設地址</span>
         {% endif %}
@@ -16,32 +16,30 @@
     <div class="p-3 sm:p-3 rounded-md mb-4 flex flex-col gap-3 sm:gap-4">
         <div>
             <p class="text-xs tertiary-color-500">{{ user_address_form.phone.label }}</p>
-            <p class="font-medium">{{ user_address_form.phone.value }}</p>
+            <p class="font-medium">{{ user_address_form.phone.value|default:"尚未設定" }}</p>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-2">
             <div>
                 <p class="text-xs tertiary-color-500">{{ user_address_form.county.label }}</p>
-                <p class="font-medium">{{ user_address_form.county.value }}</p>
+                <p class="font-medium">{{ user_address_form.county.value|default:"尚未設定" }}</p>
             </div>
             <div>
                 <p class="text-xs tertiary-color-500">{{ user_address_form.district.label }}</p>
-                <p class="font-medium">{{ user_address_form.district.value }}</p>
+                <p class="font-medium">{{ user_address_form.district.value|default:"尚未設定" }}</p>
             </div>
             <div>
                 <p class="text-xs tertiary-color-500">{{ user_address_form.postal_code.label }}</p>
-                <p class="font-medium">{{ user_address_form.postal_code.value }}</p>
+                <p class="font-medium">{{ user_address_form.postal_code.value|default:"尚未設定" }}</p>
             </div>
         </div>
         <div class="break-words">
             <p class="text-xs tertiary-color-500">{{ user_address_form.road.label }}</p>
-            <p class="font-medium break-all">{{ user_address_form.road.value }}</p>
+            <p class="font-medium break-all">{{ user_address_form.road.value|default:"尚未設定" }}</p>
         </div>
-        {% if user_address_form.detail.value %}
         <div class="break-words">
             <p class="text-xs tertiary-color-500">{{ user_address_form.detail.label }}</p>
-            <p class="font-medium break-all">{{ user_address_form.detail.value }}</p>
+            <p class="font-medium break-all">{{ user_address_form.detail.value|default:"尚未設定" }}</p>
         </div>
-        {% endif %}
     </div>
 
     <div class="flex gap-4 self-end justify-end">

@@ -102,7 +102,7 @@
             </div>
         </div>
     </div>
-    <form action="{% url 'orders:payment_type' order.id %}" method="post">
+    <form action="{% url 'orders:payment_type' order.id %}" method="post" @submit="loading=true">
         <div class="p-6 rounded-lg border-2 border-[var(--tertiary-color)] mb-6 w-full">
             {% csrf_token %}
             <h2 class="text-lg mb-4 font-semibold text-primary-700">付款方式</h2>

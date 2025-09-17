@@ -1,6 +1,6 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 @import "tailwindcss";
 @import "toastify-js/src/toastify.css";
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 
 [x-cloak] {
   display: none !important;
@@ -207,7 +207,7 @@ select:focus {
   border-radius: 50px;
   align-items: center;
   justify-content: center;
-  padding: 8px 16px;
+  padding: 6px 14px;
   font-size: 14px;
 }
 .card-btn-white {
@@ -396,11 +396,11 @@ input[type="number"] {
   transform: translateZ(0);
 }
 
-.ball-bounce-animate:nth-child(2) {
+.ball-bounce-animate-2 {
   -webkit-animation: ball-bounce 0.8s ease-in-out 0.15s infinite both;
   animation: ball-bounce 0.8s ease-in-out 0.15s infinite both;
 }
-.ball-bounce-animate:nth-child(3) {
+.ball-bounce-animate-3 {
   -webkit-animation: ball-bounce 0.8s ease-in-out 0.3s infinite both;
   animation: ball-bounce 0.8s ease-in-out 0.3s infinite both;
 }
