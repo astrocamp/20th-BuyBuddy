@@ -4,6 +4,7 @@ from django_fsm import FSMField, transition
 from users.models import User
 from tinymce.models import HTMLField
 
+
 class Group(models.Model):
 
     GOAL_CHOICES = [
@@ -24,7 +25,7 @@ class Group(models.Model):
     min_goal = models.IntegerField()
     goal_choice = models.CharField(max_length=10, choices=GOAL_CHOICES)
     deadline = models.DateTimeField(null=True)
-    current_progress = models.IntegerField(default=0)  
+    current_progress = models.IntegerField(default=0)
     status = FSMField(default="pending", choices=STATUS_CHOICES, protected=True)
     banner = models.ImageField(upload_to="groups/banners/")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -58,10 +59,7 @@ class Group(models.Model):
 
     @transition(field=status, source="ongoing", target="reached")
     def reached(self):
-        from orders.services import create_orders
-
-        create_orders(self)
-        self.save()
+        pass
 
     @transition(field=status, source="ongoing", target="failed")
     def expire(self):
@@ -70,6 +68,7 @@ class Group(models.Model):
     @transition(field=status, source=["pending", "ongoing"], target="deleted")
     def cancel_group(self):
         self.save()
+
 
 class JoinedGroup(models.Model):
 
