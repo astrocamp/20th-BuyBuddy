@@ -25,7 +25,7 @@ from allauth.socialaccount.models import SocialLogin, SocialAccount
 from allauth.socialaccount.helpers import complete_social_login
 from django.http import JsonResponse
 from allauth.exceptions import ImmediateHttpResponse
-
+from django.conf import settings
 from django.http import HttpResponse, HttpRequest
 from allauth.account.views import PasswordResetFromKeyView
 from .forms import CustomResetPasswordFromKeyForm
@@ -49,12 +49,15 @@ def custom_password_reset_from_key(request, uid=None, key=None):
 
 
 def js_google_client(request):
-    return JsonResponse({"client_id": os.getenv("GOOGLE_CLIENT_ID")})
+    return JsonResponse({
+        "GOOGLE_CLIENT_ID": settings.GOOGLE_CLIENT_ID,
+        "HOSTNAME": settings.HOSTNAME,
+    })
 
 
 def handle_error(request):
     error_messages = {
-        "config_error": "系統配置載入失敗，請稍後再試",
+        "config_error": "系統配置載入失敗，請重整頁面後再試",
         "network_error": "網路連線異常，請檢查網路狀態",
         "unknown": "發生未知錯誤，請聯絡客服",
         "auth_failed": "登入取消，請稍後再試",
@@ -534,7 +537,7 @@ def address_cancel(request, address_id):
 # TODO: 接收前端的授權碼進行驗證和登入
 def social_oauth2(request):
     # 先加入調試訊息
-    code = request.POST.get("google_code")
+    code = request.GET.get("code")
 
     if not code:
         messages.error(request, "過程中斷，請重新嘗試")
@@ -548,7 +551,6 @@ def social_oauth2(request):
 
         # 2. 用 access token 取得用戶資料
         user_info = get_user_info(tokens["access_token"])
-
         # 3. 前往登入或註冊
         social_login = create_google_login(user_info)
         return complete_social_login(request, social_login)
@@ -567,11 +569,11 @@ def social_oauth2(request):
 
 
 def token_code_handler(code):
-    # 設定 OAuth 流程
+    # 設定 OAuth 流程    
     client_config = {
         "web": {
-            "client_id": os.getenv("GOOGLE_CLIENT_ID"),
-            "client_secret": os.getenv("GOOGLE_CLIENT_SECRET"),
+            "client_id": settings.GOOGLE_CLIENT_ID,
+            "client_secret": settings.GOOGLE_CLIENT_SECRET,
             "auth_uri": "https://accounts.google.com/o/oauth2/auth",
             "token_uri": "https://oauth2.googleapis.com/token",
         }
@@ -587,7 +589,7 @@ def token_code_handler(code):
     )
 
     # 設定重導向 URI（必須與 Google Console 設定一致）
-    flow.redirect_uri = "postmessage"  # 彈窗模式用這個
+    flow.redirect_uri = f"https://{settings.HOSTNAME}/users/social-oauth2/"
 
     # 用授權碼換取 token
     flow.fetch_token(code=code)

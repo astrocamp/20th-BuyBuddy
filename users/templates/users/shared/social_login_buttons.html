@@ -8,17 +8,12 @@
     </div>
 
     <div class="flex flex-col justify-center gap-4 mt-4">
-        <!-- Google OAuth2 Popup 登入按鈕 -->
-        <form id="google-oauth2-form" action="{% url 'users:social_oauth2' %}" method="post">
-            {% csrf_token %}
-            <input type="hidden" name="google_code" id="google_code">
-            <input type="hidden" name="social_provider" id="social_provider">
-            <button id="google-signin-btn" 
-                class="flex items-center justify-center gap-2 w-full py-2 px-4 border border-[var(--tertiary-color-300)] rounded-full hover:border-[var(--tertiary-color)] hover:bg-[var(--tertiary-color)] transition-colors">
-                <img src="{% static 'assets/google.png' %}" alt="Google" class="w-4 h-4">
-                <span class="text-sm">Google</span>
-            </button>
-        </form>
+        <!-- Google OAuth2 登入按鈕 -->
+        <button id="google-signin-btn" 
+            class="flex items-center justify-center gap-2 w-full py-2 px-4 border border-[var(--tertiary-color-300)] rounded-full hover:border-[var(--tertiary-color)] hover:bg-[var(--tertiary-color)] transition-colors">
+            <img src="{% static 'assets/google.png' %}" alt="Google" class="w-4 h-4">
+            <span class="text-sm">Google</span>
+        </button>
         
         <a href="#" class="flex items-center justify-center gap-2 w-full py-2 px-4 border border-[var(--tertiary-color-300)] rounded-full hover:border-[var(--tertiary-color)] hover:bg-[var(--tertiary-color)] transition-colors">
             <img src="{% static 'assets/line.png' %}" alt="Line" class="w-[18px] h-[18px]">
