@@ -287,6 +287,7 @@ LOGOUT_REDIRECT_URL = "/"
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 
 # 藍新金流設定
 NEWEBPAY_MERCHANT_ID = os.getenv("NEWEBPAY_MERCHANT_ID")
@@ -304,4 +305,8 @@ if DEBUG:
     ]
     # 允許跨域請求攜帶認證資訊 (cookies, session 等)
     CORS_ALLOW_CREDENTIALS = True
-
+    # ngrok 域名
+    HOSTNAME = os.getenv("NGROK_HOSTNAME")
+    ALLOWED_HOSTS += [
+        os.getenv("NGROK_HOSTNAME"),
+    ]
