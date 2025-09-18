@@ -51,7 +51,7 @@ BuyBuddy，正是一個為團購而生的平台，我們的目標是幫助使用
 
 ## 功能簡介
 
-1. **簡潔的開團、跟團購管理系統 - 簡化團購流程:**
+1. **簡潔的開團、跟團管理系統 - 簡化團購流程:**
    <div align="center">
      <img src="https://buy-buddy.s3.amazonaws.com/avatars/%E9%96%8B%E8%B7%9F%E5%9C%98%E7%B3%BB%E7%B5%B1.png" alt="開跟團系統">
    </div>
