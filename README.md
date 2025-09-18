@@ -51,7 +51,7 @@ BuyBuddy，正是一個為團購而生的平台，我們的目標是幫助使用
 
 ## 功能簡介
 
-1. **簡潔的開、跟團購管理系統 - 簡化團購流程:**
+1. **簡潔的開團、跟團購管理系統 - 簡化團購流程:**
    <div align="center">
      <img src="https://buy-buddy.s3.amazonaws.com/avatars/%E9%96%8B%E8%B7%9F%E5%9C%98%E7%B3%BB%E7%B5%B1.png" alt="開跟團系統">
    </div>
@@ -61,7 +61,7 @@ BuyBuddy，正是一個為團購而生的平台，我們的目標是幫助使用
      <img src="https://buy-buddy.s3.amazonaws.com/avatars/%E7%AC%AC%E4%B8%89%E6%96%B9%E7%99%BB%E5%85%A5.png" alt="第三方登入">
    </div>
 
-3. **清晰 UI 呈現 - 進度條、剩餘數量顯示省下雙方溝通成本:**
+3. **清晰 UI 呈現 - 進度條、剩餘數量顯示，省下雙方溝通成本:**
    <div align="center">
      <img src="https://buy-buddy.s3.amazonaws.com/avatars/UI%E5%91%88%E7%8F%BE.png" alt="UI呈現">
    </div>
@@ -85,7 +85,7 @@ BuyBuddy，正是一個為團購而生的平台，我們的目標是幫助使用
 
 - `Python` 版本：3.11+
 - `pip` / `uv` 套件管理
-- `Docker` & `Docker Compose` (用於容器化部署)
+- `Docker` & `Docker Compose` (用於部署)
 
 ## 安裝設定
 
