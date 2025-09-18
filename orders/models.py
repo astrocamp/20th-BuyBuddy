@@ -77,6 +77,7 @@ class Order(models.Model):
     def mark_as_shipped(self):
         self.shipped_at = timezone.now()
         """標記為已出貨"""
+        pass
 
     @transition(
         field=order_status, source=OrderStatus.SHIPPED, target=OrderStatus.COMPLETED
@@ -84,6 +85,7 @@ class Order(models.Model):
     def mark_as_completed(self):
         self.completed_at = timezone.now()
         """標記為已完成"""
+        pass
 
     def is_pending(self):
         """檢查訂單是否待付款"""
@@ -154,12 +156,14 @@ class Payment(models.Model):
     )
     def mark_as_paid(self):
         """標記為已付款"""
+        pass
 
     @transition(
         field=payment_status, source=PaymentStatus.PENDING, target=PaymentStatus.FAILED
     )
     def mark_as_failed(self):
         """標記為付款失敗"""
+        pass
 
     def is_pending(self):
         """檢查是否待付款"""
