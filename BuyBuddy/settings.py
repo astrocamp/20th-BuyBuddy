@@ -294,8 +294,10 @@ NEWEBPAY_HASH_IV= os.getenv("NEWEBPAY_HASH_IV")
 NEWEBPAY_URL = "https://ccore.newebpay.com/MPG/mpg_gateway"
 NGROK_HOSTNAME = os.getenv("NGROK_HOSTNAME")
 
-# 給藍新用的CORS設定
-if DEBUG:
+# 給 GOOGLE 登入用的環境 
+GOOGLE_SET = False
+
+if GOOGLE_SET:
     # 開發環境 (ngrok)
     # # ngrok 域名每次都變，所以允許全部
     CORS_ALLOWED_ORIGINS = [
