@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "django.contrib.sites",
     "django.contrib.staticfiles",
     "django.contrib.humanize",
+    "debug_toolbar",
     "pages",
     "users",
     "groups",
@@ -61,6 +62,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 ROOT_URLCONF = "BuyBuddy.urls"
@@ -289,8 +291,8 @@ GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 
 # 藍新金流設定
 NEWEBPAY_MERCHANT_ID = os.getenv("NEWEBPAY_MERCHANT_ID")
-NEWEBPAY_HASH_KEY= os.getenv("NEWEBPAY_HASH_KEY")
-NEWEBPAY_HASH_IV= os.getenv("NEWEBPAY_HASH_IV")
+NEWEBPAY_HASH_KEY = os.getenv("NEWEBPAY_HASH_KEY")
+NEWEBPAY_HASH_IV = os.getenv("NEWEBPAY_HASH_IV")
 NEWEBPAY_URL = "https://ccore.newebpay.com/MPG/mpg_gateway"
 NGROK_HOSTNAME = os.getenv("NGROK_HOSTNAME")
 
@@ -308,3 +310,5 @@ if DEBUG:
     ALLOWED_HOSTS += [
         os.getenv("NGROK_HOSTNAME"),
     ]
+
+INTERNAL_IPS = ["127.0.0.1", "localhost"]

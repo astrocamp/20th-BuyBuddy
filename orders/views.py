@@ -1,26 +1,29 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.views.decorators.http import require_POST
-from django.contrib import messages
-from django.conf import settings
-import uuid
-import json
+import base64
 import hmac
 import hashlib
-import base64
+import json
+import uuid
 import requests
-from users.models import UserAddress
-from users.forms import UserAddressForm
-from .models import Order, Payment
-from groups.models import JoinedGroup, Group
-from products.models import JoinedGroupProduct
+
+from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import F, Prefetch, Q, Sum
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.db.models import Sum, F, Q, Prefetch
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+
+from groups.models import Group, JoinedGroup
+from products.models import JoinedGroupProduct
+from users.forms import UserAddressForm
+from users.models import UserAddress
+
+from .exports import export_orders_to_excel
+from .models import Order, Payment
 from .newebpay.service import create_payment_request, handle_newebpay_notify
 from .utils import get_buyer_list_data
-from .exports import export_orders_to_excel
-from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse
 
 
 REQUIRED_ADDR_FIELDS = (
@@ -69,7 +72,17 @@ def ship_address(request, order_id):
 def check_order(request, order_id):
     user = request.user
     order = get_object_or_404(
-        Order, pk=order_id, user=user, order_status=Order.OrderStatus.PENDING
+        Order.objects.select_related("group", "joined_group").prefetch_related(
+            Prefetch(
+                "joined_group__joined_group_products",
+                queryset=JoinedGroupProduct.objects.filter(
+                    deleted_at__isnull=True
+                ).select_related("product"),
+            )
+        ),
+        pk=order_id,
+        user=user,
+        order_status=Order.OrderStatus.PENDING,
     )
 
     # 從新增地址路徑來的
@@ -99,11 +112,7 @@ def check_order(request, order_id):
     # 存地址快照
     order.apply_address(address)
 
-    joined_group = (
-        JoinedGroup.objects.filter(order=order)
-        .prefetch_related("joined_group_products__product")
-        .first()
-    )
+    joined_group = order.joined_group
     joined_group_products = joined_group.joined_group_products.all()
 
     return render(
@@ -139,7 +148,6 @@ def create_headers(body, uri):
     }
 
     return headers
-
 
 
 @login_required
@@ -348,11 +356,19 @@ def get_orders_by_tab(user, tab):
         Order.objects.filter(user=user)
         .order_by("-updated_at")
         .select_related("group", "joined_group")
-        .prefetch_related("joined_group__joined_group_products__product")
+        .prefetch_related(
+            Prefetch(
+                "joined_group__joined_group_products",
+                queryset=JoinedGroupProduct.objects.filter(
+                    deleted_at__isnull=True
+                ).select_related("product"),
+            )
+        )
         .annotate(
             total_amount=Sum(
-                F('joined_group__joined_group_products__product__price')
-                * F('joined_group__joined_group_products__quantity'),
+                F("joined_group__joined_group_products__product__price")
+                * F("joined_group__joined_group_products__quantity"),
+                filter=Q(joined_group__joined_group_products__deleted_at=None),
             )
         )
     )
@@ -370,7 +386,7 @@ def get_orders_by_tab(user, tab):
             Prefetch(
                 "joined_group_products",
                 queryset=JoinedGroupProduct.objects.filter(
-                    deleted_at=None
+                    deleted_at__isnull=True
                 ).select_related("product"),
             )
         )
@@ -401,7 +417,7 @@ def get_orders_by_tab(user, tab):
 
     elif tab == "completed":
         orders = base_orders_query.filter(order_status=Order.OrderStatus.COMPLETED)
-    
+
     elif tab == "deleted":
         joined_groups = base_joined_groups.filter(group__deleted_at__isnull=False)
 
@@ -530,6 +546,7 @@ def shipped(request, order_id):
     messages.success(request, "訂單已確認出貨")
     return redirect('orders:buyer_list', group_id=order.group.id)
 
+
 # 付款方式
 @require_POST
 @login_required
@@ -546,10 +563,10 @@ def payment_type(request, order_id):
 def newebpay(request, order_id):
     order = get_object_or_404(Order, pk=order_id, user=request.user)
     payment = Payment.objects.create(order=order)
-    
+
     try:
         payment_data = create_payment_request(order, payment)
-        
+
         # 生成自動提交的 HTML，讓瀏覽器來提交
         html_content = f"""
         <html>
@@ -568,8 +585,9 @@ def newebpay(request, order_id):
     except Exception as e:
         messages.error(request, "藍新金流付款請求失敗，請稍後再試")
         return redirect("orders:my_orders")
-    
+
     return HttpResponse(html_content)
+
 
 @csrf_exempt
 def newebpay_notify(request):
@@ -577,7 +595,7 @@ def newebpay_notify(request):
     payment_number = payment_data.get("merchant_order_no")
     payment = get_object_or_404(Payment, payment_number=payment_number)
     order = payment.order
-    
+
     if payment_data.get("status") == "SUCCESS":
         payment.mark_as_paid()
         payment.save()
@@ -589,7 +607,6 @@ def newebpay_notify(request):
         payment.save()
         return HttpResponse(status=400)
 
-    
 
 @csrf_exempt
 def newebpay_return(request):

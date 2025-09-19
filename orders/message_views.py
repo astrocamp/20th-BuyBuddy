@@ -15,7 +15,7 @@ def get_order_messages(order):
 
     joined_group_products = order.joined_group.joined_group_products.select_related(
         "product"
-    ).all()
+    ).filter(deleted_at__isnull=True)
 
     return order_messages, joined_group_products
 

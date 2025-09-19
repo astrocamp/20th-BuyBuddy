@@ -12,6 +12,5 @@ def navbar_notifications(request):
     )
 
     unread_count = all_user_notifications.filter(is_read=False).count()
-    latest_notifications = all_user_notifications[:20]
 
-    return {"notifications": latest_notifications, "unread_count": unread_count}
+    return {"notifications": all_user_notifications, "unread_count": unread_count}
