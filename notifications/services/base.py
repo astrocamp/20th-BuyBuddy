@@ -1,13 +1,15 @@
-import time
 import logging
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
+
+from celery import shared_task
+
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from celery import shared_task
-from users.models import User
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+
 from groups.models import Group
 from orders.models import Order
+from users.models import User
 from .db_service import create_notification_for_event
 from .mail_service import send_group_notification_email, send_order_notification_email
 
@@ -60,7 +62,9 @@ def send_notification_for_new_order(order):
             send_owner_email_task.delay(group.id, "團購收到新訂單", order_id=order.id)
 
     except Exception as e:
-        logger.error(f"❌ 發送新訂單通知失敗 (Order ID: {order.id}): {e}", exc_info=True)
+        logger.error(
+            f"❌ 發送新訂單通知失敗 (Order ID: {order.id}): {e}", exc_info=True
+        )
 
 
 def send_notification_for_order_status_change(order):
@@ -72,9 +76,7 @@ def send_notification_for_order_status_change(order):
         status_text = f"訂單「{current_status_display}」"
 
         title = f"【訂單狀態更新】{group.name}"
-        content = (
-            f"您關於團購「{group.name}」的訂單，狀態已更新為：{current_status_display}。"
-        )
+        content = f"您關於團購「{group.name}」的訂單，狀態已更新為：{current_status_display}。"
 
         if order.order_status in [
             Order.OrderStatus.PROCESSING,
@@ -153,9 +155,7 @@ def check_deadline():
     try:
         logger.info("🕐 定時任務: 開始檢查團購截止時間...")
         with transaction.atomic():
-            expired_groups = Group.objects.select_for_update(
-                skip_locked=True
-            ).filter(
+            expired_groups = Group.objects.select_for_update(skip_locked=True).filter(
                 status="ongoing",
                 deadline__lt=timezone.now(),
             )

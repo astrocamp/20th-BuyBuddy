@@ -1,34 +1,35 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Group, JoinedGroup
-from products.models import JoinedGroupProduct
-from orders.models import Order
-from .forms import GroupForm, ProductFormSet, ProductForm, URLExtractForm
-from products.models import Product
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.db import transaction
-from .services.exceptions import *
-from .services.group_services import GroupService
-from django.utils import timezone
-from datetime import timedelta
-from django.core.files.storage import default_storage
-from django.http import JsonResponse
+import json
 import os
 import uuid
-from django.core.paginator import Paginator
-from django.urls import reverse
-from django.http import HttpResponse
+import itertools
+import re
+from datetime import timedelta
+
+import requests
+
 from django.conf import settings
-import json
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
+from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import F, Subquery, OuterRef
 from django.db.models.functions import Coalesce
-from .services.scraper_service import scrape_product_url_sync
-import itertools
 from django.forms import formset_factory
-import requests
-from django.core.files.base import ContentFile
-import re
+from django.http import JsonResponse, HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
+from django.utils import timezone
 from django.utils.datastructures import MultiValueDict
+
+from .models import Group, JoinedGroup
+from .forms import GroupForm, ProductFormSet, ProductForm, URLExtractForm
+from .services.exceptions import *
+from .services.group_services import GroupService
+from .services.scraper_service import scrape_product_url_sync
+from products.models import Product, JoinedGroupProduct
+from orders.models import Order
 
 
 def index(request, filter_type="ongoing"):

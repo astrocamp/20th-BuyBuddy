@@ -1,34 +1,33 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.views.decorators.http import require_POST, require_http_methods
-from users.models import User, UserAddress
+import requests
+
+from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_str
+from django.core.exceptions import ValidationError
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from .tokens import email_verification_token_generator
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.views.decorators.http import require_POST, require_http_methods
+
+from anymail.message import AnymailMessage
+from google_auth_oauthlib.flow import Flow
+from allauth.exceptions import ImmediateHttpResponse
+from allauth.socialaccount.helpers import complete_social_login
+from allauth.socialaccount.models import SocialLogin, SocialAccount
+
+from users.models import User, UserAddress
 from .forms import (
     UserForm,
     UserAddressForm,
     RegistrationForm,
     LoginForm,
     UserAddressFormSet,
+    CustomResetPasswordFromKeyForm,
 )
-from anymail.message import AnymailMessage
-from django.core.exceptions import ValidationError
-from django.http import HttpResponse
-from google_auth_oauthlib.flow import Flow
-import os
-import requests
-from allauth.socialaccount.models import SocialLogin, SocialAccount
-from allauth.socialaccount.helpers import complete_social_login
-from django.http import JsonResponse
-from allauth.exceptions import ImmediateHttpResponse
-from django.conf import settings
-from django.http import HttpResponse, HttpRequest
-from allauth.account.views import PasswordResetFromKeyView
-from .forms import CustomResetPasswordFromKeyForm
+from .tokens import email_verification_token_generator
 
 
 def custom_password_reset_from_key(request, uid=None, key=None):
@@ -49,10 +48,12 @@ def custom_password_reset_from_key(request, uid=None, key=None):
 
 
 def js_google_client(request):
-    return JsonResponse({
-        "GOOGLE_CLIENT_ID": settings.GOOGLE_CLIENT_ID,
-        "HOSTNAME": settings.HOSTNAME,
-    })
+    return JsonResponse(
+        {
+            "GOOGLE_CLIENT_ID": settings.GOOGLE_CLIENT_ID,
+            "HOSTNAME": settings.HOSTNAME,
+        }
+    )
 
 
 def handle_error(request):
@@ -561,19 +562,19 @@ def social_oauth2(request):
     except ImmediateHttpResponse:
         # 讓 allauth 的重導向正常通過
         raise
-    except (ValueError, KeyError) as e:
+    except (ValueError, KeyError):
         messages.error(request, "Google 授權失敗，請稍後再試")
         return redirect("users:sessions_new")
-    except requests.RequestException as e:
+    except requests.RequestException:
         messages.error(request, "網路連線失敗，請稍後再試")
         return redirect("users:sessions_new")
-    except Exception as e:
+    except Exception:
         messages.error(request, "系統錯誤，請稍後再試")
         return redirect("users:sessions_new")
 
 
 def token_code_handler(code):
-    # 設定 OAuth 流程    
+    # 設定 OAuth 流程
     client_config = {
         "web": {
             "client_id": settings.GOOGLE_CLIENT_ID,

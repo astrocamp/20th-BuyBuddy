@@ -1,6 +1,6 @@
+from tinymce.models import HTMLField
 from django.db import models
 from groups.models import Group, JoinedGroup
-from tinymce.models import HTMLField
 
 
 class Product(models.Model):
@@ -13,6 +13,7 @@ class Product(models.Model):
     @property
     def formatted_price(self):
         return f"${self.price:,.0f}"
+
 
 class JoinedGroupProduct(models.Model):
     joined_group = models.ForeignKey(

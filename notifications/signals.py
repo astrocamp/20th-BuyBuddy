@@ -1,8 +1,10 @@
 import logging
+
+from django.db import transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django_fsm.signals import post_transition
-from django.db import transaction
+
 from groups.models import Group, JoinedGroup
 from orders.models import Order
 from .services.base import (

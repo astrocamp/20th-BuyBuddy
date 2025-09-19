@@ -1,8 +1,15 @@
+import logging
+
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
-from django.contrib import messages
 from allauth.exceptions import ImmediateHttpResponse
+from anymail.message import AnymailMessage
+
+from django.conf import settings
+from django.contrib import messages
 from django.shortcuts import redirect
+
+logger = logging.getLogger(__name__)
 
 
 class CustomAccountAdapter(DefaultAccountAdapter):
@@ -18,13 +25,6 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         # 攔截預設 messages 模版
         if message_template == "account/messages/logged_in.txt":
             return ImmediateHttpResponse()
-
-
-from django.conf import settings
-from anymail.message import AnymailMessage
-import logging
-
-logger = logging.getLogger(__name__)
 
 
 def send_password_reset_email_with_template(email: str, reset_url: str):
