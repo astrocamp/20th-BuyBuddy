@@ -1,6 +1,6 @@
 {% if not role == "joiner" %}
     <div>
-        <form action="{% url 'groups:detail' group.id %}" method="post">
+        <form action="{% url 'groups:detail' group.id %}" method="post" @submit="loading = true">
             {% csrf_token %}
             <input type="hidden" name="group-id" value="{{ group.id }}">
     

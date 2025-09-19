@@ -2,16 +2,17 @@
     {% include "shared/flash_messages_content.html" with messages=messages only %}
     
     <!-- 使用 hx-swap-oob 同時更新導航欄頭像 -->
-    <img hx-swap-oob="outerHTML:#navbar-avatar-desktop img" 
-        hx-disinherit="oobErrorIgnore"
-        src="{{ user_form.instance.avatar_url.url }}" 
-        alt="User Avatar">
+    {% if user_form.instance.avatar_url %}
+        <img hx-swap-oob="outerHTML:#navbar-avatar-desktop img" 
+            hx-disinherit="oobErrorIgnore"
+            src="{{ user_form.instance.avatar_url.url }}" 
+            alt="User Avatar">
 
-    <img hx-swap-oob="outerHTML:#navbar-avatar-mobile img" 
-        hx-disinherit="oobErrorIgnore"
-        src="{{ user_form.instance.avatar_url.url }}" 
-        alt="User Avatar">
-
+        <img hx-swap-oob="outerHTML:#navbar-avatar-mobile img" 
+            hx-disinherit="oobErrorIgnore"
+            src="{{ user_form.instance.avatar_url.url }}" 
+            alt="User Avatar">
+    {% endif %}
 {% endif %}
 
 
@@ -29,6 +30,7 @@
         src="{{ user_form.instance.avatar_url.url }}" 
         alt="User Avatar" 
         class="w-full h-full object-cover"
+        onerror="this.onerror=null; this.src='/media/avatars/avatar_default.png';"
         >
     </div>
 

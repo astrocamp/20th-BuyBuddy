@@ -50,16 +50,25 @@
                     </div>
                     {% if user_form.username.errors %}
                         <div class="min-h-[2px]"></div>
-                        <div class="red-color-700 text-sm mt-2 min-h-[20px]">
+                        <div class="red-color-700 text-sm mt-2 sm:ml-4 min-h-[20px]">
                             {{ user_form.username.errors.0 }}
                         </div>
                     {% endif %}
                 </div>
             </div>
 
-            <div class="w-full mt-6">
+            <div class="w-full mt-6 flex gap-4">
+                 <button 
+                    type="button"
+                    hx-get="{% url 'users:profiles_edit_cancel' %}"
+                    hx-target="#user_profile"
+                    hx-swap="outerHTML"
+                    class="w-full py-[6px] px-[18px] lg:py-[12px] lg:px-[24px] rounded-full flex justify-center items-center gap-2 h-12 text-[var(--red-color-500)] border-2 border-[var(--red-color-500)] hover:bg-[var(--red-color-500)] hover:text-white transition-colors duration-200">
+                    取消
+                </button>
+
                 <button type="submit"
-                    class="w-full py-[12px] px-[24px] rounded-full flex justify-center items-center gap-2 h-12 bg-[var(--secondary-color)] text-white hover:bg-[var(--secondary-color-900)] transition-colors duration-200 cursor-pointer">
+                    class="w-full py-[6px] px-[18px] lg:py-[12px] lg:px-[24px] rounded-full flex justify-center items-center gap-2 h-12 bg-[var(--secondary-color)] text-white hover:bg-[var(--secondary-color-900)] transition-colors duration-200">
                     儲存
                 </button>
             </div>

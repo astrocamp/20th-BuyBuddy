@@ -1,9 +1,9 @@
 <div class="flex gap-4 self-end justify-end">
-    <button class="card-btn card-btn-secondary">儲存</button>
-
     <button hx-get="{% url 'users:address_cancel' user_address_form.instance.id %}"
             hx-target="#user_address_{{user_address_form.instance.id}}"
             hx-swap="outerHTML"
             class="card-btn card-btn-red"
             type="button">取消</button>
+
+    <button class="card-btn card-btn-secondary">儲存</button>       
 </div>

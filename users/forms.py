@@ -23,6 +23,9 @@ from django.forms import (
 
 from .models import User, UserAddress
 
+# 定義檔案大小
+MAX_AVATAR_SIZE = 1 * 1024 * 1024
+
 # 讀出縣市區域的
 _DATA_PATH = Path(settings.BASE_DIR) / "public" / "assets" / "taiwan-districts.json"
 with _DATA_PATH.open(encoding="utf-8") as f:
@@ -105,6 +108,9 @@ class UserForm(ModelForm):
     class Meta:
         model = User
         fields = ["avatar_url", "username"]
+        error_messages = {
+            "username": {"required": "請輸入用戶名"},
+        }
         labels = {
             "avatar_url": "大頭照",
             "username": "用戶名稱",
@@ -115,6 +121,15 @@ class UserForm(ModelForm):
             ),
             "username": TextInput(),
         }
+
+    def clean_avatar_url(self):
+        avatar = self.cleaned_data.get('avatar_url')
+        if avatar and getattr(avatar, 'size', 0) > MAX_AVATAR_SIZE:
+            raise forms.ValidationError(
+                f"檔案太大了，不能超過 {MAX_AVATAR_SIZE / 1024 / 1024}MB。",
+                code="file_too_large",
+            )
+        return avatar
 
 
 class UserAddressForm(ModelForm):
