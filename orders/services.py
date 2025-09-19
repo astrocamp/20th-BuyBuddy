@@ -1,6 +1,8 @@
 from .models import Order
 from groups.models import JoinedGroup
+from products.models import JoinedGroupProduct
 from django.db import transaction, IntegrityError
+from django.db.models import Prefetch
 
 
 def create_orders(group):
@@ -15,7 +17,14 @@ def create_orders(group):
     joined_groups = (
         JoinedGroup.objects.filter(group=group)
         .select_related("buyer")
-        .prefetch_related("joined_group_products__product")
+        .prefetch_related(
+            Prefetch(
+                "joined_group_products",
+                queryset=JoinedGroupProduct.objects.select_related("product").filter(
+                    deleted_at__isnull=True
+                ),
+            )
+        )
     )
 
     orders = []
@@ -25,13 +34,10 @@ def create_orders(group):
         # 找到跟團者
         buyer = joined_group.buyer
 
-        # 找出商品們
-        joined_group_products = joined_group.joined_group_products.all()
-
         subtotal = 0
 
         # 找出每個商品的名字、價錢、數量並統計
-        for joined_group_product in joined_group_products:
+        for joined_group_product in joined_group.joined_group_products.all():
             price = joined_group_product.product.price
             quantity = joined_group_product.quantity
             subtotal += price * quantity
