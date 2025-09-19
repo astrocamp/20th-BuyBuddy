@@ -43,18 +43,18 @@
     </div>
 
     <div class="flex gap-4 self-end justify-end">
-         <button hx-get="{% url 'users:address_edit' user_address_form.instance.id %}"
-                hx-target="#user_address_{{user_address_form.instance.id}}"
-                class="card-btn card-btn-secondary">
-                編輯
-        </button>
-
         <button 
                 hx-delete="{% url 'users:address_delete' user_address_form.instance.id %}"
                 hx-target="#user_address_{{user_address_form.instance.id}}"
                 hx-swap="outerHTML"
                 class="card-btn card-btn-red">
                 刪除
+        </button>
+
+         <button hx-get="{% url 'users:address_edit' user_address_form.instance.id %}"
+                hx-target="#user_address_{{user_address_form.instance.id}}"
+                class="card-btn card-btn-secondary">
+                編輯
         </button>
 
     </div>

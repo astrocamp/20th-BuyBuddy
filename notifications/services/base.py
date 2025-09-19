@@ -9,7 +9,6 @@ from django.utils import timezone
 
 from groups.models import Group
 from orders.models import Order
-from users.models import User
 from .db_service import create_notification_for_event
 from .mail_service import send_group_notification_email, send_order_notification_email
 

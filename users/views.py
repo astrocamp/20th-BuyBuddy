@@ -292,14 +292,14 @@ def profiles(request):
 def profiles_edit(request):
     user = request.user
 
-    # POST 請求，更新資訊
     if request.method == "POST":
         user_form = UserForm(request.POST, request.FILES, instance=user)
+
         if user_form.is_valid():
             user_form.save()
             updated_form = UserForm(instance=user)
 
-            # 儲存成功，返回顯示模式
+            # 儲存成功
             messages.success(request, "用戶資訊更新成功")
             context = {
                 "user_form": updated_form,
@@ -311,13 +311,22 @@ def profiles_edit(request):
                 context,
             )
 
+        # 有錯誤，返回編輯模式
         else:
-            # 有錯誤，返回編輯模式並顯示錯誤
+            if "avatar_url" in user_form.errors:
+                error_message = str(user_form.errors['avatar_url'])
+                if "檔案太大" in error_message:
+                    messages.warning(request, "檔案太大了，不能超過 1MB")
+                else:
+                    messages.warning(request, "檔案格式不支援")
 
             return render(
                 request,
                 "users/shared/profiles_edit.html",
-                {"user_form": user_form},
+                {
+                    "user_form": user_form,
+                    "partial_msg_show": True,
+                },
             )
 
     # GET 請求，顯示編輯表單
@@ -328,6 +337,16 @@ def profiles_edit(request):
             "users/shared/profiles_edit.html",
             {"user_form": user_form},
         )
+
+
+# 取消更新個人資訊
+def profiles_edit_cancel(request):
+    user_form = UserForm(instance=request.user)
+    return render(
+        request,
+        "users/shared/profiles.html",
+        {"user_form": user_form},
+    )
 
 
 # 顯示編輯畫面或更新地址
