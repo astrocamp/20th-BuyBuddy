@@ -1,8 +1,9 @@
+from django.db import transaction, IntegrityError
+from django.db.models import Prefetch
+
 from .models import Order
 from groups.models import JoinedGroup
 from products.models import JoinedGroupProduct
-from django.db import transaction, IntegrityError
-from django.db.models import Prefetch
 
 
 def create_orders(group):

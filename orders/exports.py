@@ -1,13 +1,16 @@
-from django.http import HttpResponse
+import urllib.parse
+
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, PatternFill, Border, Side
 from openpyxl.utils import get_column_letter
-from groups.models import Group
-from django.shortcuts import redirect, get_object_or_404
+
 from django.contrib import messages
-from .utils import get_buyer_list_data
-import urllib.parse
+from django.http import HttpResponse
+from django.shortcuts import redirect, get_object_or_404
 from django.utils import timezone
+
+from groups.models import Group
+from .utils import get_buyer_list_data
 
 
 def export_orders_to_excel(request, group_id):

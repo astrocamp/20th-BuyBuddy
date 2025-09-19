@@ -3,6 +3,7 @@ import hmac
 import hashlib
 import json
 import uuid
+
 import requests
 
 from django.conf import settings
@@ -368,7 +369,7 @@ def get_orders_by_tab(user, tab):
             total_amount=Sum(
                 F("joined_group__joined_group_products__product__price")
                 * F("joined_group__joined_group_products__quantity"),
-                filter=Q(joined_group__joined_group_products__deleted_at=None),
+                filter=Q(joined_group__joined_group_products__deleted_at__isnull=True),
             )
         )
     )

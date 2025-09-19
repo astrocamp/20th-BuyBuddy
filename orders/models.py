@@ -1,11 +1,13 @@
-from django.db import models
-from django.core.validators import MinValueValidator
-from users.models import User, UserAddress
-from groups.models import Group, JoinedGroup
-from django.utils import timezone
 import uuid
-from django_fsm import FSMField, transition
+
+from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
+from django.db import models
+from django_fsm import FSMField, transition
+from django.utils import timezone
+
+from groups.models import Group, JoinedGroup
+from users.models import User, UserAddress
 
 
 def _generate_unique_number():

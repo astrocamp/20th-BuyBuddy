@@ -1,33 +1,33 @@
 import asyncio
-from playwright.async_api import async_playwright
 import json
-import re
-from urllib.parse import urlparse
-from typing import Dict, Any, List
 import os
-import google.generativeai as genai
+from typing import Dict, Any, List
 from urllib.parse import urlparse
 
+import google.generativeai as genai
+from playwright.async_api import async_playwright
 
-class ECommerceScraper:    
+
+class ECommerceScraper:
     def __init__(self):
         self.ai_client = None
         gemini_api_key = os.getenv("GEMINI_API_KEY")
         if gemini_api_key:
             genai.configure(api_key=gemini_api_key)
             self.ai_client = genai.GenerativeModel("gemini-1.5-pro")
-    
+
     async def _get_extractor_type(self, url: str, page) -> tuple:
         domain = urlparse(url).netloc.lower()
-        
+
         # 1. 檢查專用網站 (PCHome, Momo)
         if "pchome.com.tw" in domain:
             return self._extract_pchome, "pchome"
         elif "momoshop.com.tw" in domain:
             return self._extract_momo, "momo"
-        
+
         # 2. 動態檢測 Shopify
-        is_shopify = await page.evaluate('''() => {
+        is_shopify = await page.evaluate(
+            '''() => {
             return !!(
                 window.Shopify ||
                 document.querySelector('[data-shopify]') ||
@@ -36,12 +36,14 @@ class ECommerceScraper:
                 document.querySelector('.shopify-section') ||
                 document.querySelector('[class*="shopify"]')
             );
-        }''')
-        
+        }'''
+        )
+
         if is_shopify:
             return self._extract_shopify, "shopify"
-        
-        is_shopline = await page.evaluate('''() => {
+
+        is_shopline = await page.evaluate(
+            '''() => {
             return !!(
                 document.querySelector('[data-shopline]') ||
                 document.querySelector('.shopline-product') ||
@@ -49,15 +51,17 @@ class ECommerceScraper:
                 document.querySelector('script[src*="shoplineapp"]') ||
                 document.querySelector('meta[name="generator"][content*="Shopline"]')
             );
-        }''')
-        
+        }'''
+        )
+
         if is_shopline:
             return self._extract_shopline, "shopline"
-        
+
         return None, "unknown"
 
     async def _extract_momo(self, page):
-        return await page.evaluate('''() => {
+        return await page.evaluate(
+            '''() => {
             const data = {};
             
             // 基本資訊從 JSON-LD 提取
@@ -155,10 +159,12 @@ class ECommerceScraper:
             }
             
             return data;
-        }''')
-    
+        }'''
+        )
+
     async def _extract_pchome(self, page):
-        return await page.evaluate('''() => {
+        return await page.evaluate(
+            '''() => {
             const data = {};
             
             const jsonLdScripts = document.querySelectorAll('script[type="application/ld+json"]');
@@ -227,10 +233,12 @@ class ECommerceScraper:
             data.spec_variants = {};
             
             return data;
-        }''')
-    
+        }'''
+        )
+
     async def _extract_shopline(self, page):
-        return await page.evaluate('''() => {
+        return await page.evaluate(
+            '''() => {
             const data = {};
             
             // Shopline 的商品名稱通常在 h1 標籤
@@ -284,10 +292,12 @@ class ECommerceScraper:
             });
             
             return data;
-        }''')
-    
+        }'''
+        )
+
     async def _extract_shopify(self, page):
-        return await page.evaluate('''() => {
+        return await page.evaluate(
+            '''() => {
             const data = {};
             
             // 改進商品名稱提取 - 優先從 JSON-LD 提取
@@ -457,7 +467,8 @@ class ECommerceScraper:
             data.spec_variants = {};
             
             return data;
-        }''')
+        }'''
+        )
 
     def _process_variants(self, spec_variants: Dict) -> Dict[str, List[str]]:
         variants = {}
@@ -465,7 +476,7 @@ class ECommerceScraper:
         for spec_id, options in spec_variants.items():
             if not options or len(options) <= 1:
                 continue
-            
+
             if len(options) <= 8:  # 合理的變體選項數量
                 if "color" in spec_id.lower():
                     variants["colors"] = options
@@ -475,65 +486,70 @@ class ECommerceScraper:
                     variants["sizes"] = options
                 else:
                     variants["options"] = options
-        
+
         return variants
 
     async def _is_product_page(self, page_html: str, url: str) -> bool:
         parsed_url = urlparse(url)
         path = parsed_url.path.lower()
-        
+
         strong_product_patterns = [
-            "/products/",     
-            "/goods/",        
-            "/prod/",         
-            "/item/",         
-            "/product/",      
-            "/detail/",       
+            "/products/",
+            "/goods/",
+            "/prod/",
+            "/item/",
+            "/product/",
+            "/detail/",
         ]
-        
-        has_strong_product_url = any(pattern in path for pattern in strong_product_patterns)
-        
+
+        has_strong_product_url = any(
+            pattern in path for pattern in strong_product_patterns
+        )
+
         non_product_patterns = [
-            "/collections/", 
-            "/category/",    
-            "/categories/",  
-            "/search",       
-            "/list",         
-            "/index",        
-            "/home",         
+            "/collections/",
+            "/category/",
+            "/categories/",
+            "/search",
+            "/list",
+            "/index",
+            "/home",
         ]
-        
+
         has_non_product_url = any(pattern in path for pattern in non_product_patterns)
-        
+
         is_homepage = path == "/" or path == ""
-        
+
         html_lower = page_html[:3000].lower()
-    
+
         strong_product_indicators = [
-            "add to cart",          
-            "加入購物車",           
-            "立即購買",             
-            "buy now",              
-            "現在購買",             
-            "product-price",        
-            "single-product",       
-            "data-product-id",      
+            "add to cart",
+            "加入購物車",
+            "立即購買",
+            "buy now",
+            "現在購買",
+            "product-price",
+            "single-product",
+            "data-product-id",
         ]
-        
-        has_strong_html_indicators = any(indicator in html_lower for indicator in strong_product_indicators)
-        
+
+        has_strong_html_indicators = any(
+            indicator in html_lower for indicator in strong_product_indicators
+        )
+
         # 輔助的商品頁特徵
         supporting_indicators = [
             "product-detail",
-            "product-info",  
-            "商品詳情",      
-            "產品規格",      
-            "商品規格",               
+            "product-info",
+            "商品詳情",
+            "產品規格",
+            "商品規格",
         ]
-        
-        has_supporting_indicators = any(indicator in html_lower for indicator in supporting_indicators)
-        
-        
+
+        has_supporting_indicators = any(
+            indicator in html_lower for indicator in supporting_indicators
+        )
+
         if is_homepage or has_non_product_url:
             return False
         if has_strong_product_url:
@@ -544,13 +560,15 @@ class ECommerceScraper:
             return True
         return False
 
-    async def _ai_extract_product_info(self, page_html: str, url: str) -> Dict[str, Any]:
+    async def _ai_extract_product_info(
+        self, page_html: str, url: str
+    ) -> Dict[str, Any]:
         if not self.ai_client:
             return {"success": False, "error": "AI 功能未啟用"}
-            
+
         try:
-            truncated_html = page_html[:10000] 
-            
+            truncated_html = page_html[:10000]
+
             prompt = f"""
 請從以下電商網頁中提取商品資訊，以 JSON 格式回答：
 
@@ -581,30 +599,34 @@ HTML 內容:
 JSON:"""
 
             response = self.ai_client.generate_content(prompt)
-            
+
             result_text = response.text.strip()
-            
+
             if result_text.startswith('```json'):
-                result_text = result_text.replace('```json', '').replace('```', '').strip()
-            
+                result_text = (
+                    result_text.replace('```json', '').replace('```', '').strip()
+                )
+
             try:
                 result = json.loads(result_text)
-                
-                result.update({
-                    'url': url,
-                    'site': urlparse(url).netloc,
-                    'success': True,
-                    'error': None,
-                    'variants': {},  
-                    'has_variants': False,
-                    'main_image': result.get('images', [None])[0]
-                })
-                
+
+                result.update(
+                    {
+                        'url': url,
+                        'site': urlparse(url).netloc,
+                        'success': True,
+                        'error': None,
+                        'variants': {},
+                        'has_variants': False,
+                        'main_image': result.get('images', [None])[0],
+                    }
+                )
+
                 return result
-                
+
             except json.JSONDecodeError:
                 return {"success": False, "error": "AI 回應格式錯誤"}
-                
+
         except Exception as e:
             return {"success": False, "error": str(e)}
 
@@ -614,41 +636,48 @@ JSON:"""
             launch_options = {"headless": True}
             if proxy_server:
                 launch_options["proxy"] = {"server": proxy_server}
-            
+
             browser = await p.chromium.launch(**launch_options)
             page = await browser.new_page()
-            
-            await page.set_extra_http_headers({
-                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
-            })
-            
+
+            await page.set_extra_http_headers(
+                {
+                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+                }
+            )
+
             try:
                 await page.goto(url, wait_until="domcontentloaded", timeout=10000)
-                
+
                 await asyncio.sleep(3)
                 await page.evaluate("window.scrollTo(0, 500)")
                 await asyncio.sleep(2)
                 await page.evaluate("window.scrollTo(0, 0)")
-                
+
                 page_html = await page.content()
-                
+
                 is_product_page = await self._is_product_page(page_html, url)
                 if not is_product_page:
                     return {
-                        'name': None, 'price': None, 'success': False,
-                        'error': '此網址不是商品頁面', 'url': url,
-                        'site': urlparse(url).netloc, 'variants': {}, 'has_variants': False
+                        'name': None,
+                        'price': None,
+                        'success': False,
+                        'error': '此網址不是商品頁面',
+                        'url': url,
+                        'site': urlparse(url).netloc,
+                        'variants': {},
+                        'has_variants': False,
                     }
-            
+
                 extractor, extractor_type = await self._get_extractor_type(url, page)
-                
+
                 if extractor:
                     result = await extractor(page)
-                
+
                     has_sufficient_data = result.get('name') and result.get('price')
                     if not has_sufficient_data:
                         extractor = None
-                
+
                 if not extractor and self.ai_client:
                     ai_result = await self._ai_extract_product_info(page_html, url)
                     if ai_result.get('success'):
@@ -657,23 +686,24 @@ JSON:"""
                         raise Exception("無法提取商品資訊，請檢查網址")
                 elif not extractor:
                     raise Exception("不支援此網站的商品頁面")
-                
 
                 if extractor and result:
                     spec_variants = result.pop('spec_variants', {})
                     variants = self._process_variants(spec_variants)
-                    
-                    result.update({
-                        'url': url,
-                        'site': urlparse(url).netloc,
-                        'success': True,
-                        'error': None,
-                        'variants': variants,
-                        'has_variants': len(variants) > 0
-                    })
-                    
+
+                    result.update(
+                        {
+                            'url': url,
+                            'site': urlparse(url).netloc,
+                            'success': True,
+                            'error': None,
+                            'variants': variants,
+                            'has_variants': len(variants) > 0,
+                        }
+                    )
+
                     return result
-                
+
             except Exception as e:
                 return {
                     "url": url,
@@ -682,7 +712,7 @@ JSON:"""
                     "error": str(e),
                     "error_type": type(e).__name__,
                     "variants": {},
-                    "has_variants": False
+                    "has_variants": False,
                 }
             finally:
                 await browser.close()
@@ -691,6 +721,7 @@ JSON:"""
 async def scrape_product_url(url: str) -> Dict[str, Any]:
     scraper = ECommerceScraper()
     return await scraper.scrape_product(url)
+
 
 def scrape_product_url_sync(url: str) -> Dict[str, Any]:
     return asyncio.run(scrape_product_url(url))
