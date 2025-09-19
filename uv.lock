@@ -97,6 +97,7 @@ dependencies = [
     { name = "psycopg", extra = ["binary"] },
     { name = "pycryptodome" },
     { name = "python-dotenv" },
+    { name = "requests" },
 ]
 
 [package.metadata]
@@ -124,6 +125,7 @@ requires-dist = [
     { name = "psycopg", extras = ["binary"], specifier = ">=3.2.9" },
     { name = "pycryptodome", specifier = ">=3.23.0" },
     { name = "python-dotenv", specifier = ">=1.1.1" },
+    { name = "requests", specifier = ">=2.32.5" },
 ]
 
 [[package]]
