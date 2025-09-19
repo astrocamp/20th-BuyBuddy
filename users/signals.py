@@ -1,9 +1,9 @@
+from allauth.account.signals import password_reset
+from django.conf import settings
+from django.contrib import messages
 from django.db.models.signals import post_save, pre_save, pre_delete
 from django.dispatch import receiver
-from django.conf import settings
 from .models import UserAddress, DefaultAddressRequiredError
-from allauth.account.signals import password_reset
-from django.contrib import messages
 
 User = settings.AUTH_USER_MODEL
 

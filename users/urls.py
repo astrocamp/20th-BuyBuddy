@@ -1,4 +1,4 @@
-from django.urls import path, re_path, include
+from django.urls import path, re_path
 from . import views
 from users.views import custom_password_reset_from_key
 

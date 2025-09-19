@@ -1,8 +1,9 @@
-from django.db import models
-from django.utils import timezone
-from django_fsm import FSMField, transition
-from users.models import User
 from tinymce.models import HTMLField
+
+from django.db import models
+from django_fsm import FSMField, transition
+
+from users.models import User
 
 
 class Group(models.Model):

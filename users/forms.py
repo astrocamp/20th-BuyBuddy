@@ -1,3 +1,18 @@
+import json
+import re
+from pathlib import Path
+
+from allauth.account.forms import ResetPasswordForm, ResetPasswordKeyForm
+
+from django import forms
+from django.conf import settings
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.password_validation import (
+    get_default_password_validators,
+    MinimumLengthValidator,
+)
+from django.core.exceptions import ValidationError
+from django.core.validators import MinLengthValidator
 from django.forms import (
     ModelForm,
     FileInput,
@@ -5,21 +20,8 @@ from django.forms import (
     CheckboxInput,
     modelformset_factory,
 )
+
 from .models import User, UserAddress
-from django import forms
-from django.core.validators import MinLengthValidator
-from django.contrib.auth.forms import UserCreationForm
-from django.conf import settings
-from pathlib import Path
-import json
-import re
-from allauth.account.forms import ResetPasswordForm
-from allauth.account.forms import ResetPasswordKeyForm
-from django.contrib.auth.password_validation import (
-    get_default_password_validators,
-    MinimumLengthValidator,
-)
-from django.core.exceptions import ValidationError
 
 # 讀出縣市區域的
 _DATA_PATH = Path(settings.BASE_DIR) / "public" / "assets" / "taiwan-districts.json"

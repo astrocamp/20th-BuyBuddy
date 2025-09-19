@@ -1,15 +1,21 @@
-import time
 import logging
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
+
+from celery import shared_task
+
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from celery import shared_task
-from users.models import User
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+
 from groups.models import Group
-from orders.models import Order, OrderMessage 
+from orders.models import Order, OrderMessage
+from users.models import User
 from .db_service import create_notification_for_event
-from .mail_service import send_group_notification_email, send_order_notification_email, send_new_message_email # Added send_new_message_email
+from .mail_service import (
+    send_group_notification_email,
+    send_order_notification_email,
+    send_new_message_email,
+)  # Added send_new_message_email
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -59,7 +65,9 @@ def send_notification_for_new_order(order):
             send_owner_email_task.delay(group.id, "團購收到新訂單", order_id=order.id)
 
     except Exception as e:
-        logger.error(f"❌ 發送新訂單通知失敗 (Order ID: {order.id}): {e}", exc_info=True)
+        logger.error(
+            f"❌ 發送新訂單通知失敗 (Order ID: {order.id}): {e}", exc_info=True
+        )
 
 
 def send_notification_for_order_status_change(order):
@@ -71,9 +79,7 @@ def send_notification_for_order_status_change(order):
         status_text = f"訂單「{current_status_display}」"
 
         title = f"【訂單狀態更新】{group.name}"
-        content = (
-            f"您關於團購「{group.name}」的訂單，狀態已更新為：{current_status_display}。"
-        )
+        content = f"您關於團購「{group.name}」的訂單，狀態已更新為：{current_status_display}。"
 
         if order.order_status in [
             Order.OrderStatus.PROCESSING,
@@ -109,7 +115,9 @@ def send_notification_for_new_order_message(order_message):
         receiver = order_message.receiver
 
         if not receiver:
-            logger.warning(f"新留言通知：收件人為空，無法發送。留言 ID: {order_message.id}")
+            logger.warning(
+                f"新留言通知：收件人為空，無法發送。留言 ID: {order_message.id}"
+            )
             return
 
         title = f"訂單 #{order.order_number} 有新留言"
@@ -119,10 +127,15 @@ def send_notification_for_new_order_message(order_message):
 
         if receiver.is_verified and receiver.email:
             send_order_message_email_task.delay(order_message.id)
-            logger.info(f"📧 訂單 #{order.order_number} 新留言郵件任務已加入隊列給 {receiver.username}。")
+            logger.info(
+                f"📧 訂單 #{order.order_number} 新留言郵件任務已加入隊列給 {receiver.username}。"
+            )
 
     except Exception as e:
-        logger.error(f"❌ 發送訂單新留言通知失敗 (Message ID: {order_message.id}): {e}", exc_info=True)
+        logger.error(
+            f"❌ 發送訂單新留言通知失敗 (Message ID: {order_message.id}): {e}",
+            exc_info=True,
+        )
 
 
 @shared_task(bind=True, max_retries=3)
@@ -179,7 +192,7 @@ def send_order_message_email_task(self, order_message_id):
         order = order_message.order
         group_owner = order.group.owner
 
-        receiver_is_owner = (receiver == group_owner)
+        receiver_is_owner = receiver == group_owner
 
         if receiver and receiver.is_verified and receiver.email:
             send_new_message_email(
@@ -188,14 +201,21 @@ def send_order_message_email_task(self, order_message_id):
                 order_number=order.order_number,
                 message_content=order_message.content,
                 order_id=order.id,
-                receiver_is_owner=receiver_is_owner
+                receiver_is_owner=receiver_is_owner,
             )
-            logger.info(f"📧 已將訂單 #{order.order_number} 的新留言郵件任務執行完畢給 {receiver.username}。")
+            logger.info(
+                f"📧 已將訂單 #{order.order_number} 的新留言郵件任務執行完畢給 {receiver.username}。"
+            )
         else:
-            logger.warning(f"訂單 #{order.order_number} 新留言郵件任務：收件人 {receiver.username} 無效或未驗證。")
+            logger.warning(
+                f"訂單 #{order.order_number} 新留言郵件任務：收件人 {receiver.username} 無效或未驗證。"
+            )
 
     except Exception as exc:
-        logger.error(f"❌ 訂單新留言郵件任務失敗 (Message ID: {order_message_id}): {exc}", exc_info=True)
+        logger.error(
+            f"❌ 訂單新留言郵件任務失敗 (Message ID: {order_message_id}): {exc}",
+            exc_info=True,
+        )
         raise self.retry(exc=exc, countdown=30)
 
 
@@ -204,9 +224,7 @@ def check_deadline():
     try:
         logger.info("🕐 定時任務: 開始檢查團購截止時間...")
         with transaction.atomic():
-            expired_groups = Group.objects.select_for_update(
-                skip_locked=True
-            ).filter(
+            expired_groups = Group.objects.select_for_update(skip_locked=True).filter(
                 status="ongoing",
                 deadline__lt=timezone.now(),
             )

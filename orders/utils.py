@@ -1,8 +1,8 @@
+from django.db.models import Sum, F, Prefetch, Q
 from django.shortcuts import get_object_or_404
 from .models import Order
 from groups.models import Group, JoinedGroup
 from products.models import JoinedGroupProduct
-from django.db.models import Sum, F, Prefetch, Q
 
 
 # 查詢跟團者資訊

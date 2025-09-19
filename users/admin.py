@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import User, UserAddress
 from django.contrib.auth.admin import UserAdmin
+from .models import User, UserAddress
 
 
 class CustomUserAdmin(UserAdmin):

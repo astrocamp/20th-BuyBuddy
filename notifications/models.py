@@ -1,6 +1,6 @@
 from django.db import models
-from users.models import User
 from groups.models import Group
+from users.models import User
 
 
 class Notification(models.Model):

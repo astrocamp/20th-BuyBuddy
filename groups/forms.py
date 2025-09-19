@@ -1,11 +1,13 @@
-from django.forms import ModelForm, inlineformset_factory, BaseInlineFormSet
+from tinymce.widgets import TinyMCE
+
 from django import forms
+from django.conf import settings
+from django.forms import ModelForm, inlineformset_factory, BaseInlineFormSet
+from django.forms.widgets import *
+from django.utils.timezone import now
+
 from .models import Group
 from products.models import Product
-from django.forms.widgets import *
-from tinymce.widgets import TinyMCE
-from django.conf import settings
-from django.utils.timezone import now
 
 
 class GroupForm(ModelForm):
@@ -54,17 +56,16 @@ class GroupForm(ModelForm):
                 "required": "請輸入成團金額/數量",
             },
         }
-        
+
     def clean_deadline(self):
         deadline = self.cleaned_data.get('deadline')
         if deadline and deadline.date() < now().date():
             raise forms.ValidationError("截止日期不能早於今天")
         return deadline
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["deadline"].widget.attrs["min"] = now().strftime("%Y-%m-%d")
-            
 
 
 class ProductForm(forms.ModelForm):
@@ -133,34 +134,26 @@ class ProductBaseForm(BaseInlineFormSet):
 
 
 ProductFormSet = inlineformset_factory(
-	Group,
-	Product,
-	form=ProductForm,
-	fields=['name', 'price', 'description', "banner"],
-	extra=2,
-	can_delete=False,
-	labels = {
-		'name': '產品名稱',
-		'price': '產品價格',
-		'description': '產品描述',
-		'banner': '產品圖片'
-		},
-	formset = ProductBaseForm) 
+    Group,
+    Product,
+    form=ProductForm,
+    fields=['name', 'price', 'description', "banner"],
+    extra=2,
+    can_delete=False,
+    labels={
+        'name': '產品名稱',
+        'price': '產品價格',
+        'description': '產品描述',
+        'banner': '產品圖片',
+    },
+    formset=ProductBaseForm,
+)
+
 
 class URLExtractForm(forms.Form):
-	url = forms.URLField(
-		label="產品網址",
-		required=True,
-		widget=forms.URLInput(),
-		error_messages={
-			"required": "請輸入有效網址",
-			"invalid": "請輸入有效網址"
-		}
-	)
-					
-
- 
-
-
-
-
+    url = forms.URLField(
+        label="產品網址",
+        required=True,
+        widget=forms.URLInput(),
+        error_messages={"required": "請輸入有效網址", "invalid": "請輸入有效網址"},
+    )

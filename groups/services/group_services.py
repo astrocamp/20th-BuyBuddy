@@ -1,11 +1,13 @@
 import logging
+
 from django.db import transaction
 from django.db.models import Sum, F
 from django.utils import timezone
+
 from groups.models import JoinedGroup
+from orders.services import create_orders
 from products.models import JoinedGroupProduct
 from products.models import Product
-from orders.services import create_orders
 from .exceptions import *
 from ..models import Group
 
