@@ -10,7 +10,7 @@ def send_group_notification_email(recipient_emails, group, status, is_bulk=False
     try:
         group_url = f"{settings.SITE_URL}{reverse('groups:detail', kwargs={'id': group.id})}"
         template_mapping = (
-            {"已成團": "跟團者達標通知信"} if is_bulk else {"已成團": "團主達標通知信"}
+            {"已達標": "跟團者達標通知信"} if is_bulk else {"已達標": "團主達標通知信"}
         )
         template_id = template_mapping.get(
             status,
@@ -67,4 +67,29 @@ def send_order_notification_email(recipient_emails, order, status, is_bulk=False
 
     except Exception as e:
         logger.error(f"發送訂單狀態郵件失敗: {e}", exc_info=True)
+        raise
+
+def send_new_message_email(recipient_email, sender_username, order_number, message_content, order_id, receiver_is_owner):
+    """Sends an email notification for a new order message."""
+    try:
+        subject = f"訂單 #{order_number} 有新留言：來自 {sender_username}"
+        template_id = "訂單新留言通知信" 
+        
+        if receiver_is_owner:
+            message_board_url = f"{settings.SITE_URL}{reverse('orders:group_owner_order_messages', kwargs={'order_id': order_id})}"
+        else:
+            message_board_url = f"{settings.SITE_URL}{reverse('orders:order_messages', kwargs={'order_id': order_id})}"
+        
+        mail = AnymailMessage(template_id=template_id, to=[recipient_email])
+        mail.merge_global_data = {
+            "order_number": order_number,
+            "sender_username": sender_username,
+            "message_content": message_content,
+            "homepage_url": settings.SITE_URL,
+            "message_board_url": message_board_url,
+        }
+        mail.send()
+        logger.info(f"📧 已將訂單 #{order_number} 的新留言郵件發送給 {recipient_email}。")
+    except Exception as e:
+        logger.error(f"發送訂單新留言郵件失敗: {e}", exc_info=True)
         raise

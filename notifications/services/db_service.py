@@ -5,7 +5,7 @@ logger = logging.getLogger(__name__)
 
 
 def create_notification_for_event(group, user_ids, title, content):
-    """為一個事件創建一個通知，並關聯所有相關用戶。"""
+    print(f"DEBUG: create_notification_for_event called for group {group.name}, users {user_ids}")
     if not user_ids:
         return 0
     try:
@@ -23,6 +23,7 @@ def create_notification_for_event(group, user_ids, title, content):
         logger.info(
             f"成功為 {len(unique_user_ids)} 個用戶創建了與團購 '{group.name}' 相關的站內通知。"
         )
+        print(f"DEBUG: create_notification_for_event finished. Created {len(unique_user_ids)} notifications.")
         return len(unique_user_ids)
     except Exception as e:
         logger.error(

@@ -27,4 +27,4 @@ class UserNotification(models.Model):
     read_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.user} - {self.notification.title}"
+        return f"{self.user.username} - {self.notification.title}"
