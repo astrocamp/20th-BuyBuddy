@@ -1,31 +1,31 @@
 import asyncio
 import json
-import os
-from typing import Dict, Any, List
 from urllib.parse import urlparse
-
+from typing import Dict, Any, List
+import os
+import re
+import requests
 import google.generativeai as genai
-from playwright.async_api import async_playwright
+from urllib.parse import urlparse
 
 
 class ECommerceScraper:
     def __init__(self):
         self.ai_client = None
+        self.browser = None  
         gemini_api_key = os.getenv("GEMINI_API_KEY")
         if gemini_api_key:
             genai.configure(api_key=gemini_api_key)
-            self.ai_client = genai.GenerativeModel("gemini-1.5-pro")
-
+            self.ai_client = genai.GenerativeModel("gemini-1.5-flash")
+    
     async def _get_extractor_type(self, url: str, page) -> tuple:
         domain = urlparse(url).netloc.lower()
 
-        # 1. 檢查專用網站 (PCHome, Momo)
         if "pchome.com.tw" in domain:
             return self._extract_pchome, "pchome"
         elif "momoshop.com.tw" in domain:
             return self._extract_momo, "momo"
-
-        # 2. 動態檢測 Shopify
+        
         is_shopify = await page.evaluate(
             '''() => {
             return !!(
@@ -59,31 +59,80 @@ class ECommerceScraper:
 
         return None, "unknown"
 
+    def _extract_momo_from_html(self, html_content: str):
+        """從 HTML 內容中提取 MoMo 商品資訊"""
+        
+
+        data = {}
+
+        desc_match = re.search(r'<meta name="Description" content="推薦([^,]+),', html_content)
+        if desc_match:
+            data['name'] = desc_match.group(1).strip()
+        else:
+            title_match = re.search(r'<meta property="og:title" content="([^"]+)"', html_content)
+            if title_match:
+                data['name'] = title_match.group(1).strip()
+
+        price_match = re.search(r'<meta property="product:price:amount" content="([^"]+)"', html_content)
+        if price_match:
+            try:
+                data['price'] = int(price_match.group(1))
+            except:
+                data['price'] = None
+
+        brand_match = re.search(r'<meta property="product:brand" content="([^"]+)"', html_content)
+        if brand_match:
+            data['brand'] = brand_match.group(1).strip()
+
+        image_match = re.search(r'<meta property="og:image" content="([^"]+)"', html_content)
+        if image_match:
+            data['images'] = [image_match.group(1)]
+            data['main_image'] = image_match.group(1)
+        else:
+            data['images'] = []
+            data['main_image'] = None
+
+
+        full_desc_match = re.search(r'<meta name="Description" content="推薦[^,]+,([^"]+)"', html_content)
+        if full_desc_match:
+            desc = full_desc_match.group(1).replace('momo購物網總是優惠便宜好價格,值得推薦！', '').strip()
+            data['description'] = desc
+
+        currency_match = re.search(r'<meta property="product:price:currency" content="([^"]+)"', html_content)
+        data['currency'] = currency_match.group(1) if currency_match else 'TWD'
+
+        stock_match = re.search(r'<meta property="product:availability" content="([^"]+)"', html_content)
+        data['in_stock'] = stock_match and 'in stock' in stock_match.group(1).lower() if stock_match else True
+
+        data['spec_variants'] = {}
+
+        return data
+
     async def _extract_momo(self, page):
         return await page.evaluate(
             '''() => {
             const data = {};
-            
+
             // 基本資訊從 JSON-LD 提取
             const jsonLdScripts = document.querySelectorAll('script[type="application/ld+json"]');
             for (let script of jsonLdScripts) {
                 try {
                     const jsonData = JSON.parse(script.textContent);
                     const products = Array.isArray(jsonData) ? jsonData : [jsonData];
-                    
+
                     for (let item of products) {
                         if (item['@type'] === 'Product') {
                             data.name = item.name ? item.name.trim() : null;
-                            data.price = item.offers && item.offers.price ? 
+                            data.price = item.offers && item.offers.price ?
                                        parseInt(item.offers.price) : null;
                             data.currency = item.offers && item.offers.priceCurrency || 'TWD';
                             data.brand = item.brand && item.brand.name || null;
                             data.description = item.description || null;
                             data.images = item.image || [];
                             data.main_image = item.image && item.image[0] || null;
-                            data.in_stock = item.offers && 
+                            data.in_stock = item.offers &&
                                           item.offers.availability === 'https://schema.org/InStock';
-                            
+
                             if (item.aggregateRating) {
                                 data.rating = parseFloat(item.aggregateRating.ratingValue) || null;
                                 data.review_count = item.aggregateRating.reviewCount || null;
@@ -93,7 +142,7 @@ class ECommerceScraper:
                     }
                 } catch (e) { continue; }
             }
-            
+
             // 抓取 MomoShop 的規格選項 (使用 li 清單格式)
             data.spec_variants = {};
             
@@ -477,7 +526,7 @@ class ECommerceScraper:
             if not options or len(options) <= 1:
                 continue
 
-            if len(options) <= 8:  # 合理的變體選項數量
+            if len(options) <= 8: 
                 if "color" in spec_id.lower():
                     variants["colors"] = options
                 elif "flavor" in spec_id.lower():
@@ -537,7 +586,6 @@ class ECommerceScraper:
             indicator in html_lower for indicator in strong_product_indicators
         )
 
-        # 輔助的商品頁特徵
         supporting_indicators = [
             "product-detail",
             "product-info",
@@ -603,119 +651,225 @@ JSON:"""
             result_text = response.text.strip()
 
             if result_text.startswith('```json'):
-                result_text = (
-                    result_text.replace('```json', '').replace('```', '').strip()
-                )
+                result_text = result_text.replace('```json', '').replace('```', '').strip()
 
+            if '\n\n' in result_text:
+                result_text = result_text.split('\n\n')[0].strip()
+            
             try:
                 result = json.loads(result_text)
 
-                result.update(
-                    {
-                        'url': url,
-                        'site': urlparse(url).netloc,
-                        'success': True,
-                        'error': None,
-                        'variants': {},
-                        'has_variants': False,
-                        'main_image': result.get('images', [None])[0],
-                    }
-                )
+                result.update({
+                    'url': url,
+                    'site': urlparse(url).netloc,
+                    'success': True,
+                    'error': None,
+                    'variants': {},
+                    'has_variants': False,
+                    'main_image': result.get('images', [None])[0]
+                })
 
                 return result
 
-            except json.JSONDecodeError:
-                return {"success": False, "error": "AI 回應格式錯誤"}
-
+            except json.JSONDecodeError as e:
+                print(f"AI 回應 JSON 解析錯誤: {str(e)}")  
+                print(f"原始回應內容: {result_text[:500]}...") 
+                return {"success": False, "error": f"AI 回應格式錯誤: {str(e)}"}
+                
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def scrape_product(self, url: str) -> Dict[str, Any]:
-        async with async_playwright() as p:
+    async def _get_browser(self):
+        """取得或創建瀏覽器實例"""
+        if self.browser is None:
+            self.playwright = await async_playwright().start()
+
             proxy_server = os.getenv("PROXY_SERVER", None)
-            launch_options = {"headless": True}
+            launch_options = {
+                "headless": True,
+                "args": [
+                    "--no-sandbox",                                
+                    "--disable-setuid-sandbox",                   
+                    "--disable-dev-shm-usage",                    
+                    "--disable-gpu",                              
+                    "--disable-accelerated-2d-canvas",           
+                    "--no-first-run",                             
+                    "--no-zygote",                                
+                    "--disable-background-timer-throttling",     
+                    "--disable-backgrounding-occluded-windows",  
+                    "--disable-renderer-backgrounding"           
+                ]
+            }
             if proxy_server:
                 launch_options["proxy"] = {"server": proxy_server}
 
-            browser = await p.chromium.launch(**launch_options)
-            page = await browser.new_page()
+            self.browser = await self.playwright.chromium.launch(**launch_options)
 
-            await page.set_extra_http_headers(
-                {
-                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
-                }
+        return self.browser
+
+    async def _get_html_from_api(self, url: str) -> str:
+        """使用 Oxylabs API 獲取 HTML"""
+
+        username = os.getenv("OXYLABS_USERNAME")
+        password = os.getenv("OXYLABS_PASSWORD")
+
+        if not username or not password:
+            print("OXYLABS_USERNAME 或 OXYLABS_PASSWORD 環境變數未設定")
+            return None
+
+        try:
+            payload = {
+                'source': 'universal',
+                'url': url,
+                'geo_location': 'Taiwan Province of China',
+                'locale': 'zh-tw',
+                'user_agent_type': 'desktop_chrome',
+                'render': 'html'
+            }
+
+            print(f"調用 Oxylabs API: {url}")
+            response = requests.post(
+                'https://realtime.oxylabs.io/v1/queries',
+                auth=(username, password),
+                json=payload,
+                timeout=120
             )
+            response.raise_for_status()
 
+            result = response.json()
+            print(f"Oxylabs API 返回結果: {result.keys()}")
+
+            # Oxylabs 返回的 JSON 結構中，HTML 內容在 results[0].content
+            if result.get('results') and len(result['results']) > 0:
+                html_content = result['results'][0].get('content', '')
+                print(f"成功獲取 HTML，長度: {len(html_content)} 字符")
+                return html_content
+            else:
+                print(f"Oxylabs 返回的結果格式異常: {result}")
+                return None
+
+        except Exception as e:
+            print(f"Oxylabs API 調用失敗: {str(e)}")
+            return None
+
+    async def scrape_product(self, url: str) -> Dict[str, Any]:
+        if "momoshop.com.tw" in url:
+            print(f"檢測到 MoMo 網站，使用 API 獲取 HTML: {url}")
             try:
-                await page.goto(url, wait_until="domcontentloaded", timeout=10000)
+                html_content = await self._get_html_from_api(url)
+                if html_content:
+                    result = self._extract_momo_from_html(html_content)
+                    if result.get('name') and result.get('price'):
+                        spec_variants = result.pop('spec_variants', {})
+                        variants = self._process_variants(spec_variants)
 
-                await asyncio.sleep(3)
-                await page.evaluate("window.scrollTo(0, 500)")
-                await asyncio.sleep(2)
-                await page.evaluate("window.scrollTo(0, 0)")
-
-                page_html = await page.content()
-
-                is_product_page = await self._is_product_page(page_html, url)
-                if not is_product_page:
-                    return {
-                        'name': None,
-                        'price': None,
-                        'success': False,
-                        'error': '此網址不是商品頁面',
-                        'url': url,
-                        'site': urlparse(url).netloc,
-                        'variants': {},
-                        'has_variants': False,
-                    }
-
-                extractor, extractor_type = await self._get_extractor_type(url, page)
-
-                if extractor:
-                    result = await extractor(page)
-
-                    has_sufficient_data = result.get('name') and result.get('price')
-                    if not has_sufficient_data:
-                        extractor = None
-
-                if not extractor and self.ai_client:
-                    ai_result = await self._ai_extract_product_info(page_html, url)
-                    if ai_result.get('success'):
-                        return ai_result
-                    else:
-                        raise Exception("無法提取商品資訊，請檢查網址")
-                elif not extractor:
-                    raise Exception("不支援此網站的商品頁面")
-
-                if extractor and result:
-                    spec_variants = result.pop('spec_variants', {})
-                    variants = self._process_variants(spec_variants)
-
-                    result.update(
-                        {
+                        result.update({
                             'url': url,
                             'site': urlparse(url).netloc,
                             'success': True,
                             'error': None,
                             'variants': variants,
-                            'has_variants': len(variants) > 0,
-                        }
-                    )
-
-                    return result
-
+                            'has_variants': len(variants) > 0
+                        })
+                        return result
+                    else:
+                        print(f"HTML 解析結果不完整: name={result.get('name')}, price={result.get('price')}")
+                else:
+                    print("API 未返回 HTML 內容")
             except Exception as e:
+                print(f"MoMo API 處理失敗: {str(e)}")
+                return {"success": False, "error": f"MoMo API 處理失敗: {str(e)}"}
+
+        browser = await self._get_browser()
+        page = await browser.new_page()
+
+        try:
+            await page.set_extra_http_headers({
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+            })
+
+            timeout = 60000 if "momoshop.com.tw" in url else 10000
+            await page.goto(url, wait_until="domcontentloaded", timeout=timeout)
+
+            await asyncio.sleep(3)
+            await page.evaluate("window.scrollTo(0, 500)")
+            await asyncio.sleep(2)
+            await page.evaluate("window.scrollTo(0, 0)")
+
+            page_html = await page.content()
+
+            is_product_page = await self._is_product_page(page_html, url)
+            if not is_product_page:
                 return {
-                    "url": url,
-                    "site": urlparse(url).netloc,
-                    "success": False,
-                    "error": str(e),
-                    "error_type": type(e).__name__,
-                    "variants": {},
-                    "has_variants": False,
+                    'name': None, 'price': None, 'success': False,
+                    'error': '此網址不是商品頁面', 'url': url,
+                    'site': urlparse(url).netloc, 'variants': {}, 'has_variants': False
                 }
-            finally:
-                await browser.close()
+
+            extractor, extractor_type = await self._get_extractor_type(url, page)
+            print(f"選擇的提取器: {extractor_type}") 
+
+            if extractor:
+                try:
+                    result = await extractor(page)
+                    print(f"提取器結果: {result}")  
+
+                    has_sufficient_data = result.get('name') and result.get('price')
+                    if not has_sufficient_data:
+                        print(f"資料不足，名稱: {result.get('name')}, 價格: {result.get('price')}")  
+                        extractor = None
+                except Exception as e:
+                    print(f"專用提取器錯誤: {str(e)}") 
+                    extractor = None
+
+            if not extractor and self.ai_client:
+                print(f"使用 AI 提取商品資訊: {url}")  
+                ai_result = await self._ai_extract_product_info(page_html, url)
+                print(f"AI 提取結果: {ai_result}")  
+                if ai_result.get('success'):
+                    return ai_result
+                else:
+                    error_msg = ai_result.get('error', '未知錯誤')
+                    raise Exception(f"AI 提取失敗: {error_msg}")
+            elif not extractor:
+                raise Exception("不支援此網站的商品頁面")
+
+
+            if extractor and result:
+                spec_variants = result.pop('spec_variants', {})
+                variants = self._process_variants(spec_variants)
+
+                result.update({
+                    'url': url,
+                    'site': urlparse(url).netloc,
+                    'success': True,
+                    'error': None,
+                    'variants': variants,
+                    'has_variants': len(variants) > 0
+                })
+
+                return result
+
+        except Exception as e:
+            return {
+                "url": url,
+                "site": urlparse(url).netloc,
+                "success": False,
+                "error": str(e),
+                "error_type": type(e).__name__,
+                "variants": {},
+                "has_variants": False
+            }
+        finally:
+            await page.close()
+
+    async def close(self):
+        """關閉瀏覽器和 Playwright"""
+        if self.browser:
+            await self.browser.close()
+            self.browser = None
+        if hasattr(self, 'playwright') and self.playwright:
+            await self.playwright.stop()
 
 
 async def scrape_product_url(url: str) -> Dict[str, Any]:
