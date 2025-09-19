@@ -50,10 +50,14 @@
         <p class="text-center p-2">${{ order.total_amount | intcomma }}</p>
       </div>
       <div class="border p-4">
-        <p>收件人: {{ order.ship_recipient_name }}</p>
-        <p>電話: {{ order.ship_phone }}</p>
+        <p>收件人: {{ order.ship_recipient_name | default:"尚未設定" }}</p>
+        <p>電話: {{ order.ship_phone | default:"尚未設定" }}</p>
         <p>付款狀態: {{ order.get_order_status_display }}</p>
+        {% if order.ship_postal_code %}
         <p>寄件地址: {{ order.ship_postal_code }} {{ order.ship_county }} {{ order.ship_district }} {{ order.ship_road }} {{ order.ship_detail }}</p>
+        {% else %}
+        <p>寄件地址: 尚未設定</p>
+        {% endif %}
       </div>
     </div>
   </div>

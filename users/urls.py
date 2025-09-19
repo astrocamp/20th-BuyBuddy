@@ -7,6 +7,9 @@ app_name = "users"
 urlpatterns = [
     path("profiles/", views.profiles, name="profiles"),
     path("profiles/edit/", views.profiles_edit, name="profiles_edit"),
+    path(
+        "profiles/edit/cancel/", views.profiles_edit_cancel, name="profiles_edit_cancel"
+    ),
     path("profiles/address/create/", views.address_create, name="address_create"),
     path(
         "profiles/address/<int:address_id>/edit/",
