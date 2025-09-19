@@ -82,7 +82,7 @@ data-limited-config='{{ limited_config_json|safe }}'>
         <div class="bg-white p-6 border-2 border-tertiary-color-300 rounded-lg flex flex-col gap-4">
             <label for="{{ empty_form.name.id_for_label }}" class="text-sm font-medium">{{ empty_form.name.label }}</label>
             <input
-            class="w-full border-2 border-tertiary-color-300 rounded-lg p-2 text-sm sm:text-base"
+            class="w-full border-2 border-tertiary-color-300 rounded-lg p-2 text-sm sm:text-base text-center"
             type="text"
             name="{{ empty_form.name.html_name }}"
             id="{{ empty_form.name.id_for_label }}"
@@ -95,7 +95,7 @@ data-limited-config='{{ limited_config_json|safe }}'>
             {% endif %}
             <label for="{{ empty_form.price.auto_id }}" class="text-sm font-medium">{{ empty_form.price.label }}</label>
             <input
-            class="w-full border-2 border-tertiary-color-300 rounded-lg p-2 text-sm sm:text-base"
+            class="w-full border-2 border-tertiary-color-300 rounded-lg p-2 text-sm sm:text-base text-center"
             type="number"
             name="{{ empty_form.price.html_name }}"
             id="{{ empty_form.price.auto_id }}"
