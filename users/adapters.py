@@ -71,10 +71,6 @@ class CustomAccountAdapter(DefaultAccountAdapter):
     def is_open_for_signup(self, request):
         return False
 
-        # 其他訊息使用原本的邏輯
-        super().add_message(
-            request, level, message_template, message_context, extra_tags, message
-        )
 
     # 自定義登入後的 行為
     def post_login(self, request, user, **kwargs):
@@ -121,10 +117,14 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             )
             sociallogin.user = existing_user
             user = existing_user
+
+            if sociallogin.account.provider == 'line':
+                user.line_id = sociallogin.account.uid
+                user.save(update_fields=["line_id"])
         # 如果沒有 相同的 email
         else:
             request.session["is_social_signup"] = True
-
+            
             # 創建新帳號，讓 allauth 完成註冊流程
             user = super().save_user(request, sociallogin, form)
 

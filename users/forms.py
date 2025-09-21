@@ -367,3 +367,11 @@ class CustomResetPasswordFromKeyForm(ResetPasswordKeyForm):
             if isinstance(v, MinimumLengthValidator):
                 return getattr(v, "min_length", 8)
         return 8
+
+class LineNoEmailForm(forms.Form):
+    email = forms.EmailField(
+        error_messages={
+            "required": "請輸入電子郵件地址",
+            "invalid": "請輸入有效的電子郵件地址",
+        }
+    )
