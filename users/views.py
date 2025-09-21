@@ -26,9 +26,12 @@ from .forms import (
     LoginForm,
     UserAddressFormSet,
     CustomResetPasswordFromKeyForm,
+    LineNoEmailForm,
 )
 from .tokens import email_verification_token_generator
-
+import requests, secrets, random
+from urllib.parse import urlencode
+from django.core.cache import cache
 
 def custom_password_reset_from_key(request, uid=None, key=None):
     if request.method == "POST":
@@ -44,15 +47,6 @@ def custom_password_reset_from_key(request, uid=None, key=None):
         request,
         "account/password_reset_from_key.html",
         {"form": form},
-    )
-
-
-def js_google_client(request):
-    return JsonResponse(
-        {
-            "GOOGLE_CLIENT_ID": settings.GOOGLE_CLIENT_ID,
-            "HOSTNAME": settings.HOSTNAME,
-        }
     )
 
 
@@ -558,6 +552,14 @@ def address_cancel(request, address_id):
     )
 
 
+# Google OAuth2
+# 回傳 Google Client ID
+def js_google_client(request):
+    return JsonResponse({
+        "GOOGLE_CLIENT_ID": settings.GOOGLE_CLIENT_ID,
+        "HOSTNAME": settings.HOSTNAME,
+    })
+
 # TODO: 接收前端的授權碼進行驗證和登入
 def social_oauth2(request):
     # 先加入調試訊息
@@ -576,7 +578,7 @@ def social_oauth2(request):
         # 2. 用 access token 取得用戶資料
         user_info = get_user_info(tokens["access_token"])
         # 3. 前往登入或註冊
-        social_login = create_google_login(user_info)
+        social_login = create_social_login(user_info, 'google')
         return complete_social_login(request, social_login)
     except ImmediateHttpResponse:
         # 讓 allauth 的重導向正常通過
@@ -637,14 +639,20 @@ def get_user_info(access_token):
     return response.json()
 
 
-def create_google_login(user_info):
+def create_social_login(user_info, provider):
     # 創建 SocialLogin
     social_login = SocialLogin()
 
     # 創建 SocialAccount
     social_login.account = SocialAccount()
-    social_login.account.provider = "google"
-    social_login.account.uid = user_info.get("sub")  # Google 用戶 ID
+    social_login.account.provider = provider
+    
+    # 根據不同的提供商設定 uid
+    if provider == 'google':
+        social_login.account.uid = user_info.get("sub")  # Google 用戶 ID
+    elif provider == 'line':
+        social_login.account.uid = user_info.get("line_user_id") or user_info.get("sub")  # Line 用戶 ID
+    
     social_login.account.extra_data = user_info
 
     # 創建 暫時的 User
@@ -653,11 +661,268 @@ def create_google_login(user_info):
     user.username = user_info.get("email", "")  # 用 email 作為 username
     user.is_verified = True
 
+    if provider == 'line':
+        user.line_id = user_info.get("line_user_id") or user_info.get("sub")
+        user.is_verified = False
+
     # 關聯 User 和 SocialAccount
     social_login.user = user
     social_login.account.user = user
 
     return social_login
+
+# Line OAuth2
+def js_line_client(request):
+    # 使用 python 的 secrets 模組生成 state
+    state = secrets.token_urlsafe(32)
+
+    # 將生成的 state 存在 Django session 中
+    request.session["line_oauth_state"] = state
+
+    # 建構授權 URL
+    params = {
+        "response_type": "code",
+        "client_id": settings.LINE_LOGIN_CHANNEL_ID,
+        "redirect_uri": f"https://{settings.HOSTNAME}/users/line_social-oauth2/",
+        # TODO: 加上 email 權限
+        "scope": "profile openid",
+        "state": state
+    }
+    auth_url = f"https://access.line.me/oauth2/v2.1/authorize?{urlencode(params)}"
+
+    return JsonResponse({"auth_url": auth_url})
+
+def line_social_oauth2(request):
+    
+    # 檢查 state 是否一致
+    if request.GET.get("state") != request.session.get("line_oauth_state"):
+        messages.error(request, "state 不一致，請重新嘗試")
+        return redirect("users:sessions_new")
+    
+    # 檢查 code 是否存在
+    code = request.GET.get("code")
+    if not code:
+        messages.error(request, "code 不存在，請重新嘗試")
+        return redirect("users:sessions_new")
+    
+    # 清除 Django session 中的 state
+    del request.session["line_oauth_state"]
+
+    # 取得 Line token -> 往 get_line_token 函式
+    line_token = get_line_token(code)
+
+    if not line_token["success"]:
+        messages.error(request, line_token["message"])
+        return redirect("users:sessions_new")
+
+    # 解析 Line token -> 往 parse_line_token 函式
+    line_data = parse_line_token(line_token)
+
+    # 檢查 Line token 是否解析成功
+    if not line_data["success"]:
+        messages.error(request, line_data["message"])
+        return redirect("users:sessions_new")
+
+    # 從 line data 中取得 user 資料
+    user_info = line_data.get('data')
+
+    if user_info.get('email'):
+        social_login = create_social_login(user_info, 'line')
+        return complete_social_login(request, social_login)
+
+    # 假設 line 的 email 不存在，則跳轉到 line_no_email 頁面
+    else:
+        request.session["line_user_info"] = user_info
+        return render(request, "users/line_no_email.html")
+
+# 輸入信箱頁面
+def line_no_email(request):
+    form = LineNoEmailForm(request.POST)
+
+    if "line_user_info" not in request.session:
+          messages.error(request, "請先進行 Line 登入")
+          return redirect("users:sessions_new")
+
+    # 用戶輸入 email 並送出
+    if request.method == "POST":
+        input_email = request.POST.get("email")
+        line_user_name = request.session["line_user_info"].get("name")
+        line_user_id = request.session["line_user_info"].get("sub")
+        verify_code = request.POST.get("verify_code")
+
+        # 重發驗證碼
+        if 'resend_code' in request.POST:
+            send_code = send_verify_code(input_email)
+            if send_code:
+                messages.info(request, "已發送驗證碼至信箱，請至信箱查看")
+            else:
+                messages.error(request, "發送驗證碼時發生錯誤，請稍後再試")
+            return render(request, "users/line_no_email.html", {
+                "form": form, 
+                "email": input_email, 
+                "line_user_name": line_user_name,
+                "line_user_id": line_user_id,
+                "verify": True}
+                )
+            
+
+        # 檢查 email 是否已註冊
+        existing_email = User.objects.filter(email=input_email).first()
+
+        # 如果 用戶輸入的 email 已註冊，則發送驗證碼至信箱
+        if existing_email:
+
+            # 檢查是否有驗證碼欄位，沒有欄位代表初次發送驗證碼
+            if 'verify_code' in request.POST:
+                # 檢查驗證碼是否輸入
+                if verify_code:
+                    # 檢查驗證碼是否正確
+                    check_verify_code = verify_email_code(input_email, verify_code)
+
+                    # 如果 True 直接登入，False 則顯示錯誤訊息
+                    if check_verify_code[0]:
+                        user_info = {
+                            "email": input_email,
+                            "line_user_name": line_user_name,
+                            "line_user_id": line_user_id
+                        }
+                        del request.session["line_user_info"]
+                        social_login = create_social_login(user_info, 'line')
+                        return complete_social_login(request, social_login)
+                    else:
+                        messages.error(request, check_verify_code[1])
+                        return render(request, "users/line_no_email.html", {
+                            "form": form, 
+                            "email": input_email, 
+                            "line_user_name": line_user_name,
+                            "line_user_id": line_user_id,
+                            "verify": True,
+                        })
+                
+                # 如果驗證碼未輸入，則顯示 verify_code_error 錯誤訊息
+                else:
+                    return render(request, "users/line_no_email.html", {
+                        "form": form, 
+                        "email": input_email, 
+                        "line_user_name": line_user_name,
+                        "line_user_id": line_user_id,
+                        "verify": True,
+                        "verify_code_error": "請輸入驗證碼"
+                    })
+
+            # 初次發送驗證碼
+            send_code = send_verify_code(input_email)
+            if send_code:
+                messages.info(request, "已發送驗證碼至信箱，請至信箱查看")
+            else:
+                messages.error(request, "發送驗證碼時發生錯誤，請稍後再試")
+            # 開啟 驗證碼欄位，讓用戶輸入驗證碼
+            return render(request, "users/line_no_email.html", {
+                "form": form, 
+                "email": input_email, 
+                "line_user_name": line_user_name,
+                "line_user_id": line_user_id,
+                "verify": True}
+                )
+
+        # 檢查信箱
+        if not form.is_valid():
+            return render(request, "users/line_no_email.html", {"form": form, "email": input_email})
+        
+        # 如果 用戶輸入的 email 不重複，則建立新的 user 並綁定 line
+        user_info = {
+            "email": input_email,
+            "line_user_name": line_user_name,
+            "line_user_id": line_user_id
+        }
+        social_login = create_social_login(user_info, 'line')
+        return complete_social_login(request, social_login)
+    # 進入 輸入信箱頁面
+    return render(request, "users/line_no_email.html")
+
+# 發送驗證碼
+def send_verify_code(input_email):
+    verify_code = random.randint(100000, 999999)
+    
+    # 將驗證碼存到快取，5分鐘過期
+    cache.set(f"verify_code_{input_email}", verify_code, timeout=300)
+    
+    try: 
+        mail = AnymailMessage(template_id="信箱綁定驗證", to=[input_email])
+        # 使用 merge_global_data 傳遞變數到 Mailgun 模板
+        mail.merge_global_data = {
+            "verify_code": verify_code,
+        }
+        mail.send()
+        return True
+    except Exception as e:
+        return False
+
+# 驗證驗證碼
+def verify_email_code(input_email, input_code):
+    stored_code = cache.get(f"verify_code_{input_email}")
+    
+    if not stored_code:
+        return False, "驗證碼不存在或已過期"
+    
+    if str(stored_code) == str(input_code):
+        # 驗證成功後刪除驗證碼
+        cache.delete(f"verify_code_{input_email}")
+        return True, "驗證成功"
+    
+    return False, "驗證碼錯誤"
+
+def get_line_token(code):
+    post_url = "https://api.line.me/oauth2/v2.1/token"
+
+    data = {
+        "grant_type": "authorization_code",
+        "code": code,
+        "redirect_uri": f"https://{settings.HOSTNAME}/users/line_social-oauth2/",
+        "client_id": settings.LINE_LOGIN_CHANNEL_ID,
+        "client_secret": settings.LINE_LOGIN_CHANNEL_SECRET_KEY,
+    }
+
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+
+    try:
+        response = requests.post(post_url, data=data, headers=headers)
+        token_data = response.json()
+        return {
+            "success": True,
+            "access_token": token_data["access_token"],
+            "id_token": token_data["id_token"],
+            "refresh_token": token_data["refresh_token"],
+        }
+    except Exception as e:
+        message = f"取得 Line token 時發生錯誤: {e}"
+        return {
+            "success": False,
+            "message": message
+        }
+
+def parse_line_token(token_data):
+    url = "https://api.line.me/oauth2/v2.1/verify"
+    data = {
+        "id_token": token_data["id_token"],
+        "client_id": settings.LINE_LOGIN_CHANNEL_ID,
+    }
+
+    try:
+        response = requests.post(url, data=data).json()
+        return {
+            "success": True,
+            "data": response
+        }
+    except Exception as e:
+        message = f"解析 Line token 時發生錯誤: {e}"
+        return {
+            "success": False,
+            "message": message
+        }
+
 
 
 def password_reset_redirect(request):

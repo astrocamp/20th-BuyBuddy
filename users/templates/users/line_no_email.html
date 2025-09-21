@@ -1,0 +1,64 @@
+{% extends 'layouts/default.html'%}
+
+{% block content%}
+<div class="flex flex-col items-center">
+    <div class="w-full max-w-md px-14">
+        <h1 class="text-xl lg:text-lg font-bold mt-5 mb-4 text-center">請輸入信箱，以便繼續接下來的步驟</h1>
+        <form action="{% url 'users:line_no_email' %}" method="post" class="flex flex-col gap-4 sm:gap-6" novalidate>
+            {% csrf_token %}
+            <div class="mb-2">
+                <div class="relative mb-5">
+                    <svg class="absolute left-6 top-1/2 -translate-y-1/2" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#7c7c7c" viewBox="0 0 256 256">
+                        <path d="M224,48H32a8,8,0,0,0-8,8V192a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A8,8,0,0,0,224,48ZM203.43,64,128,133.15,52.57,64ZM216,192H40V74.19l82.59,75.71a8,8,0,0,0,10.82,0L216,74.19V192Z"></path>
+                    </svg>
+                    <input type="email" 
+                           placeholder="請輸入信箱" 
+                           name="email" 
+                           class="text-sm w-full py-2 px-4 pl-14 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full transition-colors h-[42px]"
+                           value="{{ email }}">
+                    <input type="hidden" name="line_user_name" value="{{ line_user_name }}">
+                    <input type="hidden" name="line_user_id" value="{{ line_user_id }}">
+                  </div>
+                  {% if verify %}
+                  <div class="flex gap-2 justify-between">
+                    <div>
+                      <input
+                          type="text"
+                          inputmode="numeric"
+                          name="verify_code"
+                          placeholder="請輸入 6 位驗證碼"
+                          maxlength="6"
+                          pattern="[0-9]{6}"
+                          class="text-sm text-center w-full py-2 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full transition-colors h-[42px]"
+                          required
+                      />
+                    </div>
+                    <div class="">
+                        <button name="resend_code" type="submit" class="secondary-btn">
+                            再次發送驗證碼
+                        </button>
+                    </div>
+                  </div>
+                  {% if verify_code_error %}
+                    <div class="min-h-[2px]"></div>
+                    <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2 min-h-[20px]">
+                        {{ verify_code_error }}
+                    </div>
+                    {% endif %}
+                  {% endif %}
+                {% if form.email.errors %}
+                    <div class="min-h-[2px]"></div>
+                    <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2 min-h-[20px]">
+                        {{ form.email.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="flex justify-center mt-2 sm:mt-6">
+                <button class="main-btn">
+                    送出
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

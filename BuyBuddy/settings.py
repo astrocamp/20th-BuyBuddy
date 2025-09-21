@@ -24,7 +24,11 @@ ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 CSRF_TRUSTED_ORIGINS = [
     "https://www.buybuddy.site",
     "https://buybuddy.site",
+    "https://" + os.getenv("HOSTNAME"),
 ]
+
+# 允許跨域請求攜帶認證資訊 (cookies, session 等)
+CORS_ALLOW_CREDENTIALS = True
 
 # Application definition
 
@@ -235,6 +239,10 @@ LINE_CHANNEL_SECRET_KEY = os.getenv("LINE_CHANNEL_SECRET_KEY")
 LINE_SIGNATURE_REQUEST_URI = os.getenv("LINE_SIGNATURE_REQUEST_URI")
 LINE_SANDBOX_URL = os.getenv("LINE_SANDBOX_URL")
 
+# LINE 登入設定
+LINE_LOGIN_CHANNEL_ID = os.getenv("LINE_LOGIN_CHANNEL_ID")
+LINE_LOGIN_CHANNEL_SECRET_KEY = os.getenv("LINE_LOGIN_CHANNEL_SECRET_KEY")
+
 
 # 富文本設定
 TINYMCE_JS_URL = STATIC_URL + "tinymce/tinymce.min.js"
@@ -295,21 +303,3 @@ NEWEBPAY_MERCHANT_ID = os.getenv("NEWEBPAY_MERCHANT_ID")
 NEWEBPAY_HASH_KEY = os.getenv("NEWEBPAY_HASH_KEY")
 NEWEBPAY_HASH_IV = os.getenv("NEWEBPAY_HASH_IV")
 NEWEBPAY_URL = "https://ccore.newebpay.com/MPG/mpg_gateway"
-NGROK_HOSTNAME = os.getenv("NGROK_HOSTNAME")
-
-# 給藍新用的CORS設定
-if DEBUG:
-    # 開發環境 (ngrok)
-    # # ngrok 域名每次都變，所以允許全部
-    CORS_ALLOWED_ORIGINS = [
-        os.getenv("NGROK_HOSTNAME"),
-    ]
-    # 允許跨域請求攜帶認證資訊 (cookies, session 等)
-    CORS_ALLOW_CREDENTIALS = True
-    # ngrok 域名
-    HOSTNAME = os.getenv("NGROK_HOSTNAME")
-    ALLOWED_HOSTS += [
-        os.getenv("NGROK_HOSTNAME"),
-    ]
-
-INTERNAL_IPS = ["127.0.0.1", "localhost"]

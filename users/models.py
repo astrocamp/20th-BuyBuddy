@@ -14,6 +14,7 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     avatar_url = models.ImageField(upload_to='avatars/')
     is_verified = models.BooleanField(default=False)
+    line_id = models.CharField(max_length=255, null=True, blank=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
