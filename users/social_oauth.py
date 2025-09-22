@@ -220,7 +220,7 @@ def create_social_login(user_info, provider):
   if provider == 'google':
       social_login.account.uid = user_info.get("sub")  # Google 用戶 ID
   elif provider == 'line':
-      social_login.account.uid = user_info.git("user_id")  # Line 用戶 ID
+      social_login.account.uid = user_info.get("user_id")  # Line 用戶 ID
   
   social_login.account.extra_data = user_info
 
