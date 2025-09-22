@@ -1,12 +1,12 @@
 <div class="flex justify-center items-center gap-4 my-6">
-    <a href="{% url 'groups:index_filtered' filter_type=active_tab %}?status=ongoing"
+    <a href="{% url 'groups:index_filtered' filter_type=active_tab %}?status=ongoing{% if query %}&query={{ query }}{% endif %}"
        hx-get="{% url 'groups:index_filtered' filter_type=active_tab %}?status=ongoing"
        hx-target="#groups-container"
        hx-push-url="true"
        class="sub-tab-btn {% if active_status == 'ongoing' %}active{% endif %}">
         進行中
     </a>
-    <a href="{% url 'groups:index_filtered' filter_type=active_tab %}?status=reached"
+    <a href="{% url 'groups:index_filtered' filter_type=active_tab %}?status=reached{% if query %}&query={{ query }}{% endif %}"
        hx-get="{% url 'groups:index_filtered' filter_type=active_tab %}?status=reached"
        hx-target="#groups-container"
        hx-push-url="true"

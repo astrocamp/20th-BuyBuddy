@@ -1,3 +1,26 @@
+<!-- 搜尋 -->
+<div class="mt-6 mb-8">
+	<form {% if request.htmx %}
+			hx-get="{% url 'groups:index_filtered' filter_type=active_tab %}"
+			hx-target="#groups-container"
+			hx-push-url="true"
+			hx-trigger="submit"
+			{% endif %}
+	>
+		{% if active_status %}
+			<input type="hidden" name="status" value="{{ active_status }}">
+		{% endif %}
+		
+		<div class="relative flex items-center">
+			<input type="text" name="query" value="{{ query|default:'' }}" placeholder="搜尋團名、團購介紹、商品名稱" 
+					class="w-full border-2 border-[var(--tertiary-color-200)] rounded-full py-3 px-8 text-sm sm:text-base">
+			<button type="submit" class="rounded-[50px] secondary-btn text-xs text-center sm:text-sm flex-shrink-0 absolute right-2">
+				搜尋
+			</button>
+		</div>
+	</form>
+</div> 
+
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 auto-rows-fr">
 	{% if page_groups %}
 		{% for group in page_groups %}
@@ -13,29 +36,38 @@
 {% if page_groups.paginator.num_pages > 1 %}
 <nav aria-label="Page navigation" class="mt-8 lg:mt-12">
 
-	<ul class="flex items-center justify-center gap-2 sm:gap-4">
-		{% if page_groups.has_previous %}
-		<li>
-            <a href="{% url 'groups:index_filtered' filter_type=active_tab %}?page={{ page_groups.previous_page_number }}{% if active_status %}&status={{ active_status }}{% endif %}" class="flex items-center justify-center px-4 h-10 text-sm font-medium rounded-full bg-[var(--tertiary-color)] hover:bg-[var(--tertiary-color-200)] transition-colors">上一頁</a>
+	<ul class="flex items-center justify-center gap-4">
+		<!-- 上一頁按鈕 -->
+		<li class="w-[70px] flex justify-start">
+		    {% if page_groups.has_previous %}
+            <a href="{% url 'groups:index_filtered' filter_type=active_tab %}?page={{ page_groups.previous_page_number }}{% if active_status %}&status={{ active_status }}{% endif %}{% if query %}&query={{ query }}{% endif %}" class="flex items-center justify-center px-4 h-10 text-sm font-medium rounded-full bg-[var(--tertiary-color)] hover:bg-[var(--tertiary-color-200)] transition-colors break-keep">上一頁</a>
+            {% endif %}
         </li>
-		{% endif %}
+		
+		<!-- 中螢幕 -->
 		{% for page_num in page_groups.paginator.page_range %}
 			{% if page_num >= page_groups.number|add:-2 and page_num <= page_groups.number|add:2 %}
-			<li>
+			<li class="hidden md:block">
 				 {% if page_groups.number == page_num %}
 				 <span class="flex items-center justify-center w-10 h-10 text-sm font-bold bg-secondary-color text-white rounded-full">{{ page_num }}</span>
                 {% else %}
-				 <a href="{% url 'groups:index_filtered' filter_type=active_tab %}?page={{ page_num }}{% if active_status %}&status={{ active_status }}{% endif %}" class="flex items-center justify-center w-10 h-10 text-sm font-medium rounded-full bg-[var(--tertiary-color)] hover:bg-[var(--tertiary-color-200)]">{{ page_num }}</a>
+				 <a href="{% url 'groups:index_filtered' filter_type=active_tab %}?page={{ page_num }}{% if active_status %}&status={{ active_status }}{% endif %}{% if query %}&query={{ query }}{% endif %}" class="flex items-center justify-center w-10 h-10 text-sm font-medium rounded-full bg-[var(--tertiary-color)] hover:bg-[var(--tertiary-color-200)]">{{ page_num }}</a>
                 {% endif %}
 			</li>
 			{% endif %}
 		{% endfor %}
-
-		{% if page_groups.has_next %}
-		<li>
-			<a href="{% url 'groups:index_filtered' filter_type=active_tab %}?page={{ page_groups.next_page_number }}{% if active_status %}&status={{ active_status }}{% endif %}" class="flex items-center justify-center px-4 h-10 text-sm font-medium rounded-full bg-[var(--tertiary-color)] hover:bg-[var(--tertiary-color-200)]">下一頁</a>
+		
+		<!-- 小螢幕 -->
+		<li class="block md:hidden">
+			<span class="flex items-center justify-center w-10 h-10 text-sm font-bold bg-secondary-color text-white rounded-full">{{ page_groups.number }}</span>
 		</li>
-		{% endif %}
+
+		<!-- 下一頁按鈕 -->
+		<li class="w-[70px] flex justify-end">
+		    {% if page_groups.has_next %}
+			<a href="{% url 'groups:index_filtered' filter_type=active_tab %}?page={{ page_groups.next_page_number }}{% if active_status %}&status={{ active_status }}{% endif %}{% if query %}&query={{ query }}{% endif %}" class="flex items-center justify-center px-4 h-10 text-sm font-medium rounded-full bg-[var(--tertiary-color)] hover:bg-[var(--tertiary-color-200)] break-keep">下一頁</a>
+			{% endif %}
+		</li>
 	</ul>
 </nav>
 {% endif %}

@@ -3,131 +3,135 @@
 
 <div class="max-w-[1440px] mx-auto px-12 sm:px-24 md:px-16">
   {% if ongoing_groups or reached_groups%}
-  {% comment %} 已成團 {% endcomment %}
-  {% if reached_groups %}
-  <section>
-    <h2 class="text-center text-lg font-medium mb-4">已成團</h2>
-    {% comment %} =========== {% endcomment %}
-    {% for g in reached_groups %}
-    <div class="bg-white rounded-2xl border-2 border-tertiary-color p-6 mb-4 hover:shadow-md transition-shadow">
-      <div class="flex flex-col lg:flex-row gap-6">
-        {% comment %} 圖片區 {% endcomment %}
-        <div class="flex-shrink-0">
-          <div class="w-full h-48 lg:h-64 lg:w-64 rounded-lg border border-tertiary-color overflow-hidden">
-            {% if g.banner.url %}
-            <img class="w-full h-full object-cover object-center" src="{{ g.banner.url }}" alt="{{ g.name }}">
-            {% else %}
-            <div class="w-full h-full bg-tertiary-color-300 flex items-center justify-center tertiary-color-500">
-              <span>無圖片</span>
-            </div>
-            {% endif %}
-          </div>
-        </div>
-        {% comment %} 內容區 {% endcomment %}
-        <div class="flex-1 flex flex-col gap-4">
-          <div class="flex-col sm:flex-row  flex justify-between items-center gap-2">
-            <h2 class="text-lg sm:text-2xl text-center md:text-left font-semibold break-all">{{ g.name }}</h2>
-            <p class="text-sm text-right mb-2">已成團</p>
-          </div>
-          <div class="space-y-3" >
-            <ul class="min-h-[130px]">
-              <li class="grid grid-cols-4 gap-2 bg-tertiary-color-50 rounded-lg text-center p-2">
-                <p class="text-sm col-span-3">商品</p>
-                <p class="text-sm">價格</p>
-              </li>
-              {% include 'orders/owned_orders/list_columns.html' with items=g.products.all %}
-              <li class="grid grid-cols-4 gap-2 bg-tertiary-color-50 rounded-lg text-center my-2 p-2">
-                <p class="col-span-3 text-base font-semibold">達標數目</p>
-                <p class="text-base font-semibold">
-                  {% if g.goal_choice == "quantity" %}
-                  {{ g.min_goal }}
-                  {% else %}
-                  {{ g.min_goal | intcomma }}
-                  {% endif %}
-                </p>
-              </li>
-            </ul>
-            <div class="flex lg:flex-row flex-col justify-between items-center gap-2 ">
-              <div>
-                <p class="text-base text-red-500">
-                  截止日期：{{ g.deadline|date:"Y-m-d" }}
-                </p>
-              </div>
-              <div class="flex items-center gap-2">
-                <a href="{% url 'groups:detail' g.id %}" class="card-btn card-btn-white">團購頁面</a>
-                <a href="{% url 'orders:buyer_list' g.id %} " class="card-btn card-btn-secondary">檢視跟團者</a>
+    {% comment %} 已成團 {% endcomment %}
+    {% if reached_groups %}
+      <section>
+        <h2 class="text-center text-lg font-medium mb-4">已成團</h2>
+        {% comment %} =========== {% endcomment %}
+        {% for g in reached_groups %}
+        <div class="bg-white rounded-2xl border-2 border-tertiary-color p-6 mb-4 hover:shadow-md transition-shadow">
+          <div class="flex flex-col lg:flex-row gap-6">
+            {% comment %} 圖片區 {% endcomment %}
+            <div class="flex-shrink-0">
+              <div class="w-full h-48 lg:h-64 lg:w-64 rounded-lg border border-tertiary-color overflow-hidden">
+                {% if g.banner.url %}
+                <img class="w-full h-full object-cover object-center" src="{{ g.banner.url }}" alt="{{ g.name }}">
+                {% else %}
+                <div class="w-full h-full bg-tertiary-color-300 flex items-center justify-center tertiary-color-500">
+                  <span>無圖片</span>
+                </div>
+                {% endif %}
               </div>
             </div>
-            
+            {% comment %} 內容區 {% endcomment %}
+            <div class="flex-1 flex flex-col gap-4">
+              <div class="flex-col sm:flex-row  flex justify-between items-center gap-2">
+                <h2 class="text-lg sm:text-2xl text-center md:text-left font-semibold break-all">{{ g.name }}</h2>
+                <p class="text-sm text-right mb-2">已成團</p>
+              </div>
+              <div class="space-y-3" >
+                <ul class="min-h-[130px]">
+                  <li class="grid grid-cols-4 gap-2 bg-tertiary-color-50 rounded-lg text-center p-2">
+                    <p class="text-sm col-span-3">商品</p>
+                    <p class="text-sm">價格</p>
+                  </li>
+                  {% include 'orders/owned_orders/list_columns.html' with items=g.products.all %}
+                  <li class="grid grid-cols-4 gap-2 bg-tertiary-color-50 rounded-lg text-center my-2 p-2">
+                    <p class="col-span-3 text-base font-semibold">達標數目</p>
+                    <p class="text-base font-semibold">
+                      {% if g.goal_choice == "quantity" %}
+                      {{ g.min_goal }}
+                      {% else %}
+                      {{ g.min_goal | intcomma }}
+                      {% endif %}
+                    </p>
+                  </li>
+                </ul>
+                <div class="flex lg:flex-row flex-col justify-between items-center gap-2 ">
+                  <div>
+                    <p class="text-base text-red-500">
+                      截止日期：{{ g.deadline|date:"Y-m-d" }}
+                    </p>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <a href="{% url 'groups:detail' g.id %}" class="card-btn card-btn-white">團購頁面</a>
+                    <a href="{% url 'orders:buyer_list' g.id %} " class="card-btn card-btn-secondary">檢視跟團者</a>
+                  </div>
+                </div>
+                
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+        
+        {% endfor %}
+      </section>
+    {% endif %}
     
-    {% endfor %}
-  </section>
-  {% endif %}
-  
-  {% comment %} 未成團 {% endcomment %}
-  {% if ongoing_groups %}
-  <section>
-    <h2 class="text-center text-lg font-medium mb-4">尚未成團</h2>
-    {% for g in ongoing_groups %}
-    <div class="bg-white rounded-2xl border-2 border-tertiary-color p-6 mb-4 hover:shadow-md transition-shadow">
-      <div class="flex flex-col lg:flex-row gap-6">
-        {% comment %} 圖片區 {% endcomment %}
-        <div class="flex-shrink-0">
-          <div class="w-full h-48 lg:h-64 lg:w-64 rounded-lg border border-tertiary-color overflow-hidden">
-            {% if g.banner.url %}
-            <img class="w-full h-full object-cover object-center" src="{{ g.banner.url }}" alt="{{ g.name }}">
-            {% else %}
-            <div class="w-full h-full bg-tertiary-color-300 flex items-center justify-center tertiary-color-500">
-              <span>無圖片</span>
-            </div>
-            {% endif %}
-          </div>
-        </div>
-        {% comment %} 內容區 {% endcomment %}
-        <div class="flex-1 flex flex-col gap-4">
-          <div class="flex-col sm:flex-row  flex justify-between items-center gap-2">
-            <h2 class="text-lg sm:text-2xl text-center md:text-left font-semibold break-all">{{ g.name }}</h2>
-            <p class="text-sm text-right text-red-500 mb-2 flex-shrink-0">未成團</p>
-          </div>
-          <div class="space-y-3" >
-            <ul class="min-h-[130px]">
-              <li class="grid grid-cols-4 gap-2 bg-tertiary-color-50 rounded-lg text-center p-2">
-                <p class="text-sm col-span-3">商品</p>
-                <p class="text-sm">價格</p>
-              </li>
-              {% include 'orders/owned_orders/list_columns.html' with items=g.products.all %}
-              <li class="grid grid-cols-4 gap-2 bg-tertiary-color-50 rounded-lg text-center my-2 p-2">
-                <p class="col-span-3 text-base font-semibold">達標數目</p>
-                <p class="text-base font-semibold">
-                  {% if g.goal_choice == "quantity" %}
-                  {{ g.min_goal }}
-                  {% else %}
-                  {{ g.min_goal | intcomma }}
-                  {% endif %}
-                </p>
-              </li>
-            </ul>
-            <div class="flex lg:flex-row flex-col justify-between items-center gap-2 ">
-              <div>
-                <p class="text-base text-red-500">
-                  截止日期：{{ g.deadline|date:"Y-m-d" }}
-                </p>
+    {% comment %} 未成團 {% endcomment %}
+    {% if ongoing_groups %}
+      <section>
+        <h2 class="text-center text-lg font-medium mb-4">尚未成團</h2>
+        {% for g in ongoing_groups %}
+        <div class="bg-white rounded-2xl border-2 border-tertiary-color p-6 mb-4 hover:shadow-md transition-shadow">
+          <div class="flex flex-col lg:flex-row gap-6">
+            {% comment %} 圖片區 {% endcomment %}
+            <div class="flex-shrink-0">
+              <div class="w-full h-48 lg:h-64 lg:w-64 rounded-lg border border-tertiary-color overflow-hidden">
+                {% if g.banner.url %}
+                <img class="w-full h-full object-cover object-center" src="{{ g.banner.url }}" alt="{{ g.name }}">
+                {% else %}
+                <div class="w-full h-full bg-tertiary-color-300 flex items-center justify-center tertiary-color-500">
+                  <span>無圖片</span>
+                </div>
+                {% endif %}
               </div>
-              <div class="flex items-center gap-2">
-                <a href="{% url 'groups:detail' g.id %}" class="card-btn card-btn-white">團購頁面</a>
-                <a href="{% url 'orders:buyer_list' g.id %}" class="card-btn card-btn-secondary">檢視跟團者</a>
+            </div>
+            {% comment %} 內容區 {% endcomment %}
+            <div class="flex-1 flex flex-col gap-4">
+              <div class="flex-col sm:flex-row  flex justify-between items-center gap-2">
+                <h2 class="text-lg sm:text-2xl text-center md:text-left font-semibold break-all">{{ g.name }}</h2>
+                <p class="text-sm text-right text-red-500 mb-2 flex-shrink-0">未成團</p>
+              </div>
+              <div class="space-y-3" >
+                <ul class="min-h-[130px]">
+                  <li class="grid grid-cols-4 gap-2 bg-tertiary-color-50 rounded-lg text-center p-2">
+                    <p class="text-sm col-span-3">商品</p>
+                    <p class="text-sm">價格</p>
+                  </li>
+                  {% include 'orders/owned_orders/list_columns.html' with items=g.products.all %}
+                  <li class="grid grid-cols-4 gap-2 bg-tertiary-color-50 rounded-lg text-center my-2 p-2">
+                    <p class="col-span-3 text-base font-semibold">達標數目</p>
+                    <p class="text-base font-semibold">
+                      {% if g.goal_choice == "quantity" %}
+                      {{ g.min_goal }}
+                      {% else %}
+                      {{ g.min_goal | intcomma }}
+                      {% endif %}
+                    </p>
+                  </li>
+                </ul>
+                <div class="flex lg:flex-row flex-col justify-between items-center gap-2 ">
+                  <div>
+                    <p class="text-base text-red-500">
+                      截止日期：{{ g.deadline|date:"Y-m-d" }}
+                    </p>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <a href="{% url 'groups:detail' g.id %}" class="card-btn card-btn-white">團購頁面</a>
+                    <a href="{% url 'orders:buyer_list' g.id %}" class="card-btn card-btn-secondary">檢視跟團者</a>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+          
         </div>
-      </div>
-      
-    </div>
-    {% endfor %}
-  </section>
-  {% endif %}
+        {% endfor %}
+      </section>
+    {% endif %}
+  {% else %}
+    <section class="mb-10">
+      <h2 class="text-center text-lg font-medium mb-4">尚未有此分類訂單</h2>
+    </section>
   {% endif %}

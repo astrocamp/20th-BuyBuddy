@@ -59,10 +59,6 @@ urlpatterns = [
     path("my-orders/payment/confirm/", views.confirm, name="payment_confirm"),
     # 取消付款
     path("my-orders/payment/cancel/", views.cancel, name="payment_cancel"),
-    # 付款成功
-    path("my-orders/payment/success/", views.success, name="payment_success"),
-    # 付款失敗
-    path("my-orders/payment/fail/", views.fail, name="payment_fail"),
     # 確認收貨
     path("my-orders/<int:order_id>/received/", views.received, name="received"),
     # ========== 訂單留言版相關 ==========
@@ -84,17 +80,26 @@ urlpatterns = [
         message_views.send_message,
         name="send_message",
     ),
-
     # 付款方式
-    path("my-orders/payment/type/<int:order_id>/", views.payment_type, name="payment_type"),
-
+    path(
+        "my-orders/payment/type/<int:order_id>/",
+        views.payment_type,
+        name="payment_type",
+    ),
     # 藍新金流
-    path("my-orders/payment/newebpay/<int:order_id>/",
+    path(
+        "my-orders/payment/newebpay/<int:order_id>/",
         views.newebpay,
         name="newebpay",
     ),
-    path("my-orders/payment/newebpay/return/", views.newebpay_return, name="newebpay_return"),
-    path("my-orders/payment/newebpay/notify/", views.newebpay_notify, name="newebpay_notify"),
-
-    
+    path(
+        "my-orders/payment/newebpay/return/",
+        views.newebpay_return,
+        name="newebpay_return",
+    ),
+    path(
+        "my-orders/payment/newebpay/notify/",
+        views.newebpay_notify,
+        name="newebpay_notify",
+    ),
 ]

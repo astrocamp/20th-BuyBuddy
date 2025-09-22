@@ -298,14 +298,6 @@ def cancel(request):
     return render(request, "orders/payment_cancel.html")
 
 
-def success(request):
-    return render(request, "orders/payment_success.html")
-
-
-def fail(request):
-    return render(request, "orders/payment_fail.html")
-
-
 # 我跟團的訂單
 @login_required
 def my_orders(request):
