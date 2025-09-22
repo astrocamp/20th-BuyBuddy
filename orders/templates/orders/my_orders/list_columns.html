@@ -1,20 +1,21 @@
 {% load humanize %}
+{% load number_filters %}
 {# Partial moved: renders 商品 / 價格 / 數量 / 小計 columns for a given `items` iterable #}
 {% for jqp in items %}
 <li class="hidden md:grid grid-cols-1 md:grid-cols-2 gap-2 bg-tertiary-color-50 rounded-lg my-2 p-2 items-center">
     <p class="text-sm tertiary-color-500 text-left md:text-center">{{ jqp.product.name }}</p>
     <p class="grid grid-cols-3 gap-4 text-sm tertiary-color-500">
-        <span class="text-left md:text-center">${{ jqp.product.price| intcomma }}</span>
-        <span class="text-left md:text-center">x {{ jqp.quantity| intcomma }}</span>
-        <span class="text-center">${{ jqp.subtotal| intcomma }}</span>
+        <span class="text-left md:text-center">${{ jqp.product.price | custom_intcomma }}</span>
+        <span class="text-left md:text-center">x {{ jqp.quantity | custom_intcomma }}</span>
+        <span class="text-center">${{ jqp.subtotal | custom_intcomma }}</span>
     </p>
 </li>
 <li class="grid md:hidden grid-cols-4 gap-2 bg-tertiary-color-50 rounded-lg my-2 p-4">
     <p class="text-sm col-span-3 sm:col-span-2 tertiary-color-500 text-left md:text-center">{{ jqp.product.name }}</p>
-    <p class="text-center col-span-1 text-right sm:text-center">x {{ jqp.quantity| intcomma }}</p>
-    <p class="text-center font-bold hidden sm:grid">${{ jqp.subtotal| intcomma }}</p>
-    <p class="text-sm tertiary-color-500">${{ jqp.product.price }}</p>
-    <p class="text-right font-bold col-span-3 grid sm:hidden">${{ jqp.subtotal| intcomma }}</p>
+    <p class="text-center col-span-1 text-right sm:text-center">x {{ jqp.quantity | custom_intcomma }}</p>
+    <p class="text-center font-bold hidden sm:grid">${{ jqp.subtotal | custom_intcomma }}</p>
+    <p class="text-sm tertiary-color-500">${{ jqp.product.price | custom_intcomma }}</p>
+    <p class="text-right font-bold col-span-3 grid sm:hidden">${{ jqp.subtotal | custom_intcomma }}</p>
 </li>
 
 {% endfor %}

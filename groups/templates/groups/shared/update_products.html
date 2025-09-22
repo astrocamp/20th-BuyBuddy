@@ -1,3 +1,6 @@
+{% load humanize %}
+{% load number_filters %}
+
 {% if not role == "joiner" %}
     <div>
         <form action="{% url 'groups:detail' group.id %}" method="post" @submit="loading = true">
@@ -32,7 +35,7 @@
                                 <div class="flex flex-col gap-4 mt-auto">
                                     <div class="flex justify-between items-center">
                                         <span class="text-lg md:text-2xl font-semibold primary-color">
-                                            ${{ product.price }}
+                                            ${{ product.price | custom_intcomma }}
                                         </span>
                                     </div>
                                     
@@ -103,7 +106,7 @@
                             
                             <div class="flex flex-col gap-4 mt-auto">
                                 <div class="flex justify-between items-center">
-                                    <span class="text-xl font-semibold primary-color">${{ product.price }}</span>
+                                    <span class="text-xl font-semibold primary-color">${{ product.price| custom_intcomma }}</span>
                                 </div>
 
                                     <div class="flex justify-between items-center space-x-2 pr-4">

@@ -1,5 +1,6 @@
 {% extends "layouts/default.html" %}
 {% load humanize %}
+{% load number_filters %}
 {% block content %}
 <section class="max-w-[1440px] mx-auto px-4 sm:px-8 md:px-16 mt-6 lg:mt-8 flex flex-1 min-h-[calc(100dvh-270px)] xl:max-h-[calc(100dvh-270px)]">
     <div class="flex flex-col flex-1 justify-center items-stretch xl:flex-row gap-8 px-6 sm:px-0 ">
@@ -35,28 +36,28 @@
                     <li class="hidden md:grid grid-cols-1 md:grid-cols-2 gap-2 bg-tertiary-color-50 rounded-lg my-2 p-2 items-center">
                         <p class="text-sm tertiary-color-500 text-left md:text-center">{{ jgp.product.name }}</p>
                         <p class="grid grid-cols-3 gap-4 text-sm tertiary-color-500">
-                            <span class="text-left md:text-center">${{ jgp.product.price|intcomma }}</span>
-                            <span class="text-left md:text-center">x {{ jgp.quantity|intcomma }}</span>
-                            <span class="text-center">${{ jgp.subtotal|intcomma }}</span>
+                            <span class="text-left md:text-center">${{ jgp.product.price | custom_intcomma }}</span>
+                            <span class="text-left md:text-center">x {{ jgp.quantity | custom_intcomma }}</span>
+                            <span class="text-center">${{ jgp.subtotal | custom_intcomma }}</span>
                         </p>
                     </li>
                     <li class="grid md:hidden grid-cols-1 gap-2 bg-tertiary-color-50 rounded-lg my-2 px-4 py-2">
                         <div class="flex flex-row items-center justify-between w-full">
                             <span class="text-xs tertiary-color-500 flex-1 text-left">{{ jgp.product.name }}</span>
-                            <span class="text-xs tertiary-color-500 flex-none ml-2">x {{ jgp.quantity|intcomma }}</span>
-                            <span class="text-xs tertiary-color-500 flex-none ml-2">${{ jgp.product.price|intcomma }}</span>
-                            <span class="text-xs font-bold flex-none ml-2">${{ jgp.subtotal|intcomma }}</span>
+                            <span class="text-xs tertiary-color-500 flex-none ml-2">x {{ jgp.quantity | custom_intcomma }}</span>
+                            <span class="text-xs tertiary-color-500 flex-none ml-2">${{ jgp.product.price | custom_intcomma }}</span>
+                            <span class="text-xs font-bold flex-none ml-2">${{ jgp.subtotal | custom_intcomma }}</span>
                         </div>
                     </li>
                     {% endfor %}
                     <li class="hidden md:grid grid-cols-2 gap-2 bg-tertiary-color-50 rounded-lg text-center my-2 p-2">
                         <p class="grid col-start-2 grid-cols-3 gap-4 text-base font-semibold">
                             <span class="col-start-2">合計</span>
-                            <span>${{ order.amount|floatformat:0|intcomma }}</span>
+                            <span>${{ order.amount | custom_intcomma }}</span>
                         </p>
                     </li>
                     <li class="grid md:hidden rounded-lg text-center my-2 px-4 py-2 bg-tertiary-color-50">
-                        <p class="text-sm font-semibold text-right">合計 ${{ order.amount|floatformat:0|intcomma }}</p>
+                        <p class="text-sm font-semibold text-right">合計 ${{ order.amount | custom_intcomma }}</p>
                     </li>
                 </ul>
             </div>
