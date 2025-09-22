@@ -3,7 +3,7 @@
 {% block content%}
 <div class="flex flex-col items-center">
     <div class="w-full max-w-md px-14">
-        <h1 class="text-xl lg:text-lg font-bold mt-5 mb-4 text-center">請輸入信箱，以便繼續接下來的步驟</h1>
+        <h1 class="text-lg lg:text-lg font-bold mt-5 mb-4 text-center">請輸入信箱，以便繼續接下來的步驟</h1>
         <form action="{% url 'users:line_no_email' %}" method="post" class="flex flex-col gap-4 sm:gap-6" novalidate>
             {% csrf_token %}
             <div class="mb-2">
@@ -20,8 +20,8 @@
                     <input type="hidden" name="line_user_id" value="{{ line_user_id }}">
                   </div>
                   {% if verify %}
-                  <div class="flex gap-2 justify-between">
-                    <div>
+                  <div class="flex gap-2 ">
+                    <div class="flex-1">
                       <input
                           type="text"
                           inputmode="numeric"
@@ -29,19 +29,19 @@
                           placeholder="請輸入 6 位驗證碼"
                           maxlength="6"
                           pattern="[0-9]{6}"
-                          class="text-sm text-center w-full py-2 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full transition-colors h-[42px]"
+                          class="flex text-sm text-center w-full py-2 border-[1.5px] border-[var(--tertiary-color-300)] rounded-full transition-colors h-[42px]"
                           required
                       />
                     </div>
-                    <div class="">
-                        <button name="resend_code" type="submit" class="secondary-btn">
+                    <div>
+                        <button name="resend_code" type="submit" class="flex-shrink-0 bg-[var(--tertiary-color)] rounded-full transition duration-200 px-4 sm:px-6 py-2 text-sm h-full hover:bg-[var(--secondary-color)] hover:text-white">
                             再次發送驗證碼
                         </button>
                     </div>
                   </div>
                   {% if verify_code_error %}
                     <div class="min-h-[2px]"></div>
-                    <div class="text-[var(--red-color-700)] text-sm ml-8 mt-2 min-h-[20px]">
+                    <div class="h-full text-[var(--red-color-700)] text-sm ml-8 mt-2 min-h-[20px]">
                         {{ verify_code_error }}
                     </div>
                     {% endif %}
