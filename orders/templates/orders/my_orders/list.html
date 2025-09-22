@@ -62,7 +62,7 @@
 							
 								<div class="flex justify-center sm:justify-end items-center gap-2 pt-2">
 									<a href="{% url 'groups:detail' jg.group.id %}" class="card-btn card-btn-white">修改跟團</a>
-									<form action="{% url 'groups:detail' jg.group.id %}?next={{ request.path }}" method="post" class="inline">
+									<form action="{% url 'groups:detail' jg.group.id %}?next={{ request.path }}" method="post" class="inline" onsubmit="return confirm('確定要退出嗎？')">
 										{% csrf_token %}
 										<input type="hidden" name="_method" value="delete" />
 										<button type="submit" class="card-btn card-btn-red">退團</button>

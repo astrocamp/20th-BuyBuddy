@@ -9,6 +9,7 @@
 			{% include "shared/tab_group.html" with active_tab=active_tab only %}
     	</div>
     	<div class="w-full max-w-[1105px] mx-auto">
+
 			<div id="sub-tabs-container">
 				{% if active_tab == 'owned' or active_tab == 'followed' %}
 					{% include "groups/shared/sub_groups_tabs.html" with active_tab=active_tab active_status=active_status only %}
@@ -17,7 +18,7 @@
 
 			<!-- Cards -->
 			<div id="groups-container" class="mt-6 lg:mt-8 px-8">
-				{% include "groups/shared/group_with_paginator.html" with page_groups=page_groups active_tab=active_tab only %}
+				{% include "groups/shared/group_with_paginator.html" with page_groups=page_groups active_tab=active_tab active_status=active_status query=query only %}
 			</div>
 		</div>
   	</section>
