@@ -45,7 +45,7 @@ async function triggerGoogleSignIn() {
       client_id: googleClient.GOOGLE_CLIENT_ID,
       scope: 'email profile openid',
       ux_mode: 'redirect',
-      redirect_uri: `https://${googleClient.HOSTNAME}/users/social-oauth2/`
+      redirect_uri: `https://${googleClient.HOSTNAME}/users/google_social-oauth2/`
     });
     client.requestCode();
   }
