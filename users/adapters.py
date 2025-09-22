@@ -97,7 +97,6 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
 
         # 取得第三方登入的 email
         email = sociallogin.user.email
-
         # 過濾出 相同的 email
         existing_user = User.objects.filter(email=email).first()
         # 如果有 相同的 email
