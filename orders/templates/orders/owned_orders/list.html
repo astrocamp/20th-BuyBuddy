@@ -1,4 +1,5 @@
 {% load humanize %}
+{% load number_filters %}
 {% include 'orders/owned_orders/sub_tab_group.html' %}
 
 <div class="max-w-[1440px] mx-auto px-12 sm:px-24 md:px-16">
@@ -42,7 +43,7 @@
                       {% if g.goal_choice == "quantity" %}
                       {{ g.min_goal }}
                       {% else %}
-                      {{ g.min_goal | intcomma }}
+                      {{ g.min_goal | custom_intcomma }}
                       {% endif %}
                     </p>
                   </li>
@@ -106,7 +107,7 @@
                       {% if g.goal_choice == "quantity" %}
                       {{ g.min_goal }}
                       {% else %}
-                      {{ g.min_goal | intcomma }}
+                      {{ g.min_goal | custom_intcomma }}
                       {% endif %}
                     </p>
                   </li>

@@ -1,5 +1,6 @@
 {% extends "layouts/default.html"%}
 {% load humanize %}
+{% load number_filters %}
 {% load static %}
 {% block content %}
 
@@ -47,13 +48,13 @@
       {% for jqp in order.joined_group.joined_group_products.all %}
       <div class="grid grid-cols-3 text-center border-x">
         <p class="border-b p-2">{{ jqp.product.name }}</p>
-        <p class="border-x border-b p-2">{{ jqp.quantity }}</p>
-        <p class="border-b p-2">${{ jqp.product.price }}</p>
+        <p class="border-x border-b p-2">{{ jqp.quantity | custom_intcomma }}</p>
+        <p class="border-b p-2">${{ jqp.product.price | custom_intcomma }}</p>
       </div>
       {% endfor %}
       <div class="grid grid-cols-3 border-x">
         <p class="col-span-2 text-right border-r p-2">合計：</p>
-        <p class="text-center p-2">${{ order.total_amount | intcomma }}</p>
+        <p class="text-center p-2">${{ order.total_amount | custom_intcomma }}</p>
       </div>
       <div class="border p-4">
         <p>收件人: {{ order.ship_recipient_name | default:"尚未設定" }}</p>
@@ -90,13 +91,13 @@
       {% for jqp in buyer.joined_group_products.all %}
       <div class="grid grid-cols-3 text-center border-x">
         <p class="border-b p-2">{{ jqp.product.name }}</p>
-        <p class="border-x border-b p-2">{{ jqp.quantity }}</p>
-        <p class="border-b p-2">${{ jqp.product.price }}</p>
+        <p class="border-x border-b p-2">{{ jqp.quantity | custom_intcomma }}</p>
+        <p class="border-b p-2">${{ jqp.product.price | custom_intcomma }}</p>
       </div>
       {% endfor %}
       <div class="grid grid-cols-3 border-x border-b">
         <p class="col-span-2 text-right border-r p-2">合計：</p>
-        <p class="text-center p-2">${{ buyer.total_amount | intcomma }}</p>
+        <p class="text-center p-2">${{ buyer.total_amount | custom_intcomma }}</p>
       </div>
     </div>
   </div>

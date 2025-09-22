@@ -10,10 +10,6 @@ class Product(models.Model):
     description = HTMLField()
     banner = models.ImageField(null=True, upload_to='products/banners/')
 
-    @property
-    def formatted_price(self):
-        return f"${self.price:,.0f}"
-
 
 class JoinedGroupProduct(models.Model):
     joined_group = models.ForeignKey(

@@ -1,5 +1,7 @@
 {% extends 'layouts/default.html'%}
 {% load static %}
+{% load humanize %}
+{% load number_filters %}
 {% block content %}
 
 
@@ -74,7 +76,7 @@
 						<div class="w-full md:w-1/2 flex flex-col items-center">
 							{% if group.goal_choice == "amount" %}
 							<span class="text-sm md:text-base font-medium mb-2 tertiary-color-500">距離成團還差</span>
-							<span class="text-2xl font-bold primary-color">${{ remaining_limit }}</span>
+							<span class="text-2xl font-bold primary-color">${{ remaining_limit | custom_intcomma }}</span>
 							{% elif group.goal_choice == "quantity" %}
 							<span class="text-sm md:text-base font-medium mb-2 tertiary-color-500">剩餘可跟團數量</span>
 							<span class="text-2xl font-bold primary-color">{{ remaining_limit }} 件</span>
@@ -127,9 +129,9 @@
 								</div>
 								<span class="block sm:inline">
 									{% if group.goal_choice == "amount" %}
-									${{ group.min_goal }}
+									${{ group.min_goal | custom_intcomma }}
 									{% elif group.goal_choice == "quantity" %}
-									{{ group.min_goal }} 件
+									{{ group.min_goal | custom_intcomma }} 件
 									{% endif %}
 								</span>
 							</div>

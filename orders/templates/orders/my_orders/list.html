@@ -1,4 +1,5 @@
 {% load humanize %}
+{% load number_filters %}
 
 {% include 'orders/my_orders/sub_tab_group.html' %}
 
@@ -49,13 +50,13 @@
 									<p class="grid col-start-2 grid-cols-3 gap-4 text-base font-semibold">
 										<span class="col-start-2">合計</span>
 										<span>
-											${{ jg.total_amount | intcomma }}
+											${{ jg.total_amount | custom_intcomma }}
 										</span>
 									</p>
 								</li>
 								<li class="grid md:hidden rounded-lg text-center my-2 p-2">
 									<p class="text-base font-semibold">
-										合計 ${{ jg.total_amount | intcomma }}
+										合計 ${{ jg.total_amount | custom_intcomma }}
 									</p>
 								</li>
 							</ul>
@@ -125,13 +126,13 @@
 								<p class="grid col-start-2 grid-cols-3 gap-4 text-base font-semibold">
 									<span class="col-start-2">合計</span>
 									<span>
-										${{ order.total_amount | intcomma }}
+										${{ order.total_amount | custom_intcomma }}
 									</span>
 								</p>
 							</li>
 							<li class="grid md:hidden rounded-lg text-center my-2 p-2">
 								<p class="text-base font-semibold">
-									合計 ${{ order.total_amount | intcomma }}
+									合計 ${{ order.total_amount | custom_intcomma }}
 								</p>
 							</li>
 						</ul>
