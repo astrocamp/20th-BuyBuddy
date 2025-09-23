@@ -6,9 +6,9 @@ import os
 import re
 import requests
 import google.generativeai as genai
-
+from django.core.cache import cache
+from urllib.parse import urlparse
 from playwright.async_api import async_playwright
-
 
 class ECommerceScraper:
     def __init__(self):
@@ -780,129 +780,104 @@ JSON:"""
             return None
 
     async def scrape_product(self, url: str) -> Dict[str, Any]:
-        if "momoshop.com.tw" in url:
-            print(f"檢測到 MoMo 網站，使用 API 獲取 HTML: {url}")
-            try:
-                html_content = await self._get_html_from_api(url)
-                if html_content:
-                    result = self._extract_momo_from_html(html_content)
-                    if result.get('name') and result.get('price'):
-                        spec_variants = result.pop('spec_variants', {})
-                        variants = self._process_variants(spec_variants)
-
-                        result.update(
-                            {
-                                'url': url,
-                                'site': urlparse(url).netloc,
-                                'success': True,
-                                'error': None,
-                                'variants': variants,
-                                'has_variants': len(variants) > 0,
-                            }
-                        )
-                        return result
-                    else:
-                        print(
-                            f"HTML 解析結果不完整: name={result.get('name')}, price={result.get('price')}"
-                        )
-                else:
-                    print("API 未返回 HTML 內容")
-            except Exception as e:
-                print(f"MoMo API 處理失敗: {str(e)}")
-                return {"success": False, "error": f"MoMo API 處理失敗: {str(e)}"}
-
-        browser = await self._get_browser()
-        page = await browser.new_page()
-
+        cache_key = f"scraper:product:{url}"
         try:
-            await page.set_extra_http_headers(
-                {
+            cached_data = cache.get(cache_key)
+            if cached_data:
+                print(f"從快取中獲取資料 (URL: {url})")
+                cached_data["success"] = True
+                return cached_data
+        except Exception as e:
+            print(f"讀取 Redis 快取失敗: {e}")
+        
+        final_result = None
+        
+        if not final_result:
+            browser = await self._get_browser()
+            page = await browser.new_page()
+
+            try:
+                await page.set_extra_http_headers({
                     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
-                }
-            )
+                })
 
-            timeout = 60000 if "momoshop.com.tw" in url else 10000
-            await page.goto(url, wait_until="domcontentloaded", timeout=timeout)
+                timeout = 60000 if "momoshop.com.tw" in url else 10000
+                await page.goto(url, wait_until="domcontentloaded", timeout=timeout)
 
-            await asyncio.sleep(3)
-            await page.evaluate("window.scrollTo(0, 500)")
-            await asyncio.sleep(2)
-            await page.evaluate("window.scrollTo(0, 0)")
+                page_html = await page.content()
 
-            page_html = await page.content()
+                is_product_page = await self._is_product_page(page_html, url)
+                if not is_product_page:
+                    raise Exception("此網址不是商品頁面")
 
-            is_product_page = await self._is_product_page(page_html, url)
-            if not is_product_page:
-                return {
-                    'name': None,
-                    'price': None,
-                    'success': False,
-                    'error': '此網址不是商品頁面',
-                    'url': url,
-                    'site': urlparse(url).netloc,
-                    'variants': {},
-                    'has_variants': False,
-                }
+                extractor, extractor_type = await self._get_extractor_type(url, page)
+                print(f"選擇的提取器: {extractor_type}") 
+                
+                if extractor:
+                    try:
+                        result = await extractor(page)
+                        print(f"提取器結果: {result}")  
 
-            extractor, extractor_type = await self._get_extractor_type(url, page)
-            print(f"選擇的提取器: {extractor_type}")
-
-            if extractor:
-                try:
-                    result = await extractor(page)
-                    print(f"提取器結果: {result}")
-
-                    has_sufficient_data = result.get('name') and result.get('price')
-                    if not has_sufficient_data:
-                        print(
-                            f"資料不足，名稱: {result.get('name')}, 價格: {result.get('price')}"
-                        )
+                        has_sufficient_data = result.get('name') and result.get('price')
+                        if not has_sufficient_data:
+                            print(f"資料不足，名稱: {result.get('name')}, 價格: {result.get('price')}")  
+                            extractor = None
+                    except Exception as e:
+                        print(f"專用提取器錯誤: {str(e)}") 
                         extractor = None
-                except Exception as e:
-                    print(f"專用提取器錯誤: {str(e)}")
-                    extractor = None
 
-            if not extractor and self.ai_client:
-                print(f"使用 AI 提取商品資訊: {url}")
-                ai_result = await self._ai_extract_product_info(page_html, url)
-                print(f"AI 提取結果: {ai_result}")
-                if ai_result.get('success'):
-                    return ai_result
-                else:
-                    error_msg = ai_result.get('error', '未知錯誤')
-                    raise Exception(f"AI 提取失敗: {error_msg}")
-            elif not extractor:
-                raise Exception("不支援此網站的商品頁面")
+                if not extractor and self.ai_client:
+                    print(f"使用 AI 提取商品資訊: {url}")  
+                    ai_result = await self._ai_extract_product_info(page_html, url)
+                    print(f"AI 提取結果: {ai_result}")  
+                    if ai_result.get('success'):
+                        final_result = ai_result
+                    else:
+                        error_msg = ai_result.get('error', '未知錯誤')
+                        raise Exception(f"AI 提取失敗: {error_msg}")
+                elif not extractor:
+                    raise Exception("不支援此網站的商品頁面")
 
-            if extractor and result:
-                spec_variants = result.pop('spec_variants', {})
-                variants = self._process_variants(spec_variants)
 
-                result.update(
-                    {
+                if extractor and result:
+                    spec_variants = result.pop('spec_variants', {})
+                    variants = self._process_variants(spec_variants)
+
+                    result.update({
                         'url': url,
                         'site': urlparse(url).netloc,
                         'success': True,
                         'error': None,
                         'variants': variants,
-                        'has_variants': len(variants) > 0,
-                    }
-                )
+                        'has_variants': len(variants) > 0
+                    })
+                    final_result = result
+                else:
+                    raise Exception("不支援此網站或提取失敗")
 
-                return result
+            except Exception as e:
+                final_result = {
+                    "url": url,
+                    "site": urlparse(url).netloc,
+                    "success": False,
+                    "error": str(e),
+                    "error_type": type(e).__name__,
+                    "variants": {},
+                    "has_variants": False
+                }
+            finally:
+                await page.close()
+        
+        if final_result and final_result.get("success"):
+            try:
+                cache.set(cache_key, final_result, timeout=3600)
+                print(f"已將結果存入快取 (Key: {cache_key})")
+            except Exception as e:
+                print(f"寫入 Redis 快取失敗: {e}")
+        
+        return final_result if final_result else {"success": False, "error": "請稍候再試"}
 
-        except Exception as e:
-            return {
-                "url": url,
-                "site": urlparse(url).netloc,
-                "success": False,
-                "error": str(e),
-                "error_type": type(e).__name__,
-                "variants": {},
-                "has_variants": False,
-            }
-        finally:
-            await page.close()
+
 
     async def close(self):
         """關閉瀏覽器和 Playwright"""
@@ -911,7 +886,6 @@ JSON:"""
             self.browser = None
         if hasattr(self, 'playwright') and self.playwright:
             await self.playwright.stop()
-
 
 async def scrape_product_url(url: str) -> Dict[str, Any]:
     scraper = ECommerceScraper()

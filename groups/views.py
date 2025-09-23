@@ -27,7 +27,7 @@ from .models import Group, JoinedGroup
 from .forms import GroupForm, ProductFormSet, ProductForm, URLExtractForm
 from .services.exceptions import *
 from .services.group_services import GroupService
-from .services.scraper_service import scrape_product_url_sync
+from .services.scraper_dispatcher import scrape_product
 from products.models import Product, JoinedGroupProduct
 from orders.models import Order
 
@@ -323,7 +323,7 @@ def extract(request):
 
         if url_extractor_form.is_valid():
             url = request.POST.get("url")
-            result = scrape_product_url_sync(url)
+            result = scrape_product(url)
 
             if not result.get("success"):
                 url_extractor_form.add_error(
