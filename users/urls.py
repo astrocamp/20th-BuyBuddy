@@ -1,7 +1,7 @@
 from django.urls import path, re_path
-from . import views
 from users.views import custom_password_reset_from_key
 from users import social_oauth
+from . import views
 
 app_name = "users"
 
@@ -42,7 +42,9 @@ urlpatterns = [
         "verify-email/<str:uid>/<str:token>/", views.verify_email, name="verify_email"
     ),
     # Social OAuth2 第三方登入
-    path("google_social-oauth2/", views.google_social_oauth2, name="google_social_oauth2"),
+    path(
+        "google_social-oauth2/", views.google_social_oauth2, name="google_social_oauth2"
+    ),
     path("line_social-oauth2/", views.line_social_oauth2, name="line_social_oauth2"),
     path("line_no_email/", views.line_no_email, name="line_no_email"),
     # JS API for Social OAuth2，為了獲得 Client ID 和 Client Secret
