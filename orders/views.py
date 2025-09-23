@@ -108,7 +108,7 @@ def check_order(request, order_id):
     missing = [field for field in REQUIRED_ADDR_FIELDS if not getattr(address, field)]
     if missing:
         messages.error(request, "這個地址資料不完整，請先進行編輯")
-        return redirect("users:profile")
+        return redirect("users:profiles")
 
     # 存地址快照
     order.apply_address(address)
@@ -493,6 +493,7 @@ def buyer_list(request, group_id):
 
 
 # 匯出跟團者列表 excel
+@login_required
 def buyer_list_export(request, group_id):
     return export_orders_to_excel(request, group_id)
 

@@ -6,18 +6,19 @@ import os
 import re
 import requests
 import google.generativeai as genai
-from urllib.parse import urlparse
+
+from playwright.async_api import async_playwright
 
 
 class ECommerceScraper:
     def __init__(self):
         self.ai_client = None
-        self.browser = None  
+        self.browser = None
         gemini_api_key = os.getenv("GEMINI_API_KEY")
         if gemini_api_key:
             genai.configure(api_key=gemini_api_key)
             self.ai_client = genai.GenerativeModel("gemini-1.5-flash")
-    
+
     async def _get_extractor_type(self, url: str, page) -> tuple:
         domain = urlparse(url).netloc.lower()
 
@@ -25,7 +26,7 @@ class ECommerceScraper:
             return self._extract_pchome, "pchome"
         elif "momoshop.com.tw" in domain:
             return self._extract_momo, "momo"
-        
+
         is_shopify = await page.evaluate(
             '''() => {
             return !!(
@@ -61,30 +62,39 @@ class ECommerceScraper:
 
     def _extract_momo_from_html(self, html_content: str):
         """從 HTML 內容中提取 MoMo 商品資訊"""
-        
 
         data = {}
 
-        desc_match = re.search(r'<meta name="Description" content="推薦([^,]+),', html_content)
+        desc_match = re.search(
+            r'<meta name="Description" content="推薦([^,]+),', html_content
+        )
         if desc_match:
             data['name'] = desc_match.group(1).strip()
         else:
-            title_match = re.search(r'<meta property="og:title" content="([^"]+)"', html_content)
+            title_match = re.search(
+                r'<meta property="og:title" content="([^"]+)"', html_content
+            )
             if title_match:
                 data['name'] = title_match.group(1).strip()
 
-        price_match = re.search(r'<meta property="product:price:amount" content="([^"]+)"', html_content)
+        price_match = re.search(
+            r'<meta property="product:price:amount" content="([^"]+)"', html_content
+        )
         if price_match:
             try:
                 data['price'] = int(price_match.group(1))
             except:
                 data['price'] = None
 
-        brand_match = re.search(r'<meta property="product:brand" content="([^"]+)"', html_content)
+        brand_match = re.search(
+            r'<meta property="product:brand" content="([^"]+)"', html_content
+        )
         if brand_match:
             data['brand'] = brand_match.group(1).strip()
 
-        image_match = re.search(r'<meta property="og:image" content="([^"]+)"', html_content)
+        image_match = re.search(
+            r'<meta property="og:image" content="([^"]+)"', html_content
+        )
         if image_match:
             data['images'] = [image_match.group(1)]
             data['main_image'] = image_match.group(1)
@@ -92,17 +102,30 @@ class ECommerceScraper:
             data['images'] = []
             data['main_image'] = None
 
-
-        full_desc_match = re.search(r'<meta name="Description" content="推薦[^,]+,([^"]+)"', html_content)
+        full_desc_match = re.search(
+            r'<meta name="Description" content="推薦[^,]+,([^"]+)"', html_content
+        )
         if full_desc_match:
-            desc = full_desc_match.group(1).replace('momo購物網總是優惠便宜好價格,值得推薦！', '').strip()
+            desc = (
+                full_desc_match.group(1)
+                .replace('momo購物網總是優惠便宜好價格,值得推薦！', '')
+                .strip()
+            )
             data['description'] = desc
 
-        currency_match = re.search(r'<meta property="product:price:currency" content="([^"]+)"', html_content)
+        currency_match = re.search(
+            r'<meta property="product:price:currency" content="([^"]+)"', html_content
+        )
         data['currency'] = currency_match.group(1) if currency_match else 'TWD'
 
-        stock_match = re.search(r'<meta property="product:availability" content="([^"]+)"', html_content)
-        data['in_stock'] = stock_match and 'in stock' in stock_match.group(1).lower() if stock_match else True
+        stock_match = re.search(
+            r'<meta property="product:availability" content="([^"]+)"', html_content
+        )
+        data['in_stock'] = (
+            stock_match and 'in stock' in stock_match.group(1).lower()
+            if stock_match
+            else True
+        )
 
         data['spec_variants'] = {}
 
@@ -526,7 +549,7 @@ class ECommerceScraper:
             if not options or len(options) <= 1:
                 continue
 
-            if len(options) <= 8: 
+            if len(options) <= 8:
                 if "color" in spec_id.lower():
                     variants["colors"] = options
                 elif "flavor" in spec_id.lower():
@@ -651,31 +674,35 @@ JSON:"""
             result_text = response.text.strip()
 
             if result_text.startswith('```json'):
-                result_text = result_text.replace('```json', '').replace('```', '').strip()
+                result_text = (
+                    result_text.replace('```json', '').replace('```', '').strip()
+                )
 
             if '\n\n' in result_text:
                 result_text = result_text.split('\n\n')[0].strip()
-            
+
             try:
                 result = json.loads(result_text)
 
-                result.update({
-                    'url': url,
-                    'site': urlparse(url).netloc,
-                    'success': True,
-                    'error': None,
-                    'variants': {},
-                    'has_variants': False,
-                    'main_image': result.get('images', [None])[0]
-                })
+                result.update(
+                    {
+                        'url': url,
+                        'site': urlparse(url).netloc,
+                        'success': True,
+                        'error': None,
+                        'variants': {},
+                        'has_variants': False,
+                        'main_image': result.get('images', [None])[0],
+                    }
+                )
 
                 return result
 
             except json.JSONDecodeError as e:
-                print(f"AI 回應 JSON 解析錯誤: {str(e)}")  
-                print(f"原始回應內容: {result_text[:500]}...") 
+                print(f"AI 回應 JSON 解析錯誤: {str(e)}")
+                print(f"原始回應內容: {result_text[:500]}...")
                 return {"success": False, "error": f"AI 回應格式錯誤: {str(e)}"}
-                
+
         except Exception as e:
             return {"success": False, "error": str(e)}
 
@@ -688,17 +715,17 @@ JSON:"""
             launch_options = {
                 "headless": True,
                 "args": [
-                    "--no-sandbox",                                
-                    "--disable-setuid-sandbox",                   
-                    "--disable-dev-shm-usage",                    
-                    "--disable-gpu",                              
-                    "--disable-accelerated-2d-canvas",           
-                    "--no-first-run",                             
-                    "--no-zygote",                                
-                    "--disable-background-timer-throttling",     
-                    "--disable-backgrounding-occluded-windows",  
-                    "--disable-renderer-backgrounding"           
-                ]
+                    "--no-sandbox",
+                    "--disable-setuid-sandbox",
+                    "--disable-dev-shm-usage",
+                    "--disable-gpu",
+                    "--disable-accelerated-2d-canvas",
+                    "--no-first-run",
+                    "--no-zygote",
+                    "--disable-background-timer-throttling",
+                    "--disable-backgrounding-occluded-windows",
+                    "--disable-renderer-backgrounding",
+                ],
             }
             if proxy_server:
                 launch_options["proxy"] = {"server": proxy_server}
@@ -724,7 +751,7 @@ JSON:"""
                 'geo_location': 'Taiwan Province of China',
                 'locale': 'zh-tw',
                 'user_agent_type': 'desktop_chrome',
-                'render': 'html'
+                'render': 'html',
             }
 
             print(f"調用 Oxylabs API: {url}")
@@ -732,7 +759,7 @@ JSON:"""
                 'https://realtime.oxylabs.io/v1/queries',
                 auth=(username, password),
                 json=payload,
-                timeout=120
+                timeout=120,
             )
             response.raise_for_status()
 
@@ -763,17 +790,21 @@ JSON:"""
                         spec_variants = result.pop('spec_variants', {})
                         variants = self._process_variants(spec_variants)
 
-                        result.update({
-                            'url': url,
-                            'site': urlparse(url).netloc,
-                            'success': True,
-                            'error': None,
-                            'variants': variants,
-                            'has_variants': len(variants) > 0
-                        })
+                        result.update(
+                            {
+                                'url': url,
+                                'site': urlparse(url).netloc,
+                                'success': True,
+                                'error': None,
+                                'variants': variants,
+                                'has_variants': len(variants) > 0,
+                            }
+                        )
                         return result
                     else:
-                        print(f"HTML 解析結果不完整: name={result.get('name')}, price={result.get('price')}")
+                        print(
+                            f"HTML 解析結果不完整: name={result.get('name')}, price={result.get('price')}"
+                        )
                 else:
                     print("API 未返回 HTML 內容")
             except Exception as e:
@@ -784,9 +815,11 @@ JSON:"""
         page = await browser.new_page()
 
         try:
-            await page.set_extra_http_headers({
-                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
-            })
+            await page.set_extra_http_headers(
+                {
+                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+                }
+            )
 
             timeout = 60000 if "momoshop.com.tw" in url else 10000
             await page.goto(url, wait_until="domcontentloaded", timeout=timeout)
@@ -801,31 +834,38 @@ JSON:"""
             is_product_page = await self._is_product_page(page_html, url)
             if not is_product_page:
                 return {
-                    'name': None, 'price': None, 'success': False,
-                    'error': '此網址不是商品頁面', 'url': url,
-                    'site': urlparse(url).netloc, 'variants': {}, 'has_variants': False
+                    'name': None,
+                    'price': None,
+                    'success': False,
+                    'error': '此網址不是商品頁面',
+                    'url': url,
+                    'site': urlparse(url).netloc,
+                    'variants': {},
+                    'has_variants': False,
                 }
 
             extractor, extractor_type = await self._get_extractor_type(url, page)
-            print(f"選擇的提取器: {extractor_type}") 
+            print(f"選擇的提取器: {extractor_type}")
 
             if extractor:
                 try:
                     result = await extractor(page)
-                    print(f"提取器結果: {result}")  
+                    print(f"提取器結果: {result}")
 
                     has_sufficient_data = result.get('name') and result.get('price')
                     if not has_sufficient_data:
-                        print(f"資料不足，名稱: {result.get('name')}, 價格: {result.get('price')}")  
+                        print(
+                            f"資料不足，名稱: {result.get('name')}, 價格: {result.get('price')}"
+                        )
                         extractor = None
                 except Exception as e:
-                    print(f"專用提取器錯誤: {str(e)}") 
+                    print(f"專用提取器錯誤: {str(e)}")
                     extractor = None
 
             if not extractor and self.ai_client:
-                print(f"使用 AI 提取商品資訊: {url}")  
+                print(f"使用 AI 提取商品資訊: {url}")
                 ai_result = await self._ai_extract_product_info(page_html, url)
-                print(f"AI 提取結果: {ai_result}")  
+                print(f"AI 提取結果: {ai_result}")
                 if ai_result.get('success'):
                     return ai_result
                 else:
@@ -834,19 +874,20 @@ JSON:"""
             elif not extractor:
                 raise Exception("不支援此網站的商品頁面")
 
-
             if extractor and result:
                 spec_variants = result.pop('spec_variants', {})
                 variants = self._process_variants(spec_variants)
 
-                result.update({
-                    'url': url,
-                    'site': urlparse(url).netloc,
-                    'success': True,
-                    'error': None,
-                    'variants': variants,
-                    'has_variants': len(variants) > 0
-                })
+                result.update(
+                    {
+                        'url': url,
+                        'site': urlparse(url).netloc,
+                        'success': True,
+                        'error': None,
+                        'variants': variants,
+                        'has_variants': len(variants) > 0,
+                    }
+                )
 
                 return result
 
@@ -858,7 +899,7 @@ JSON:"""
                 "error": str(e),
                 "error_type": type(e).__name__,
                 "variants": {},
-                "has_variants": False
+                "has_variants": False,
             }
         finally:
             await page.close()

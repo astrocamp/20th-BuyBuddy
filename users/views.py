@@ -1,8 +1,11 @@
 import requests
+
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.db import transaction
+from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -25,8 +28,7 @@ from .forms import (
     LineNoEmailForm,
 )
 from .tokens import email_verification_token_generator
-import requests
-from users.social_oauth import(
+from users.social_oauth import (
     google_code_handler,
     google_user_info,
     line_code_handler,
@@ -34,6 +36,17 @@ from users.social_oauth import(
     check_verify_code,
     send_verify_code,
     create_social_login,
+)
+
+
+REQUIRED_ADDR_FIELDS = (
+    "recipient_name",
+    "phone",
+    "postal_code",
+    "county",
+    "district",
+    "road",
+    "detail",
 )
 
 
@@ -482,10 +495,31 @@ def address_create(request):
         address_form = UserAddressForm(request.POST)
 
         if address_form.is_valid():
-            # 創建新地址
+            # 準備新地址但暫不保存
             new_address_form = address_form.save(commit=False)
             new_address_form.user = user
-            new_address_form.save()
+
+            # 找註冊時創建的空預設地址
+            any_field_is_null_q = Q()
+            for field in REQUIRED_ADDR_FIELDS:
+                any_field_is_null_q |= Q(**{f"{field}__isnull": True})
+
+            empty_default_address = (
+                UserAddress.objects.filter(user=user, is_default=True)
+                .filter(any_field_is_null_q)
+                .first()
+            )
+
+            with transaction.atomic():
+                # 如果有空的預設地址且新地址不是預設，則將新地址設為預設
+                if empty_default_address and not new_address_form.is_default:
+                    new_address_form.is_default = True
+
+                new_address_form.save()
+
+                # 刪除已非預設的空地址
+                if empty_default_address:
+                    empty_default_address.delete()
 
             # 代表是從選擇地址來的
             if order_id:
@@ -555,8 +589,6 @@ def address_cancel(request, address_id):
         request, "users/shared/address.html", {"user_address_form": user_address_form}
     )
 
-# TODO: 
-
 
 def google_social_oauth2(request):
     # 先加入調試訊息
@@ -595,29 +627,27 @@ def google_social_oauth2(request):
 
 
 def line_social_oauth2(request):
-    
+
     # 檢查 state 是否一致
     if request.GET.get("state") != request.session.get("line_oauth_state"):
         messages.error(request, "state 不一致，請重新嘗試")
         return redirect("users:sessions_new")
-    
+
     # 檢查 code 是否存在
     code = request.GET.get("code")
     if not code:
         messages.error(request, "code 不存在，請重新嘗試")
         return redirect("users:sessions_new")
-    
+
     # 清除 Django session 中的 state
     del request.session["line_oauth_state"]
 
-
     try:
-        # 取得 Line token 
+        # 取得 Line token
         token = line_code_handler(code)
 
         # 解析 Line token 獲得用戶資料
         line_data = line_token_parser(token)
-
 
         # 從 line data 中抽取 必要資料
         user_info = {
@@ -634,17 +664,18 @@ def line_social_oauth2(request):
             request.session["line_user_info"] = user_info
             return render(request, "users/line_no_email.html")
 
-    except Exception as e:
-            messages.error(request, "Line 登入時發生錯誤，請稍後再試。")
-            return redirect("users:sessions_new")
+    except Exception:
+        messages.error(request, "Line 登入時發生錯誤，請稍後再試。")
+        return redirect("users:sessions_new")
+
 
 # 輸入信箱頁面
 def line_no_email(request):
     form = LineNoEmailForm(request.POST)
-    
+
     if "line_user_info" not in request.session:
-          messages.error(request, "請先進行 Line 登入")
-          return redirect("users:sessions_new")
+        messages.error(request, "請先進行 Line 登入")
+        return redirect("users:sessions_new")
 
     # 用戶輸入 email 並送出
     if request.method == "POST":
@@ -653,10 +684,12 @@ def line_no_email(request):
         if 'resend_code' in request.POST:
             send_verify_code(request, input_email)
             return render(
-                request, "users/line_no_email.html", 
-                _build_line_context(request, form, input_email=input_email, verify=True)
+                request,
+                "users/line_no_email.html",
+                _build_line_context(
+                    request, form, input_email=input_email, verify=True
+                ),
             )
-            
 
         # 檢查 email 是否已註冊
         existing_email = User.objects.filter(email=input_email).first()
@@ -667,28 +700,37 @@ def line_no_email(request):
             if 'verify_code' in request.POST:
                 verify_code = request.POST.get('verify_code')
                 return check_verify_code(
-                    request, 
-                    _build_line_context(request, form, input_email=input_email, verify=True),
-                    verify_code
+                    request,
+                    _build_line_context(
+                        request, form, input_email=input_email, verify=True
+                    ),
+                    verify_code,
                 )
             else:
                 # 初次發送驗證碼
                 send_verify_code(request, input_email)
                 # 開啟 驗證碼欄位，讓用戶輸入驗證碼
                 return render(
-                    request, "users/line_no_email.html", 
-                    _build_line_context(request, form, input_email=input_email, verify=True)
+                    request,
+                    "users/line_no_email.html",
+                    _build_line_context(
+                        request, form, input_email=input_email, verify=True
+                    ),
                 )
 
         # 檢查信箱
         if not form.is_valid():
-            return render(request, "users/line_no_email.html", {"form": form, "email": input_email})
-        
+            return render(
+                request,
+                "users/line_no_email.html",
+                {"form": form, "email": input_email},
+            )
+
         # 如果 用戶輸入的 email 不重複，則建立新的 user 並綁定 line
         user_info = {
             "email": input_email,
             "user_name": request.session["line_user_info"].get("name"),
-            "user_id": request.session["line_user_info"].get("sub")
+            "user_id": request.session["line_user_info"].get("sub"),
         }
         social_login = create_social_login(user_info, 'line')
         return complete_social_login(request, social_login)
@@ -696,17 +738,18 @@ def line_no_email(request):
     return render(request, "users/line_no_email.html")
 
 
-def _build_line_context(request, form, input_email=None,
-  verify=False, verify_code_error=None):
-      line_user_info = request.session.get("line_user_info", {})
-      return {
-          "form": form,
-          "email": input_email,
-          "line_user_name": line_user_info.get("name"),
-          "line_user_id": line_user_info.get("user_id"),
-          "verify": verify,
-          "verify_code_error": verify_code_error
-      }
+def _build_line_context(
+    request, form, input_email=None, verify=False, verify_code_error=None
+):
+    line_user_info = request.session.get("line_user_info", {})
+    return {
+        "form": form,
+        "email": input_email,
+        "line_user_name": line_user_info.get("name"),
+        "line_user_id": line_user_info.get("user_id"),
+        "verify": verify,
+        "verify_code_error": verify_code_error,
+    }
 
 
 def password_reset_redirect(request):
