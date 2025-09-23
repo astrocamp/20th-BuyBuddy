@@ -3,7 +3,7 @@ version: '3.8'
 services:
   web:
     build: .
-    command: gunicorn --bind 0.0.0.0:8000 --workers 2 --timeout 300 --max-requests 1000 --max-requests-jitter 50 BuyBuddy.wsgi:application
+    command: gunicorn  --bind 0.0.0.0:8000 --workers 2 --timeout 300 --max-requests 1000 --max-requests-jitter 50 BuyBuddy.wsgi:application  --access-logfile - --error-logfile - --log-level debug
     shm_size: '2g'
     volumes:
       - static_volume:/app/staticfiles
@@ -12,6 +12,7 @@ services:
       - "8000"
     depends_on:
       - rabbitmq
+      - redis
     env_file:
       - .env
     restart: unless-stopped
@@ -58,6 +59,12 @@ services:
       - rabbitmq
     env_file:
       - .env
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "127.0.0.1:6379:6379"
+    restart: always
 
 volumes:
   static_volume:
