@@ -76,7 +76,11 @@ const addressFormControl = () => {
         }
 
         const { district } = this.getCurrentSelections();
-        this.$refs.zip.value = this.valid[county][district];
+        if (this.valid[county] && this.valid[county][district]) {
+          this.$refs.zip.value = this.valid[county][district];
+        } else {
+          this.$refs.zip.value = "";
+        }
       }
     },
 

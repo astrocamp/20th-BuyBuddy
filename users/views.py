@@ -1,8 +1,11 @@
 import requests
+
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.db import transaction
+from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -33,6 +36,17 @@ from users.social_oauth import (
     check_verify_code,
     send_verify_code,
     create_social_login,
+)
+
+
+REQUIRED_ADDR_FIELDS = (
+    "recipient_name",
+    "phone",
+    "postal_code",
+    "county",
+    "district",
+    "road",
+    "detail",
 )
 
 
@@ -481,10 +495,31 @@ def address_create(request):
         address_form = UserAddressForm(request.POST)
 
         if address_form.is_valid():
-            # 創建新地址
+            # 準備新地址但暫不保存
             new_address_form = address_form.save(commit=False)
             new_address_form.user = user
-            new_address_form.save()
+
+            # 找註冊時創建的空預設地址
+            any_field_is_null_q = Q()
+            for field in REQUIRED_ADDR_FIELDS:
+                any_field_is_null_q |= Q(**{f"{field}__isnull": True})
+
+            empty_default_address = (
+                UserAddress.objects.filter(user=user, is_default=True)
+                .filter(any_field_is_null_q)
+                .first()
+            )
+
+            with transaction.atomic():
+                # 如果有空的預設地址且新地址不是預設，則將新地址設為預設
+                if empty_default_address and not new_address_form.is_default:
+                    new_address_form.is_default = True
+
+                new_address_form.save()
+
+                # 刪除已非預設的空地址
+                if empty_default_address:
+                    empty_default_address.delete()
 
             # 代表是從選擇地址來的
             if order_id:
@@ -555,9 +590,6 @@ def address_cancel(request, address_id):
     )
 
 
-# TODO:
-
-
 def google_social_oauth2(request):
     # 先加入調試訊息
     code = request.GET.get("code")
@@ -595,6 +627,7 @@ def google_social_oauth2(request):
 
 
 def line_social_oauth2(request):
+
     # 檢查 state 是否一致
     if request.GET.get("state") != request.session.get("line_oauth_state"):
         messages.error(request, "state 不一致，請重新嘗試")
