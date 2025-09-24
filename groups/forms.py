@@ -3,7 +3,6 @@ from tinymce.widgets import TinyMCE
 from django import forms
 from django.conf import settings
 from django.forms import ModelForm, inlineformset_factory, BaseInlineFormSet
-from django.forms.widgets import *
 from django.utils.timezone import now
 
 from .models import Group
@@ -13,7 +12,7 @@ from products.models import Product
 class GroupForm(ModelForm):
     goal_choice = forms.ChoiceField(
         choices=Group.GOAL_CHOICES,
-        label='成團方式',
+        label="成團方式",
         required=True,
         widget=forms.Select(
             attrs={"class": "w-full border-2 border-tertiary-color-300 rounded-lg p-2"}
@@ -58,7 +57,7 @@ class GroupForm(ModelForm):
         }
 
     def clean_deadline(self):
-        deadline = self.cleaned_data.get('deadline')
+        deadline = self.cleaned_data.get("deadline")
         if deadline and deadline.date() < now().date():
             raise forms.ValidationError("截止日期不能早於今天")
         return deadline
@@ -100,7 +99,7 @@ class ProductForm(forms.ModelForm):
 class ProductBaseForm(BaseInlineFormSet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        instance = kwargs.get('instance', None)
+        instance = kwargs.get("instance", None)
         if instance and instance.pk:
             self.extra = 0
 
@@ -122,29 +121,29 @@ class ProductBaseForm(BaseInlineFormSet):
             if has_data:
                 if all(
                     [
-                        form.cleaned_data.get('name'),
-                        form.cleaned_data.get('price'),
-                        form.cleaned_data.get('description'),
+                        form.cleaned_data.get("name"),
+                        form.cleaned_data.get("price"),
+                        form.cleaned_data.get("description"),
                     ]
                 ):
                     valid_forms += 1
 
         if valid_forms == 0:
-            raise forms.ValidationError('請至少添加一個完整的產品')
+            raise forms.ValidationError("請至少添加一個完整的產品")
 
 
 ProductFormSet = inlineformset_factory(
     Group,
     Product,
     form=ProductForm,
-    fields=['name', 'price', 'description', "banner"],
+    fields=["name", "price", "description", "banner"],
     extra=2,
     can_delete=False,
     labels={
-        'name': '產品名稱',
-        'price': '產品價格',
-        'description': '產品描述',
-        'banner': '產品圖片',
+        "name": "產品名稱",
+        "price": "產品價格",
+        "description": "產品描述",
+        "banner": "產品圖片",
     },
     formset=ProductBaseForm,
 )

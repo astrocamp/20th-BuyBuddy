@@ -25,7 +25,10 @@ from django.utils.datastructures import MultiValueDict
 
 from .models import Group, JoinedGroup
 from .forms import GroupForm, ProductFormSet, ProductForm, URLExtractForm
-from .services.exceptions import *
+from .services.exceptions import (
+    InsufficientQuantityException,
+    ExceedsLimitException,
+)
 from .services.group_services import GroupService
 from .services.scraper_dispatcher import scrape_product
 from products.models import Product, JoinedGroupProduct
@@ -110,12 +113,12 @@ def new(request):
                 for file in file_list:
                     files_dict.appendlist(key, file)
 
-            if not files_dict.get('group-banner'):
+            if not files_dict.get("group-banner"):
                 scraped_image_file = download_image_from_url(
                     scraped_image_url, "group_banner"
                 )
                 if scraped_image_file:
-                    files_dict['group-banner'] = scraped_image_file
+                    files_dict["group-banner"] = scraped_image_file
 
             for i, form in enumerate(product_formset.forms):
                 product_banner_field = f"product-{i}-banner"
@@ -176,13 +179,13 @@ def detail(request, id):
                 if request.POST.get("role") == "owner" and group.owner == user:
                     GroupService.leave_group_batch(group=group)
                     messages.success(request, "團購已刪除")
-                    return redirect('groups:index_filtered', filter_type="owned")
+                    return redirect("groups:index_filtered", filter_type="owned")
                 else:
                     GroupService.leave_group(user=user, group=group)
-                    next_url = request.POST.get('next')
+                    next_url = request.POST.get("next")
                     if next_url:
                         return redirect(next_url)
-                    return redirect('groups:index_filtered', filter_type="followed")
+                    return redirect("groups:index_filtered", filter_type="followed")
 
             if request.method == "POST":
                 try:
@@ -256,7 +259,7 @@ def manage_edit(request, id):
     if request.user == group.owner:
         if request.method == "POST" and group.status == "ongoing":
             group_form = GroupForm(
-                request.POST, request.FILES, instance=group, prefix='group'
+                request.POST, request.FILES, instance=group, prefix="group"
             )
 
             if group_form.is_valid():
@@ -275,8 +278,8 @@ def manage_edit(request, id):
             request,
             "groups/manage_edit.html",
             {
-                'group_form': group_form,
-                'one_week_later': one_week_later,
+                "group_form": group_form,
+                "one_week_later": one_week_later,
             },
         )
     messages.warning(request, "你沒有權限編輯此團購")
@@ -287,7 +290,7 @@ def manage_edit(request, id):
 def upload_image(request):
     if request.method == "POST" and request.FILES:
         try:
-            upload_file = request.FILES['file']
+            upload_file = request.FILES["file"]
             file_extension = os.path.splitext(upload_file.name)[1].lower()
             file_name = f"{uuid.uuid4()}{file_extension}"
 
@@ -296,7 +299,7 @@ def upload_image(request):
             file_url = default_storage.url(path)
             return JsonResponse({"location": file_url})
 
-        except Exception as e:
+        except Exception:
             return JsonResponse({"error": "上傳失敗，請稍後再試"}, status=500)
     return JsonResponse({"error": "無效請求"}, status=400)
 
@@ -425,7 +428,7 @@ def download_image_from_url(image_url, filename_prefix="scraped_image"):
             )
 
         # MoMo 的圖片伺服器 SSL 憑證有問題，需要跳過驗證
-        verify_ssl = not "momoshop.com.tw" in image_url
+        verify_ssl = "momoshop.com.tw" not in image_url
         response = requests.get(
             image_url, timeout=10, headers=headers, verify=verify_ssl
         )
@@ -435,7 +438,7 @@ def download_image_from_url(image_url, filename_prefix="scraped_image"):
         if "jpeg" in content_type or "jpg" in content_type:
             extension = ".jpg"
         elif "png" in content_type:
-            extension = '.png'
+            extension = ".png"
         elif "webp" in content_type:
             extension = ".webp"
         else:

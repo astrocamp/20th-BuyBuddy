@@ -6,33 +6,44 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('groups', '0001_initial'),
+        ("groups", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='group',
-            name='owner',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='owned_groups', to=settings.AUTH_USER_MODEL),
+            model_name="group",
+            name="owner",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="owned_groups",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='joinedgroup',
-            name='buyer',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="joinedgroup",
+            name="buyer",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
+            ),
         ),
         migrations.AddField(
-            model_name='joinedgroup',
-            name='group',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='groups.group'),
+            model_name="joinedgroup",
+            name="group",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="groups.group"
+            ),
         ),
         migrations.AddField(
-            model_name='group',
-            name='buyers',
-            field=models.ManyToManyField(related_name='joined_groups', through='groups.JoinedGroup', to=settings.AUTH_USER_MODEL),
+            model_name="group",
+            name="buyers",
+            field=models.ManyToManyField(
+                related_name="joined_groups",
+                through="groups.JoinedGroup",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

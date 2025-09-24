@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('groups', '0007_rename_min_amount_group_min_goal_and_more'),
+        ("groups", "0007_rename_min_amount_group_min_goal_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='group',
-            name='created_at',
+            model_name="group",
+            name="created_at",
             field=models.DateTimeField(auto_now_add=True),
         ),
         migrations.AlterField(
-            model_name='group',
-            name='min_goal',
+            model_name="group",
+            name="min_goal",
             field=models.IntegerField(),
         ),
     ]

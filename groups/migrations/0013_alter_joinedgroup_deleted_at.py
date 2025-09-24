@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('groups', '0012_alter_group_goal_choice_alter_group_status'),
+        ("groups", "0012_alter_group_goal_choice_alter_group_status"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='joinedgroup',
-            name='deleted_at',
+            model_name="joinedgroup",
+            name="deleted_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
     ]

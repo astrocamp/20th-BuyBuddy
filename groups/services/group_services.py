@@ -7,13 +7,16 @@ from django.utils import timezone
 from groups.models import JoinedGroup
 from orders.services import create_orders
 from products.models import JoinedGroupProduct
-from products.models import Product
-from .exceptions import *
-from ..models import Group
+from .exceptions import (
+    GroupClosedException,
+    InsufficientQuantityException,
+    ExceedsLimitException,
+    JoinedGroupException,
+)
+from groups.models import Group
 
 
 class GroupService:
-
     @staticmethod
     def get_total(group):
         products = JoinedGroupProduct.objects.filter(
@@ -67,7 +70,7 @@ class GroupService:
             raise GroupClosedException("無法加入團購")
 
         joined_group, created = JoinedGroup.objects.get_or_create(
-            buyer=user, group=group, defaults={'deleted_at': None}
+            buyer=user, group=group, defaults={"deleted_at": None}
         )
 
         if joined_group.deleted_at is not None:
@@ -137,8 +140,6 @@ class GroupService:
         if products_to_delete.exists():
             products_to_delete.update(deleted_at=timezone.now())
 
-        group = joined_group.group
-
         update_products = JoinedGroupProduct.objects.filter(
             joined_group=joined_group, deleted_at__isnull=True
         )
@@ -179,7 +180,7 @@ class GroupService:
         if GroupService.is_reached(group):
             # 執行狀態轉換
             group.reached()
-            group.save(update_fields=['status'])
+            group.save(update_fields=["status"])
 
             # 安排在交易提交後建立訂單
             transaction.on_commit(
@@ -229,7 +230,7 @@ class GroupService:
         group.save()
 
         joiners_qs = JoinedGroup.objects.filter(group=group, deleted_at__isnull=True)
-        joiner_ids = list(joiners_qs.values_list('id', flat=True))
+        joiner_ids = list(joiners_qs.values_list("id", flat=True))
         joiners_qs.update(deleted_at=now)
 
         JoinedGroupProduct.objects.filter(joined_group_id__in=joiner_ids).update(

@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('groups', '0004_alter_joinedgroup_deleted_at'),
+        ("groups", "0004_alter_joinedgroup_deleted_at"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='group',
-            name='description',
+            model_name="group",
+            name="description",
             field=models.TextField(null=True),
         ),
         migrations.AlterField(
-            model_name='group',
-            name='banner',
-            field=models.ImageField(upload_to='groups/banners/'),
+            model_name="group",
+            name="banner",
+            field=models.ImageField(upload_to="groups/banners/"),
         ),
     ]

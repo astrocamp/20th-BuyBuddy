@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('groups', '0005_group_description_alter_group_banner'),
+        ("groups", "0005_group_description_alter_group_banner"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='group',
-            name='created_at',
+            model_name="group",
+            name="created_at",
             field=models.DateTimeField(auto_now_add=True, null=True),
         ),
     ]
