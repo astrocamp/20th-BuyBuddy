@@ -1,9 +1,9 @@
 {% load static %}
 <!-- 漢堡選單 -->
 <button class="flex flex-col gap-[6px] sm:gap-2 h-6 sm:h-8 aspect-square justify-center cursor-pointer " @click="open = !open">
-    <span class="w-6 sm:w-8 h-[2px] bg-secondary-color transition-all rounded-full" :class="open ? 'rotate-45 translate-y-[7px]' : ''"></span>
-    <span class="w-6 sm:w-8 h-[2px] bg-secondary-color transition-all rounded-full" :class="open ? 'opacity-0' : ''"></span>
-    <span class="w-6 sm:w-8 h-[2px] bg-secondary-color transition-all rounded-full" :class="open ? '-rotate-45 -translate-y-[12.5px]' : ''"></span>
+    <span class="w-6 sm:w-8 h-[2px] bg-secondary-color rounded-full"></span>
+    <span class="w-6 sm:w-8 h-[2px] bg-secondary-color rounded-full"></span>
+    <span class="w-6 sm:w-8 h-[2px] bg-secondary-color rounded-full"></span>
 </button>
 
 <div x-show="open"

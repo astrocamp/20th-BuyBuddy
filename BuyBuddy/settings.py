@@ -1,22 +1,14 @@
 import os
 from pathlib import Path
-
 from dotenv import load_dotenv
-from django.core.management.utils import get_random_secret_key
+
 
 load_dotenv()
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "t")
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
@@ -28,9 +20,8 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # 允許跨域請求攜帶認證資訊 (cookies, session 等)
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
 CORS_ALLOW_CREDENTIALS = True
-
-# Application definition
 
 INSTALLED_APPS = [
     "storages",
@@ -57,6 +48,8 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "widget_tweaks",
 ]
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -91,9 +84,6 @@ TEMPLATES = [
 WSGI_APPLICATION = "BuyBuddy.wsgi.application"
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -105,15 +95,22 @@ DATABASES = {
     }
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
 AUTH_USER_MODEL = "users.User"
+
+HOSTNAME = os.getenv("HOSTNAME")
 
 # 開發階段先把密碼的各種驗證都關掉
 # 開發階段僅保留最小長度驗證
 if DEBUG:
+    SITE_URL = "http://127.0.0.1:8000"
+    SITE_NAME = "buybuddy (dev)"
+
+    # Session  Cookie 設定
+    SESSION_COOKIE_SECURE = False
+    SESSION_COOKIE_SAMESITE = "Lax"
+
+    INTERNAL_IPS = ["127.0.0.1", "localhost"]
+
     AUTH_PASSWORD_VALIDATORS = [
         {
             "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
@@ -123,6 +120,12 @@ if DEBUG:
         },
     ]
 else:
+    # TODO: 正式上線要改網域
+    SITE_URL = "https://www.buybuddy.site"
+    SITE_NAME = "buybuddy"
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_SAMESITE = "Lax"
+
     AUTH_PASSWORD_VALIDATORS = [
         {
             "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -138,9 +141,6 @@ else:
         },
     ]
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
 LANGUAGE_CODE = "zh-hant"
 
 TIME_ZONE = "Asia/Taipei"
@@ -149,10 +149,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
 STATIC_URL = "/assets/"
 STATICFILES_DIRS = [
     BASE_DIR / "public",
@@ -160,41 +156,17 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"  # 部署時用
 
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_URL = "/users/sessions/new/"
 
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 3
 
-HOSTNAME = os.getenv("HOSTNAME")
-
-# 開發階段
-if DEBUG:
-    SITE_URL = "http://127.0.0.1:8000"
-    SITE_NAME = "buybuddy (dev)"
-
-    # Session  Cookie 設定
-    SESSION_COOKIE_SECURE = False
-    SESSION_COOKIE_SAMESITE = "Lax"
-
-# 正式環境階段
-else:
-    # TODO 正式上線要改網域
-    SITE_URL = "https://www.buybuddy.site/"
-    SITE_NAME = "buybuddy"
-    SESSION_COOKIE_SECURE = True
-    SESSION_COOKIE_SAMESITE = "Lax"
-
-
 # 開發階段：在 terminal 顯示郵件內容
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # DEFAULT_FROM_EMAIL = 'noreply@yoursite.com'
 
-# 真實發信
+
 # Anymail 設定
 ANYMAIL = {
     "MAILGUN_API_KEY": os.environ.get("MAILGUN_API_KEY"),
@@ -204,13 +176,13 @@ ANYMAIL = {
 EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 
-# --- CELERY SETTINGS ---
-CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
-CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'Asia/Taipei'
+# CELERY SETTINGS
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "Asia/Taipei"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 
@@ -234,6 +206,7 @@ AWS_S3_OBJECT_PARAMETERS = {
 
 MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
 
+# LINE 金流設定
 LINE_CHANNEL_ID = os.getenv("LINE_CHANNEL_ID")
 LINE_CHANNEL_SECRET_KEY = os.getenv("LINE_CHANNEL_SECRET_KEY")
 LINE_SIGNATURE_REQUEST_URI = os.getenv("LINE_SIGNATURE_REQUEST_URI")
@@ -242,7 +215,6 @@ LINE_SANDBOX_URL = os.getenv("LINE_SANDBOX_URL")
 # LINE 登入設定
 LINE_LOGIN_CHANNEL_ID = os.getenv("LINE_LOGIN_CHANNEL_ID")
 LINE_LOGIN_CHANNEL_SECRET_KEY = os.getenv("LINE_LOGIN_CHANNEL_SECRET_KEY")
-
 
 # 富文本設定
 TINYMCE_JS_URL = STATIC_URL + "tinymce/tinymce.min.js"
@@ -275,25 +247,19 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
 ]
 
-
 ACCOUNT_ADAPTER = "users.adapters.CustomAccountAdapter"
-
-
 SOCIALACCOUNT_ADAPTER = "users.adapters.CustomSocialAccountAdapter"
-ACCOUNT_ADAPTER = "users.adapters.CustomAccountAdapter"
+
 ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_FORMS = {
     "reset_password": "users.forms.MyResetPasswordForm",
     "reset_password_from_key": "users.forms.CustomResetPasswordFromKeyForm",
 }
 
-# settings.py 末尾
-SITE_ID = 1
-
+# 登入後重定向
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
-SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
@@ -302,4 +268,4 @@ GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 NEWEBPAY_MERCHANT_ID = os.getenv("NEWEBPAY_MERCHANT_ID")
 NEWEBPAY_HASH_KEY = os.getenv("NEWEBPAY_HASH_KEY")
 NEWEBPAY_HASH_IV = os.getenv("NEWEBPAY_HASH_IV")
-NEWEBPAY_URL = "https://ccore.newebpay.com/MPG/mpg_gateway"
+NEWEBPAY_URL = os.getenv("NEWEBPAY_URL")
