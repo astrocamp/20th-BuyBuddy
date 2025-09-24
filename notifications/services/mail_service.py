@@ -8,7 +8,6 @@ logger = logging.getLogger(__name__)
 
 
 def send_group_notification_email(recipient_emails, group, status, is_bulk=False):
-    """處理所有「團購狀態變更」相關的郵件"""
     try:
         group_url = (
             f"{settings.SITE_URL}{reverse('groups:detail', kwargs={'id': group.id})}"
@@ -36,9 +35,12 @@ def send_group_notification_email(recipient_emails, group, status, is_bulk=False
 
 
 def send_order_notification_email(recipient_emails, order, status, is_bulk=False):
-    """處理所有「訂單狀態變更」相關的郵件"""
     try:
-        order_list_path = reverse("orders:my_orders")
+        if is_bulk:
+            order_list_path = reverse("orders:my_orders")
+        else:
+            order_list_path = reverse("orders:owned_orders")
+
         order_url = (
             f"{settings.SITE_URL}{order_list_path}?auto_tab={order.order_status}"
         )
@@ -76,18 +78,8 @@ def send_order_notification_email(recipient_emails, order, status, is_bulk=False
         logger.error(f"發送訂單狀態郵件失敗: {e}", exc_info=True)
         raise
 
-
-def send_new_message_email(
-    recipient_email,
-    sender_username,
-    order_number,
-    message_content,
-    order_id,
-    receiver_is_owner,
-):
-    """Sends an email notification for a new order message."""
+def send_new_message_email(recipient_email, sender_username, order_number,message_content, order_id, receiver_is_owner):
     try:
-        subject = f"訂單 #{order_number} 有新留言：來自 {sender_username}"
         template_id = "訂單新留言通知信"
 
         if receiver_is_owner:
@@ -104,9 +96,8 @@ def send_new_message_email(
             "message_board_url": message_board_url,
         }
         mail.send()
-        logger.info(
-            f"📧 已將訂單 #{order_number} 的新留言郵件發送給 {recipient_email}。"
-        )
+        logger.info(f"📧 已將訂單 #{order_number} 的新留言郵件發送給 {recipient_email}。")
+
     except Exception as e:
         logger.error(f"發送訂單新留言郵件失敗: {e}", exc_info=True)
         raise

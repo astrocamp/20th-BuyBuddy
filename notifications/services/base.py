@@ -9,13 +9,13 @@ from django.utils import timezone
 
 from groups.models import Group
 from orders.models import Order, OrderMessage
-from users.models import User
 from .db_service import create_notification_for_event
 from .mail_service import (
     send_group_notification_email,
     send_order_notification_email,
     send_new_message_email,
-)  # Added send_new_message_email
+)
+from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -25,13 +25,18 @@ def send_notifications_for_group_status_change(group):
     try:
         logger.info(f"🚀 為團購 '{group.name}' (狀態: {group.status}) 發送通知...")
 
+        group_status_display = group.get_status_display()
+        cache_key = f"in_app_notification:group_status:{group.id}:{group.status}"
+        if cache.get(cache_key):
+            logger.warning(f"已跳過重複的站內通知 (快取鍵: {cache_key})")
+            return
+
         follower_ids = group.get_followers()
         all_user_ids = list(set(follower_ids + [group.owner_id]))
 
         if not all_user_ids:
             return
 
-        group_status_display = group.get_status_display()
         title = f"【{group_status_display}】{group.name}"
         content = f"您參與的團購「{group.name}」狀態已更新為：{group_status_display}。"
         create_notification_for_event(group, all_user_ids, title, content)
@@ -42,6 +47,7 @@ def send_notifications_for_group_status_change(group):
         if follower_ids:
             send_followers_email_task.delay(group.id, group_status_display)
         logger.info(f"📧 團購狀態 '{group_status_display}' 的郵件任務已加入隊列。")
+        cache.set(cache_key, True, timeout=60)
 
     except Exception as e:
         logger.error(
@@ -70,16 +76,16 @@ def send_notification_for_new_order(order):
         )
 
 
-def send_notification_for_order_status_change(order):
+def send_notification_for_order_status_change(order, target_status_display):
     try:
+        order = Order.objects.get(id=order.id)
         group = order.group
         owner = group.owner
         follower = order.user
-        current_status_display = order.get_order_status_display()
-        status_text = f"訂單「{current_status_display}」"
+        status_text = f"訂單「{target_status_display}」"
 
         title = f"【訂單狀態更新】{group.name}"
-        content = f"您關於團購「{group.name}」的訂單，狀態已更新為：{current_status_display}。"
+        content = f"您關於團購「{group.name}」的訂單，狀態已更新為：{target_status_display}。"
 
         if order.order_status in [
             Order.OrderStatus.PROCESSING,
@@ -87,20 +93,24 @@ def send_notification_for_order_status_change(order):
             Order.OrderStatus.COMPLETED,
         ]:
             logger.info(
-                f"訂單 {order.id} 狀態更新為 {current_status_display}，準備通知團主與跟團者..."
+                f"訂單 {order.id} 狀態更新為 {target_status_display}，準備通知團主與跟團者..."
             )
 
-            recipients_for_in_app = (
-                [owner.id] if owner.id == follower.id else [owner.id, follower.id]
-            )
-            create_notification_for_event(group, recipients_for_in_app, title, content)
-
-            if owner.is_verified:
-                send_owner_email_task.delay(group.id, status_text, order_id=order.id)
-            if owner.id != follower.id and follower.is_verified:
-                send_followers_email_task.delay(
-                    group.id, status_text, order_id=order.id
+            cache_key = f"in_app_notification:order_status:{order.id}:{order.order_status}"
+            if cache.get(cache_key):
+                logger.warning(f"已跳過重複的訂單狀態站內通知 (快取鍵: {cache_key})")
+            else:
+                recipients_for_in_app = list({owner.id, follower.id})
+                create_notification_for_event(
+                    group, recipients_for_in_app, title, content, order=order
                 )
+                if owner.is_verified:
+                    send_owner_email_task.delay(group.id, status_text, order_id=order.id)
+                if owner.id != follower.id and follower.is_verified:
+                    send_followers_email_task.delay(
+                        group.id, status_text, order_id=order.id
+                    )
+                cache.set(cache_key, True, timeout=60)
 
     except Exception as e:
         logger.error(
@@ -123,7 +133,7 @@ def send_notification_for_new_order_message(order_message):
         title = f"訂單 #{order.order_number} 有新留言"
         content = f"來自 {sender.username}：{order_message.content[:50]}..."
 
-        create_notification_for_event(order.group, [receiver.id], title, content)
+        create_notification_for_event(order.group, [receiver.id], title, content, order=order)
 
         if receiver.is_verified and receiver.email:
             send_order_message_email_task.delay(order_message.id)
@@ -140,8 +150,13 @@ def send_notification_for_new_order_message(order_message):
 
 @shared_task(bind=True, max_retries=3)
 def send_owner_email_task(self, group_id, status_text, order_id=None):
+    cache_key = f"email_task:{self.name}:{group_id}:{order_id}:{status_text}"
+    if cache.get(cache_key):
+        logger.warning(f"已跳過重複的郵件任務 (快取鍵: {cache_key})")
+        return
+
     try:
-        group = get_object_or_404(Group, id=group_id)
+        group = Group.objects.get(id=group_id)
         owner = group.owner
         if owner and owner.is_verified:
             order = Order.objects.get(id=order_id) if order_id else None
@@ -150,6 +165,15 @@ def send_owner_email_task(self, group_id, status_text, order_id=None):
             else:
                 send_group_notification_email([owner.email], group, status_text)
             logger.info(f"📧 已將給團主的「{status_text}」郵件任務執行完畢。")
+            cache.set(cache_key, True, timeout=300)
+        else:
+            logger.warning(f"郵件任務未發送：團主 {owner.email if owner else 'N/A'} 未驗證或不存在。")
+    except Group.DoesNotExist:
+        logger.warning(f"郵件任務失敗：找不到團購 (ID: {group_id})，任務將不會重試。")
+        return
+    except Order.DoesNotExist:
+        logger.warning(f"郵件任務失敗：找不到訂單 (ID: {order_id})，任務將不會重試。")
+        return
     except Exception as exc:
         logger.error(f"❌ 團主郵件任務失敗: {exc}", exc_info=True)
         raise self.retry(exc=exc, countdown=30)
@@ -157,10 +181,16 @@ def send_owner_email_task(self, group_id, status_text, order_id=None):
 
 @shared_task(bind=True, max_retries=3)
 def send_followers_email_task(self, group_id, status_text, order_id=None):
+    cache_key = f"email_task:{self.name}:{group_id}:{order_id}:{status_text}"
+    if cache.get(cache_key):
+        logger.warning(f"已跳過重複的郵件任務 (快取鍵: {cache_key})")
+        return
+
     try:
-        group = get_object_or_404(Group, id=group_id)
+        group = Group.objects.get(id=group_id)
+        order = None
         if order_id:
-            order = get_object_or_404(Order, id=order_id)
+            order = Order.objects.get(id=order_id)
             followers = [order.user]
         else:
             follower_ids = group.get_followers()
@@ -168,7 +198,6 @@ def send_followers_email_task(self, group_id, status_text, order_id=None):
 
         verified_follower_emails = [f.email for f in followers if f.is_verified]
         if verified_follower_emails:
-            order = Order.objects.get(id=order_id) if order_id else None
             if order:
                 send_order_notification_email(
                     verified_follower_emails, order, status_text, is_bulk=True
@@ -178,6 +207,15 @@ def send_followers_email_task(self, group_id, status_text, order_id=None):
                     verified_follower_emails, group, status_text, is_bulk=True
                 )
             logger.info(f"📧 已將給跟團者的「{status_text}」郵件任務執行完畢。")
+            cache.set(cache_key, True, timeout=300)
+        else:
+            logger.warning(f"郵件任務未發送：沒有已驗證的跟團者郵箱。")
+    except Group.DoesNotExist:
+        logger.warning(f"郵件任務失敗：找不到團購 (ID: {group_id})，任務將不會重試。")
+        return
+    except Order.DoesNotExist:
+        logger.warning(f"郵件任務失敗：找不到訂單 (ID: {order_id})，任務將不會重試。")
+        return
     except Exception as exc:
         logger.error(f"❌ 跟團者郵件任務失敗: {exc}", exc_info=True)
         raise self.retry(exc=exc, countdown=30)
@@ -185,8 +223,13 @@ def send_followers_email_task(self, group_id, status_text, order_id=None):
 
 @shared_task(bind=True, max_retries=3)
 def send_order_message_email_task(self, order_message_id):
+    cache_key = f"email_task:{self.name}:{order_message_id}"
+    if cache.get(cache_key):
+        logger.warning(f"已跳過重複的郵件任務 (快取鍵: {cache_key})")
+        return
+
     try:
-        order_message = get_object_or_404(OrderMessage, id=order_message_id)
+        order_message = OrderMessage.objects.get(id=order_message_id)
         receiver = order_message.receiver
         sender = order_message.sender
         order = order_message.order
@@ -206,6 +249,7 @@ def send_order_message_email_task(self, order_message_id):
             logger.info(
                 f"📧 已將訂單 #{order.order_number} 的新留言郵件任務執行完畢給 {receiver.username}。"
             )
+            cache.set(cache_key, True, timeout=300)
         else:
             logger.warning(
                 f"訂單 #{order.order_number} 新留言郵件任務：收件人 {receiver.username} 無效或未驗證。"

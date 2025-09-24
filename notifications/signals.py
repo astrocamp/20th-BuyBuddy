@@ -55,7 +55,8 @@ def handle_member_join_and_check_goal(sender, instance, created, **kwargs):
 @receiver(post_transition, sender=Order)
 def on_order_status_change(sender, instance, name, source, target, **kwargs):
     logger.info(f"偵測到訂單 ID:{instance.id} 狀態變更: {source} → {target}。")
-    send_notification_for_order_status_change(instance)
+    target_display = dict(instance.OrderStatus.choices).get(target)
+    send_notification_for_order_status_change(instance, target_display)
 
 @receiver(post_save, sender=Order)
 def handle_new_order_creation(sender, instance, created, **kwargs):
