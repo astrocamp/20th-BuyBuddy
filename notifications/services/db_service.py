@@ -4,7 +4,7 @@ from ..models import UserNotification, Notification
 logger = logging.getLogger(__name__)
 
 
-def create_notification_for_event(group, user_ids, title, content):
+def create_notification_for_event(group, user_ids, title, content, *, order=None):
     print(f"DEBUG: create_notification_for_event called for group {group.name}, users {user_ids}")
     if not user_ids:
         return 0
@@ -13,6 +13,7 @@ def create_notification_for_event(group, user_ids, title, content):
             title=title,
             content=content,
             group=group,
+            order=order,
         )
         unique_user_ids = set(user_ids)
         user_notification_links = [

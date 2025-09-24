@@ -1,6 +1,6 @@
 from django.db import models
 from groups.models import Group
-from users.models import User
+from orders.models import Order
 
 
 class Notification(models.Model):
@@ -11,6 +11,13 @@ class Notification(models.Model):
         Group,
         on_delete=models.CASCADE,
         null=True,
+        related_name="notifications",
+    )
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
         related_name="notifications",
     )
 
