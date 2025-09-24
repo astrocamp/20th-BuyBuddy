@@ -7,7 +7,6 @@ from users.models import User
 
 
 class Group(models.Model):
-
     GOAL_CHOICES = [
         ("quantity", "數量目標"),
         ("amount", "金額目標"),
@@ -44,7 +43,6 @@ class Group(models.Model):
         return self.name
 
     def get_followers(self):
-
         return list(
             JoinedGroup.objects.filter(
                 group=self,
@@ -72,7 +70,6 @@ class Group(models.Model):
 
 
 class JoinedGroup(models.Model):
-
     buyer = models.ForeignKey(User, on_delete=models.CASCADE)
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)

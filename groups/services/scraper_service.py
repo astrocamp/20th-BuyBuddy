@@ -7,7 +7,6 @@ import re
 import requests
 import google.generativeai as genai
 from django.core.cache import cache
-from urllib.parse import urlparse
 from playwright.async_api import async_playwright
 
 class ECommerceScraper:
@@ -28,7 +27,7 @@ class ECommerceScraper:
             return self._extract_momo, "momo"
 
         is_shopify = await page.evaluate(
-            '''() => {
+            """() => {
             return !!(
                 window.Shopify ||
                 document.querySelector('[data-shopify]') ||
@@ -37,14 +36,14 @@ class ECommerceScraper:
                 document.querySelector('.shopify-section') ||
                 document.querySelector('[class*="shopify"]')
             );
-        }'''
+        }"""
         )
 
         if is_shopify:
             return self._extract_shopify, "shopify"
 
         is_shopline = await page.evaluate(
-            '''() => {
+            """() => {
             return !!(
                 document.querySelector('[data-shopline]') ||
                 document.querySelector('.shopline-product') ||
@@ -52,7 +51,7 @@ class ECommerceScraper:
                 document.querySelector('script[src*="shoplineapp"]') ||
                 document.querySelector('meta[name="generator"][content*="Shopline"]')
             );
-        }'''
+        }"""
         )
 
         if is_shopline:
@@ -69,38 +68,38 @@ class ECommerceScraper:
             r'<meta name="Description" content="推薦([^,]+),', html_content
         )
         if desc_match:
-            data['name'] = desc_match.group(1).strip()
+            data["name"] = desc_match.group(1).strip()
         else:
             title_match = re.search(
                 r'<meta property="og:title" content="([^"]+)"', html_content
             )
             if title_match:
-                data['name'] = title_match.group(1).strip()
+                data["name"] = title_match.group(1).strip()
 
         price_match = re.search(
             r'<meta property="product:price:amount" content="([^"]+)"', html_content
         )
         if price_match:
             try:
-                data['price'] = int(price_match.group(1))
-            except:
-                data['price'] = None
+                data["price"] = int(price_match.group(1))
+            except Exception:
+                data["price"] = None
 
         brand_match = re.search(
             r'<meta property="product:brand" content="([^"]+)"', html_content
         )
         if brand_match:
-            data['brand'] = brand_match.group(1).strip()
+            data["brand"] = brand_match.group(1).strip()
 
         image_match = re.search(
             r'<meta property="og:image" content="([^"]+)"', html_content
         )
         if image_match:
-            data['images'] = [image_match.group(1)]
-            data['main_image'] = image_match.group(1)
+            data["images"] = [image_match.group(1)]
+            data["main_image"] = image_match.group(1)
         else:
-            data['images'] = []
-            data['main_image'] = None
+            data["images"] = []
+            data["main_image"] = None
 
         full_desc_match = re.search(
             r'<meta name="Description" content="推薦[^,]+,([^"]+)"', html_content
@@ -127,13 +126,13 @@ class ECommerceScraper:
             else True
         )
 
-        data['spec_variants'] = {}
+        data["spec_variants"] = {}
 
         return data
 
     async def _extract_momo(self, page):
         return await page.evaluate(
-            '''() => {
+            """() => {
             const data = {};
 
             // 基本資訊從 JSON-LD 提取
@@ -231,12 +230,12 @@ class ECommerceScraper:
             }
             
             return data;
-        }'''
+        }"""
         )
 
     async def _extract_pchome(self, page):
         return await page.evaluate(
-            '''() => {
+            """() => {
             const data = {};
             
             const jsonLdScripts = document.querySelectorAll('script[type="application/ld+json"]');
@@ -305,12 +304,12 @@ class ECommerceScraper:
             data.spec_variants = {};
             
             return data;
-        }'''
+        }"""
         )
 
     async def _extract_shopline(self, page):
         return await page.evaluate(
-            '''() => {
+            """() => {
             const data = {};
             
             // Shopline 的商品名稱通常在 h1 標籤
@@ -364,12 +363,12 @@ class ECommerceScraper:
             });
             
             return data;
-        }'''
+        }"""
         )
 
     async def _extract_shopify(self, page):
         return await page.evaluate(
-            '''() => {
+            """() => {
             const data = {};
             
             // 改進商品名稱提取 - 優先從 JSON-LD 提取
@@ -539,7 +538,7 @@ class ECommerceScraper:
             data.spec_variants = {};
             
             return data;
-        }'''
+        }"""
         )
 
     def _process_variants(self, spec_variants: Dict) -> Dict[str, List[str]]:
@@ -673,26 +672,26 @@ JSON:"""
 
             result_text = response.text.strip()
 
-            if result_text.startswith('```json'):
+            if result_text.startswith("```json"):
                 result_text = (
-                    result_text.replace('```json', '').replace('```', '').strip()
+                    result_text.replace("```json", "").replace("```", "").strip()
                 )
 
-            if '\n\n' in result_text:
-                result_text = result_text.split('\n\n')[0].strip()
+            if "\n\n" in result_text:
+                result_text = result_text.split("\n\n")[0].strip()
 
             try:
                 result = json.loads(result_text)
 
                 result.update(
                     {
-                        'url': url,
-                        'site': urlparse(url).netloc,
-                        'success': True,
-                        'error': None,
-                        'variants': {},
-                        'has_variants': False,
-                        'main_image': result.get('images', [None])[0],
+                        "url": url,
+                        "site": urlparse(url).netloc,
+                        "success": True,
+                        "error": None,
+                        "variants": {},
+                        "has_variants": False,
+                        "main_image": result.get("images", [None])[0],
                     }
                 )
 
@@ -746,17 +745,17 @@ JSON:"""
 
         try:
             payload = {
-                'source': 'universal',
-                'url': url,
-                'geo_location': 'Taiwan Province of China',
-                'locale': 'zh-tw',
-                'user_agent_type': 'desktop_chrome',
-                'render': 'html',
+                "source": "universal",
+                "url": url,
+                "geo_location": "Taiwan Province of China",
+                "locale": "zh-tw",
+                "user_agent_type": "desktop_chrome",
+                "render": "html",
             }
 
             print(f"調用 Oxylabs API: {url}")
             response = requests.post(
-                'https://realtime.oxylabs.io/v1/queries',
+                "https://realtime.oxylabs.io/v1/queries",
                 auth=(username, password),
                 json=payload,
                 timeout=120,
@@ -767,8 +766,8 @@ JSON:"""
             print(f"Oxylabs API 返回結果: {result.keys()}")
 
             # Oxylabs 返回的 JSON 結構中，HTML 內容在 results[0].content
-            if result.get('results') and len(result['results']) > 0:
-                html_content = result['results'][0].get('content', '')
+            if result.get("results") and len(result["results"]) > 0:
+                html_content = result["results"][0].get("content", "")
                 print(f"成功獲取 HTML，長度: {len(html_content)} 字符")
                 return html_content
             else:
@@ -884,7 +883,7 @@ JSON:"""
         if self.browser:
             await self.browser.close()
             self.browser = None
-        if hasattr(self, 'playwright') and self.playwright:
+        if hasattr(self, "playwright") and self.playwright:
             await self.playwright.stop()
 
 async def scrape_product_url(url: str) -> Dict[str, Any]:

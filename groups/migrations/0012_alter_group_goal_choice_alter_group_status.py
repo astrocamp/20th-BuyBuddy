@@ -5,32 +5,31 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('groups', '0011_alter_group_description'),
+        ("groups", "0011_alter_group_description"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='group',
-            name='goal_choice',
+            model_name="group",
+            name="goal_choice",
             field=models.CharField(
-                choices=[('quantity', '數量目標'), ('amount', '金額目標')],
+                choices=[("quantity", "數量目標"), ("amount", "金額目標")],
                 max_length=10,
             ),
         ),
         migrations.AlterField(
-            model_name='group',
-            name='status',
+            model_name="group",
+            name="status",
             field=django_fsm.FSMField(
                 choices=[
-                    ('pending', '準備中'),
-                    ('ongoing', '進行中'),
-                    ('reached', '已達標'),
-                    ('failed', '已失敗'),
-                    ('deleted', '已取消'),
+                    ("pending", "準備中"),
+                    ("ongoing", "進行中"),
+                    ("reached", "已達標"),
+                    ("failed", "已失敗"),
+                    ("deleted", "已取消"),
                 ],
-                default='pending',
+                default="pending",
                 max_length=50,
                 protected=True,
             ),

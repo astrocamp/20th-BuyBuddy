@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('groups', '0003_remove_group_buyers_alter_group_deadline_and_more'),
+        ("groups", "0003_remove_group_buyers_alter_group_deadline_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='joinedgroup',
-            name='deleted_at',
+            model_name="joinedgroup",
+            name="deleted_at",
             field=models.DateTimeField(null=True),
         ),
     ]

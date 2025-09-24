@@ -6,46 +6,49 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('groups', '0008_alter_group_created_at_alter_group_min_goal'),
+        ("groups", "0008_alter_group_created_at_alter_group_min_goal"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='group',
-            name='current_progress',
+            model_name="group",
+            name="current_progress",
             field=models.IntegerField(default=0),
         ),
         migrations.AddField(
-            model_name='group',
-            name='total',
+            model_name="group",
+            name="total",
             field=models.IntegerField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='group',
-            name='owner',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="group",
+            name="owner",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
+            ),
         ),
         migrations.AddIndex(
-            model_name='group',
-            index=models.Index(fields=['owner'], name='groups_grou_owner_i_11ab1b_idx'),
+            model_name="group",
+            index=models.Index(fields=["owner"], name="groups_grou_owner_i_11ab1b_idx"),
         ),
         migrations.AddIndex(
-            model_name='group',
-            index=models.Index(fields=['status'], name='groups_grou_status_952d41_idx'),
+            model_name="group",
+            index=models.Index(fields=["status"], name="groups_grou_status_952d41_idx"),
         ),
         migrations.AddIndex(
-            model_name='joinedgroup',
-            index=models.Index(fields=['buyer'], name='groups_join_buyer_i_11cec3_idx'),
+            model_name="joinedgroup",
+            index=models.Index(fields=["buyer"], name="groups_join_buyer_i_11cec3_idx"),
         ),
         migrations.AddIndex(
-            model_name='joinedgroup',
-            index=models.Index(fields=['group'], name='groups_join_group_i_4603ed_idx'),
+            model_name="joinedgroup",
+            index=models.Index(fields=["group"], name="groups_join_group_i_4603ed_idx"),
         ),
         migrations.AddIndex(
-            model_name='joinedgroup',
-            index=models.Index(fields=['-created_at'], name='groups_join_created_69b722_idx'),
+            model_name="joinedgroup",
+            index=models.Index(
+                fields=["-created_at"], name="groups_join_created_69b722_idx"
+            ),
         ),
     ]

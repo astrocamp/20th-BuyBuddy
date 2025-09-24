@@ -4,34 +4,33 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('groups', '0002_initial'),
+        ("groups", "0002_initial"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='group',
-            name='buyers',
+            model_name="group",
+            name="buyers",
         ),
         migrations.AlterField(
-            model_name='group',
-            name='deadline',
+            model_name="group",
+            name="deadline",
             field=models.DateTimeField(null=True),
         ),
         migrations.AlterField(
-            model_name='group',
-            name='deleted_at',
+            model_name="group",
+            name="deleted_at",
             field=models.DateTimeField(null=True),
         ),
         migrations.AlterField(
-            model_name='group',
-            name='min_amount',
+            model_name="group",
+            name="min_amount",
             field=models.IntegerField(null=True),
         ),
         migrations.AlterField(
-            model_name='group',
-            name='min_quantity',
+            model_name="group",
+            name="min_quantity",
             field=models.IntegerField(null=True),
         ),
     ]

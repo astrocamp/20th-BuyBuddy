@@ -5,15 +5,14 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('groups', '0010_joinedgroup_updated_at'),
+        ("groups", "0010_joinedgroup_updated_at"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='group',
-            name='description',
+            model_name="group",
+            name="description",
             field=tinymce.models.HTMLField(),
         ),
     ]
