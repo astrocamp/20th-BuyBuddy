@@ -25,8 +25,7 @@ from .forms import (
     LineNoEmailForm,
 )
 from .tokens import email_verification_token_generator
-import requests
-from users.social_oauth import(
+from users.social_oauth import (
     google_code_handler,
     google_user_info,
     line_code_handler,
@@ -312,7 +311,7 @@ def profiles_edit(request):
         # 有錯誤，返回編輯模式
         else:
             if "avatar_url" in user_form.errors:
-                error_message = str(user_form.errors['avatar_url'])
+                error_message = str(user_form.errors["avatar_url"])
                 if "檔案太大" in error_message:
                     messages.warning(request, "檔案太大了，不能超過 1MB")
                 else:
@@ -555,7 +554,8 @@ def address_cancel(request, address_id):
         request, "users/shared/address.html", {"user_address_form": user_address_form}
     )
 
-# TODO: 
+
+# TODO:
 
 
 def google_social_oauth2(request):
@@ -576,7 +576,7 @@ def google_social_oauth2(request):
         user_info = google_user_info(tokens["access_token"])
 
         # 3. 前往登入或註冊
-        social_login = create_social_login(user_info, 'google')
+        social_login = create_social_login(user_info, "google")
 
         # 4. 完成登入流程
         return complete_social_login(request, social_login)
@@ -595,68 +595,68 @@ def google_social_oauth2(request):
 
 
 def line_social_oauth2(request):
-    
     # 檢查 state 是否一致
     if request.GET.get("state") != request.session.get("line_oauth_state"):
         messages.error(request, "state 不一致，請重新嘗試")
         return redirect("users:sessions_new")
-    
+
     # 檢查 code 是否存在
     code = request.GET.get("code")
     if not code:
         messages.error(request, "code 不存在，請重新嘗試")
         return redirect("users:sessions_new")
-    
+
     # 清除 Django session 中的 state
     del request.session["line_oauth_state"]
 
-
     try:
-        # 取得 Line token 
+        # 取得 Line token
         token = line_code_handler(code)
 
         # 解析 Line token 獲得用戶資料
         line_data = line_token_parser(token)
 
-
         # 從 line data 中抽取 必要資料
         user_info = {
-            "email": line_data.get('email'),
-            "name": line_data.get('name'),
-            "user_id": line_data.get('sub'),
+            "email": line_data.get("email"),
+            "name": line_data.get("name"),
+            "user_id": line_data.get("sub"),
         }
 
-        if user_info['email']:
-            social_login = create_social_login(user_info, 'line')
+        if user_info["email"]:
+            social_login = create_social_login(user_info, "line")
             return complete_social_login(request, social_login)
 
         else:
             request.session["line_user_info"] = user_info
             return render(request, "users/line_no_email.html")
 
-    except Exception as e:
-            messages.error(request, "Line 登入時發生錯誤，請稍後再試。")
-            return redirect("users:sessions_new")
+    except Exception:
+        messages.error(request, "Line 登入時發生錯誤，請稍後再試。")
+        return redirect("users:sessions_new")
+
 
 # 輸入信箱頁面
 def line_no_email(request):
     form = LineNoEmailForm(request.POST)
-    
+
     if "line_user_info" not in request.session:
-          messages.error(request, "請先進行 Line 登入")
-          return redirect("users:sessions_new")
+        messages.error(request, "請先進行 Line 登入")
+        return redirect("users:sessions_new")
 
     # 用戶輸入 email 並送出
     if request.method == "POST":
         input_email = request.POST.get("email")
         # 重發驗證碼
-        if 'resend_code' in request.POST:
+        if "resend_code" in request.POST:
             send_verify_code(request, input_email)
             return render(
-                request, "users/line_no_email.html", 
-                _build_line_context(request, form, input_email=input_email, verify=True)
+                request,
+                "users/line_no_email.html",
+                _build_line_context(
+                    request, form, input_email=input_email, verify=True
+                ),
             )
-            
 
         # 檢查 email 是否已註冊
         existing_email = User.objects.filter(email=input_email).first()
@@ -664,49 +664,59 @@ def line_no_email(request):
         # 如果 用戶輸入的 email 已註冊，則發送驗證碼至信箱
         if existing_email:
             # 檢查是否有驗證碼欄位
-            if 'verify_code' in request.POST:
-                verify_code = request.POST.get('verify_code')
+            if "verify_code" in request.POST:
+                verify_code = request.POST.get("verify_code")
                 return check_verify_code(
-                    request, 
-                    _build_line_context(request, form, input_email=input_email, verify=True),
-                    verify_code
+                    request,
+                    _build_line_context(
+                        request, form, input_email=input_email, verify=True
+                    ),
+                    verify_code,
                 )
             else:
                 # 初次發送驗證碼
                 send_verify_code(request, input_email)
                 # 開啟 驗證碼欄位，讓用戶輸入驗證碼
                 return render(
-                    request, "users/line_no_email.html", 
-                    _build_line_context(request, form, input_email=input_email, verify=True)
+                    request,
+                    "users/line_no_email.html",
+                    _build_line_context(
+                        request, form, input_email=input_email, verify=True
+                    ),
                 )
 
         # 檢查信箱
         if not form.is_valid():
-            return render(request, "users/line_no_email.html", {"form": form, "email": input_email})
-        
+            return render(
+                request,
+                "users/line_no_email.html",
+                {"form": form, "email": input_email},
+            )
+
         # 如果 用戶輸入的 email 不重複，則建立新的 user 並綁定 line
         user_info = {
             "email": input_email,
             "user_name": request.session["line_user_info"].get("name"),
-            "user_id": request.session["line_user_info"].get("sub")
+            "user_id": request.session["line_user_info"].get("sub"),
         }
-        social_login = create_social_login(user_info, 'line')
+        social_login = create_social_login(user_info, "line")
         return complete_social_login(request, social_login)
     # 進入 輸入信箱頁面
     return render(request, "users/line_no_email.html")
 
 
-def _build_line_context(request, form, input_email=None,
-  verify=False, verify_code_error=None):
-      line_user_info = request.session.get("line_user_info", {})
-      return {
-          "form": form,
-          "email": input_email,
-          "line_user_name": line_user_info.get("name"),
-          "line_user_id": line_user_info.get("user_id"),
-          "verify": verify,
-          "verify_code_error": verify_code_error
-      }
+def _build_line_context(
+    request, form, input_email=None, verify=False, verify_code_error=None
+):
+    line_user_info = request.session.get("line_user_info", {})
+    return {
+        "form": form,
+        "email": input_email,
+        "line_user_name": line_user_info.get("name"),
+        "line_user_id": line_user_info.get("user_id"),
+        "verify": verify,
+        "verify_code_error": verify_code_error,
+    }
 
 
 def password_reset_redirect(request):

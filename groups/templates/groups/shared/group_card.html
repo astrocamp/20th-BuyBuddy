@@ -1,12 +1,13 @@
 {% load static %}
 <!-- Card  -->
 <div class="relative h-full">
-    <!-- Image -->
-    <div class="absolute w-full h-40 sm:h-44 lg:h-48 z-10">
-        <img class="object-cover h-full w-full rounded-t-lg" src="{{group.banner.url}}" alt="團購圖片">
-    </div>
-    <!-- Card Body -->
-    <div class="h-full border-2 border-tertiary-color rounded-lg flex flex-col pt-40 sm:pt-44 lg:pt-48 hover:shadow-md transition-shadow">
+    <a href="{% url 'groups:detail' group.id %}">
+        <!-- Card Body -->
+        <div class="h-full border-2 border-tertiary-color rounded-lg flex flex-col hover:shadow-md transition-shadow overflow-hidden">
+        <!-- Image -->
+        <div class="w-full h-40 sm:h-44 lg:h-48">
+            <img class="object-cover h-full w-full" src="{{group.banner.url}}" alt="團購圖片">
+        </div>
         <!-- Card Content -->
         <div class="flex-1 flex flex-col justify-between p-4 sm:p-6 lg:p-8 gap-10">
             <div>

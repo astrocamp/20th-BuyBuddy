@@ -163,7 +163,7 @@
 		<div class="mt-[40px]">
 			<!-- Title -->
 				
-				{% include "groups/shared/update_products.html" %}
+				{% include "groups/shared/update_products.html" with min_goal=group.min_goal goal_choice=group.goal_choice %}
 			
 				<!-- divider -->
 				<hr class="max-w-[1105px] mx-auto border-[var(--tertiary-color-300)] mt-[60px] md:mt-[120px] mb-[30px] md:mb-[60px]">
