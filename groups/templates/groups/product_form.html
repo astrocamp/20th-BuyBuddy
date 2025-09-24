@@ -4,7 +4,7 @@ data-limited-config='{{ limited_config_json|safe }}'>
     
     <div id="forms-container" x-ref="formsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for form in product_form %}
-        <div class="bg-white p-6 border-2 border-tertiary-color-300 rounded-lg flex flex-col gap-4">
+        <div class="bg-white p-4 border-2 border-tertiary-color-300 rounded-lg flex flex-col gap-4">
             <label for="{{ form.name.id_for_label }}" class="text-sm text-center sm:text-base">{{ form.name.label }}</label>
             <input
             class="w-full border-2 border-tertiary-color-300 rounded-lg p-2 text-sm sm:text-base text-center"
@@ -79,7 +79,7 @@ data-limited-config='{{ limited_config_json|safe }}'>
     </button>
 
     <template x-ref="emptyFormTemplate">
-        <div class="bg-white p-6 border-2 border-tertiary-color-300 rounded-lg flex flex-col gap-4">
+        <div class="bg-white p-4 border-2 border-tertiary-color-300 rounded-lg flex flex-col gap-4">
             <label for="{{ empty_form.name.id_for_label }}" class="text-sm font-medium">{{ empty_form.name.label }}</label>
             <input
             class="w-full border-2 border-tertiary-color-300 rounded-lg p-2 text-sm sm:text-base text-center"
