@@ -1,6 +1,6 @@
 from django.urls import path, include
 
-from debug_toolbar.toolbar import debug_toolbar_urls
+from django.conf import settings
 
 urlpatterns = [
     path('tinymce/', include('tinymce.urls')),
@@ -10,4 +10,10 @@ urlpatterns = [
     path('', include("pages.urls")),
     path('orders/', include("orders.urls")),
     path('accounts/', include('allauth.urls')),
-] + debug_toolbar_urls()
+]
+
+
+if settings.DEBUG:
+    from debug_toolbar.toolbar import debug_toolbar_urls
+
+    urlpatterns += debug_toolbar_urls()

@@ -19,6 +19,7 @@ const loadTaiwanDistrictsCache = async () => {
         valid[county][d.name] = d.zip;
       });
     });
+    taiwanDistrictsCache = valid;
     return valid;
   } catch (error) {
     console.log("載入縣市資料失敗", error);
