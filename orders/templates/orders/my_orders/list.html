@@ -3,7 +3,7 @@
 
 {% include 'orders/my_orders/sub_tab_group.html' %}
 
-<div class="max-w-[1440px] mx-auto px-12 sm:px-24 md:px-16">
+<div class="max-w-[1440px] mx-auto px-4 sm:px-12 md:px-16">
 	{% if joined_groups or orders%}
 	{# 尚未成團：joined_groups #}
 	{% if joined_groups %}
@@ -11,7 +11,7 @@
 		<h2 class="text-center text-lg font-medium mb-4">尚未成團</h2>
 			{% for jg in joined_groups %}
 			
-			<div class="bg-white rounded-2xl border-2 border-tertiary-color p-6 mb-4 hover:shadow-md transition-shadow">
+			<div class="bg-white rounded-2xl border-2 border-tertiary-color  p-4 sm:p-6 lg:p-8 mb-4 hover:shadow-md transition-shadow">
 				
 				<div class="flex flex-col lg:flex-row gap-6">
 
@@ -83,7 +83,7 @@
 	<section>
 		<h2 class="text-center text-lg font-medium mb-4">訂單紀錄</h2>
 		{% for order in orders %}
-		<div class="bg-white rounded-2xl border-2 border-tertiary-color p-6 mb-4 hover:shadow-md transition-shadow">
+		<div class="bg-white rounded-2xl border-2 border-tertiary-color p-4 sm:p-6 lg:p-8 mb-4 hover:shadow-md transition-shadow">
 			<!-- 訂單號碼 -->
 			<div class="flex justify-between items-center">
 				<div class="text-sm mb-2">訂單號碼：#{{ order.order_number }}</div>

@@ -1,6 +1,6 @@
 {% load static %}
   <nav 
-    class="max-w-[1440px] mx-auto px-8 sm:px-12 h-[90px] flex items-center justify-between text-base"
+    class="max-w-[1440px] mx-auto px-4 sm:px-12 h-[90px] flex items-center justify-between text-base"
     x-data="{open:false}">
     <ul class="flex items-center gap-4">
     <li>
@@ -29,8 +29,8 @@
 
             <li>
                 <a href="{% url 'users:profiles'%}">
-                   <div id="navbar-avatar-desktop" class="rounded-full overflow-hidden w-8 h-8">
-                       <img src="{{ user.avatar_url.url }}" alt="User Avatar">
+                   <div id="navbar-avatar-desktop" class="rounded-full overflow-hidden w-8 h-8 border-2 border-tertiary-color">
+                       <img src="{{ user.avatar_url.url }}" alt="User Avatar" class="w-full h-full object-cover">
                    </div>
                 </a>
             </li>
@@ -67,7 +67,7 @@
         <ul class="relative leading-8 flex items-center gap-8" x-data="{show:false}">
             <!-- 鈴鐺-->
             {% if user.is_authenticated %}
-                <li  class="relative cursor-pointer leading-8 flex items-center group" x-data="{show:false}">
+                <li  class="relative cursor-pointer leading-8 flex items-center group" x-data="{show:false}" x-cloak>
                     {% include "shared/bell.html" %}
                     {% include "shared/notifications_dropdown.html" %}
                 </li>

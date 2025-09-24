@@ -47,7 +47,8 @@
                 hx-delete="{% url 'users:address_delete' user_address_form.instance.id %}"
                 hx-target="#user_address_{{user_address_form.instance.id}}"
                 hx-swap="outerHTML"
-                class="card-btn card-btn-red">
+                class="card-btn card-btn-red"
+                onclick="return confirm('確定要刪除嗎？')">
                 刪除
         </button>
 
