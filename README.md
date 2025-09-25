@@ -48,7 +48,7 @@ BuyBuddy，正是一個為團購而生的平台，我們的目標是幫助使用
 
 1. **簡潔的開團、跟團管理系統 - 簡化團購流程:**
    <div align="center">
-     <img src="https://buy-buddy.s3.amazonaws.com/avatars/%E9%96%8B%E8%B7%9F%E5%9C%98%E7%B3%BB%E7%B5%B1.png" alt="開跟團系統">
+     <img src="https://buy-buddy.s3.ap-southeast-1.amazonaws.com/%E6%88%AA%E5%9C%96+2025-09-25+%E4%B8%8B%E5%8D%883.42.34.png" alt="開跟團系統">
    </div>
 
 2. **第三方登入 - 輕鬆使用平台服務:**

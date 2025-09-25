@@ -20,7 +20,9 @@
                 <div class="flex flex-col">
                     <span class="text-xs sm:text-base tertiary-color-500">#{{order.order_number}}</span>
                     <h2 class="text-lg sm:text-2xl font-semibold">{{ order.group.name }}</h2>
+					
                 </div>
+				<span class="text-[0.5rem] sm:text-base w-fit bg-[var(--tertiary-color-200)] px-2 py-0.5 rounded">{{ order.get_order_status_display }}</span>
             </div>
             <div>
                 <ul class="min-h-[80px]">
