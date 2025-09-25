@@ -125,17 +125,26 @@
                     </div>
                     <div class="flex flex-col gap-2 text-center">
                         <label for="{{ group_form.goal_choice.id_for_label }}" class="text-sm sm:text-base">{{ group_form.goal_choice.label }}</label>
-                        <select 
-                            name="{{ group_form.goal_choice.html_name }}" 
-                            id="{{ group_form.goal_choice.id_for_label }}"
-                            class="{{ group_form.goal_choice.field.widget.attrs.class }} text-sm sm:text-base text-center">
-                        <option value="" disabled selected class="text-center">請選擇</option>
-                        {% for choice, label in group_form.goal_choice.field.choices %}
-                        <option value="{{ choice }}" {% if group_form.goal_choice.value == choice %} selected {% endif %}>
-                        {{ label }}
-                        </option>
-                        {% endfor %}
-                    </select>
+
+                        <div class="relative">
+                            <select 
+                                name="{{ group_form.goal_choice.html_name }}" 
+                                id="{{ group_form.goal_choice.id_for_label }}"
+                                class="{{ group_form.goal_choice.field.widget.attrs.class }} text-sm sm:text-base text-center appearance-none" required>
+                            <option value="" disabled selected class="text-center">請選擇</option>
+                            {% for choice, label in group_form.goal_choice.field.choices %}
+                            <option value="{{ choice }}" {% if group_form.goal_choice.value == choice %} selected {% endif %}>
+                            {{ label }}
+                            </option>
+                            {% endfor %}
+                            </select>
+
+                            <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                                <svg class="w-4 h-4 tertiary-color-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </div>
+                        </div>
 
                     {% for error in group_form.goal_choice.errors %}
                         <div class="red-color-700 text-sm sm:text-base mt-2 text-center">{{ error }}</div>
@@ -143,16 +152,18 @@
                     </div>
                     <div class="flex flex-col gap-2 text-center">
                         <label for="{{ group_form.min_goal.id_for_label }}" class="text-sm text-center sm:text-base">{{ group_form.min_goal.label }}</label>
-                        <input
-                            class="w-full border-2 border-tertiary-color-300 rounded-lg p-2 text-sm sm:text-base text-center"
-                            type="number"
-                            name="{{ group_form.min_goal.html_name }}"
-                            id="{{ group_form.min_goal.id_for_label }}"
-                            min="1"
-                            x-model="min_goal"
-                            x-ref="min_goal"	
-                            x-on:input="removeZero()"
-                            value="{{ group_form.min_goal.value|default:'' }}">
+
+                            <input
+                                class="w-full border-2 border-tertiary-color-300 rounded-lg p-2 text-sm sm:text-base text-center"
+                                required
+                                type="number"
+                                name="{{ group_form.min_goal.html_name }}"
+                                id="{{ group_form.min_goal.id_for_label }}"
+                                min="1"
+                                x-model="min_goal"
+                                x-ref="min_goal"	
+                                x-on:input="removeZero()"
+                                value="{{ group_form.min_goal.value|default:'' }}">
                         {% if group_form.min_goal.errors %}
                         <div class="red-color-700 text-sm sm:text-base mt-2 text-center">
                             {{ group_form.min_goal.errors }}
