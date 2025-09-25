@@ -1,7 +1,7 @@
 from django.db import models
 from groups.models import Group
 from orders.models import Order
-
+from users.models import User
 
 class Notification(models.Model):
     title = models.CharField(max_length=100)
