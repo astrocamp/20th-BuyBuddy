@@ -31,15 +31,16 @@
                         {% endwith %}
                     </div>
                     <div class="text-sm secondary-color mt-2">
-                        <span>{{ group.deadline|date:"Y-m-d H:i" }} 截止</span>
+                        <span>{{ group.deadline|date:"Y-m-d" }} 截止</span>
                     </div>
                 </div>
                 <div>
-                    <a href="{% url 'groups:detail' group.id %}" class="block w-full rounded-[50px] secondary-btn py-2 text-xs text-center  sm:text-sm">
+                    <span class="cursor-pointer block w-full rounded-[50px] secondary-btn py-2 text-xs text-center  sm:text-sm">
                         查看詳情
-                    </a>
+                    </span>
                 </div>
             </div>
         </div>
     </div>
+    </a>
 </div>
