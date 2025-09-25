@@ -3,6 +3,7 @@ import requests
 from typing import Dict, Any
 from .scraper_service import scrape_product_url_sync as local_scraper_sync
 
+
 def scrape_product(url: str) -> Dict[str, Any]:
     worker_url = os.getenv("SCRAPER_WORKER_URL")
     if not worker_url:
@@ -13,10 +14,10 @@ def scrape_product(url: str) -> Dict[str, Any]:
     print(f"將爬取任務轉發至地端 Worker: {url}")
     try:
         response = requests.post(
-                f"{worker_url}/scrape",
-                json={"url": url},
-                timeout=300  # 等待 5 分鐘
-                )
+            f"{worker_url}/scrape",
+            json={"url": url},
+            timeout=300,  # 等待 5 分鐘
+        )
         response.raise_for_status()  # 如果狀態碼是 4xx 或 5xx，會拋出異常
         return response.json()
     except requests.RequestException as e:
